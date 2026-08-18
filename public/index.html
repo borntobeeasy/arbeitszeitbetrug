@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Schätzpoker</title>
+    <title>💰 Das Duell um die Geld</title>
     <style>
         /* ─── Reset & Base ─── */
         * {
@@ -26,7 +26,6 @@
             padding: 16px;
             margin: 0 auto;
         }
-
         /* ─── Utilities ─── */
         .flex {
             display: flex;
@@ -177,7 +176,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-
         /* ─── Buttons ─── */
         .btn {
             display: inline-flex;
@@ -239,7 +237,6 @@
         .btn-block {
             width: 100%;
         }
-
         /* ─── Inputs ─── */
         .input {
             padding: 10px 16px;
@@ -258,7 +255,6 @@
         .input::placeholder {
             color: #55607a;
         }
-
         /* ─── Cards / Table ─── */
         .table {
             background: #0d1520;
@@ -275,7 +271,6 @@
             padding: 20px;
             min-height: 420px;
         }
-
         .player-seat {
             background: #141c28;
             border-radius: 12px;
@@ -300,7 +295,6 @@
             background: #2a2a1a;
             box-shadow: 0 0 40px rgba(245, 200, 66, 0.3);
         }
-
         .chip {
             display: inline-flex;
             align-items: center;
@@ -312,7 +306,6 @@
             font-size: 0.85rem;
             border: 1px solid #2a3346;
         }
-
         .bet-chip {
             display: inline-flex;
             align-items: center;
@@ -325,7 +318,6 @@
             border: 1px solid #b13e3e;
             color: #f87171;
         }
-
         .pot-display {
             background: #0a121c;
             border-radius: 16px;
@@ -334,7 +326,6 @@
             text-align: center;
             min-width: 120px;
         }
-
         .hint-box {
             background: #1a1a2a;
             border-radius: 12px;
@@ -342,14 +333,12 @@
             border-left: 4px solid #d4a030;
             animation: fadeIn 0.5s ease;
         }
-
         .guess-input {
             font-size: 2rem;
             text-align: center;
             max-width: 200px;
             padding: 12px;
         }
-
         .action-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
@@ -357,7 +346,6 @@
             max-width: 500px;
             width: 100%;
         }
-
         .timer-ring {
             width: 60px;
             height: 60px;
@@ -378,7 +366,6 @@
             border-color: #b13e3e;
             animation: pulse 0.8s infinite;
         }
-
         @keyframes pulse {
             0%,
             100% {
@@ -414,7 +401,6 @@
         .animate-fade {
             animation: fadeIn 0.5s ease;
         }
-
         /* ─── Responsive ─── */
         @media (max-width: 768px) {
             #root {
@@ -479,7 +465,6 @@
                 min-width: 50px;
             }
         }
-
         /* ─── Scrollbar ─── */
         ::-webkit-scrollbar {
             width: 6px;
@@ -494,7 +479,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #3a4a5a;
         }
-
         /* ─── Badge ─── */
         .badge {
             display: inline-block;
@@ -543,7 +527,8 @@
 
     <script type="module">
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  SCHÄTZPOKER  –  Full Multiplayer Implementation (Plain JS)
+        //  DAS DUELL UM DIE GELD  –  Full Multiplayer Implementation
+        //  React + Socket.IO Client
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         import React, {
@@ -551,27 +536,127 @@
             useEffect,
             useRef,
             useCallback,
-            useMemo,
             createContext,
             useContext,
         } from 'react';
         import ReactDOM from 'react-dom/client';
         import { io } from 'socket.io-client';
 
+        // ─── Types ──────────────────────────────────────────────────────────
+
+        type GamePhase =
+            | 'LOBBY'
+            | 'QUESTION'
+            | 'GUESSING'
+            | 'BETTING_1'
+            | 'HINT_1'
+            | 'BETTING_2'
+            | 'HINT_2'
+            | 'BETTING_3'
+            | 'REVEAL'
+            | 'FINAL_BETTING'
+            | 'SHOWDOWN'
+            | 'RESULT';
+
+        type PlayerStatus =
+            | 'WAITING'
+            | 'GUESSED'
+            | 'ACTIVE'
+            | 'CHECK'
+            | 'CALL'
+            | 'RAISE'
+            | 'FOLD'
+            | 'ALL_IN'
+            | 'OUT';
+
+        interface Player {
+            id: string;
+            name: string;
+            chips: number;
+            status: PlayerStatus;
+            bet: number;
+            isDealer: boolean;
+            isSmallBlind: boolean;
+            isBigBlind: boolean;
+            isHost: boolean;
+            guess?: number;
+            distance?: number;
+            isWinner?: boolean;
+            isSelf?: boolean;
+        }
+
+        interface Hint {
+            text: string;
+            type: string;
+        }
+
+        interface Question {
+            id: string;
+            question: string;
+            answer: number;
+            unit?: string;
+            category: string;
+            difficulty: string;
+            hints: Hint[];
+        }
+
+        interface GameState {
+            roomId: string;
+            phase: GamePhase;
+            roundNumber: number;
+            players: Player[];
+            pot: number;
+            currentBet: number;
+            currentPlayerId: string | null;
+            dealerIndex: number;
+            smallBlind: number;
+            bigBlind: number;
+            question: Question | null;
+            hintsRevealed: number;
+            correctAnswer: number | null;
+            showGuesses: boolean;
+            timeLimit: number;
+            timeRemaining: number;
+            roundOver: boolean;
+            winnerIds: string[];
+            winningAmount: number;
+            hostId: string;
+            maxPlayers: number;
+            started: boolean;
+        }
+
+        interface ClientState {
+            game: GameState | null;
+            playerId: string | null;
+            connected: boolean;
+            error: string | null;
+        }
+
         // ─── Socket Context ──────────────────────────────────────────────
 
-        const SocketContext = createContext(null);
+        const SocketContext = createContext<{
+            socket: any;
+            state: ClientState;
+            emit: (event: string, data?: any) => void;
+            joinRoom: (roomId: string, name: string) => void;
+            createRoom: (name: string, settings?: any) => void;
+            submitGuess: (value: number) => void;
+            act: (action: string, amount?: number) => void;
+            startGame: () => void;
+        } | null>(null);
 
         const SOCKET_URL = window.location.origin;
 
-        function SocketProvider({ children }) {
-            const [state, setState] = useState({
+        // ─── Socket Provider ─────────────────────────────────────────────
+
+        function SocketProvider({ children }: { children: React.ReactNode }) {
+            const [state, setState] = useState<ClientState>({
                 game: null,
                 playerId: null,
                 connected: false,
                 error: null,
             });
-            const socketRef = useRef(null);
+            const socketRef = useRef<any>(null);
 
             useEffect(() => {
                 const socket = io(SOCKET_URL, {
@@ -582,26 +667,26 @@
                 socketRef.current = socket;
 
                 socket.on('connect', () => {
-                    setState(s => ({ ...s, connected: true, error: null }));
+                    setState((s) => ({ ...s, connected: true, error: null }));
                     console.log('🔗 Connected');
                 });
 
                 socket.on('disconnect', () => {
-                    setState(s => ({ ...s, connected: false }));
+                    setState((s) => ({ ...s, connected: false }));
                     console.log('🔌 Disconnected');
                 });
 
-                socket.on('connect_error', (err) => {
-                    setState(s => ({ ...s, error: 'Verbindungsfehler: ' + err.message }));
+                socket.on('connect_error', (err: any) => {
+                    setState((s) => ({ ...s, error: 'Verbindungsfehler: ' + err.message }));
                     console.error('Connection error:', err);
                 });
 
-                socket.on('game:state', (game) => {
-                    setState(s => ({
+                socket.on('game:state', (game: GameState) => {
+                    setState((s) => ({
                         ...s,
                         game: {
                             ...game,
-                            players: game.players.map(p => ({
+                            players: game.players.map((p) => ({
                                 ...p,
                                 isSelf: p.id === s.playerId,
                             })),
@@ -609,24 +694,24 @@
                     }));
                 });
 
-                socket.on('game:error', (msg) => {
-                    setState(s => ({ ...s, error: msg }));
-                    setTimeout(() => setState(s => ({ ...s, error: null })), 4000);
+                socket.on('game:error', (msg: string) => {
+                    setState((s) => ({ ...s, error: msg }));
+                    setTimeout(() => setState((s) => ({ ...s, error: null })), 4000);
                 });
 
-                socket.on('player:id', (id) => {
-                    setState(s => ({ ...s, playerId: id }));
+                socket.on('player:id', (id: string) => {
+                    setState((s) => ({ ...s, playerId: id }));
                 });
 
-                socket.on('game:host', (hostId) => {
-                    setState(s => {
+                socket.on('game:host', (hostId: string) => {
+                    setState((s) => {
                         if (!s.game) return s;
                         return {
                             ...s,
                             game: {
                                 ...s.game,
                                 hostId,
-                                players: s.game.players.map(p => ({
+                                players: s.game.players.map((p) => ({
                                     ...p,
                                     isHost: p.id === hostId,
                                 })),
@@ -640,25 +725,25 @@
                 };
             }, []);
 
-            const emit = useCallback((event, data) => {
+            const emit = useCallback((event: string, data?: any) => {
                 if (socketRef.current) {
                     socketRef.current.emit(event, data);
                 }
             }, []);
 
-            const joinRoom = useCallback((roomId, name) => {
+            const joinRoom = useCallback((roomId: string, name: string) => {
                 emit('room:join', { roomId, name });
             }, [emit]);
 
-            const createRoom = useCallback((name, settings) => {
+            const createRoom = useCallback((name: string, settings?: any) => {
                 emit('room:create', { name, settings });
             }, [emit]);
 
-            const submitGuess = useCallback((value) => {
+            const submitGuess = useCallback((value: number) => {
                 emit('guess:submit', { value });
             }, [emit]);
 
-            const act = useCallback((action, amount) => {
+            const act = useCallback((action: string, amount?: number) => {
                 emit('bet:act', { action, amount });
             }, [emit]);
 
@@ -678,7 +763,9 @@
             };
 
             return (
-                React.createElement(SocketContext.Provider, { value: ctxValue }, children)
+                <SocketContext.Provider value={ctxValue}>
+                    {children}
+                </SocketContext.Provider>
             );
         }
 
@@ -690,9 +777,9 @@
 
         // ─── Hooks ──────────────────────────────────────────────────────
 
-        function useTimer(seconds, onExpire) {
+        function useTimer(seconds: number, onExpire: () => void) {
             const [remaining, setRemaining] = useState(seconds);
-            const intervalRef = useRef(null);
+            const intervalRef = useRef<number | null>(null);
 
             useEffect(() => {
                 setRemaining(seconds);
@@ -701,9 +788,9 @@
                     return;
                 }
                 intervalRef.current = window.setInterval(() => {
-                    setRemaining(r => {
+                    setRemaining((r) => {
                         if (r <= 1) {
-                            clearInterval(intervalRef.current);
+                            clearInterval(intervalRef.current!);
                             onExpire();
                             return 0;
                         }
@@ -720,141 +807,149 @@
 
         // ─── Components ──────────────────────────────────────────────────
 
-        function Lobby({ game, isHost, onStart }) {
-            return React.createElement(
-                'div',
-                { className: 'flex flex-col items-center gap-6 p-6' },
-                React.createElement(
-                    'div',
-                    { className: 'text-center' },
-                    React.createElement('h1', { className: 'text-3xl font-bold text-gold' }, '♠ SCHÄTZPOKER'),
-                    React.createElement('p', { className: 'text-muted text-sm mt-2' },
-                        'Raum: ', React.createElement('span', { className: 'text-gold font-semibold' }, game.roomId)
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'w-full max-w-md bg-card rounded p-6 border' },
-                    React.createElement('h2', { className: 'text-lg font-semibold mb-4' },
-                        'Spieler (', game.players.length, '/', game.maxPlayers, ')'
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'flex flex-col gap-2' },
-                        game.players.map(p =>
-                            React.createElement(
-                                'div',
-                                { key: p.id, className: 'flex items-center justify-between bg-dark p-2 rounded' },
-                                React.createElement('span', { className: 'font-medium' }, p.name),
-                                React.createElement(
-                                    'div',
-                                    { className: 'flex items-center gap-2' },
-                                    React.createElement('span', { className: 'chip' }, p.chips, ' 🪙'),
-                                    p.isHost && React.createElement('span', { className: 'badge badge-dealer' }, 'Host'),
-                                    p.isSelf && React.createElement('span', { className: 'text-sm text-blue' }, '(du)')
-                                )
-                            )
-                        )
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'flex flex-col items-center gap-3 w-full max-w-md' },
-                    isHost && React.createElement(
-                        'button',
-                        {
-                            className: 'btn btn-gold btn-lg btn-block',
-                            onClick: onStart,
-                            disabled: game.players.length < 2,
-                        },
-                        game.players.length < 2 ? 'Warte auf Spieler...' : '▶ Spiel starten'
-                    ),
-                    React.createElement('p', { className: 'text-sm text-muted' },
-                        isHost ?
-                        (game.players.length < 2 ? 'Mindestens 2 Spieler benötigt' : 'Drücke "Spiel starten"') :
-                        'Warte auf den Host...'
-                    )
-                )
+        // ── Lobby ──
+        function Lobby({ game, isHost, onStart }: { game: GameState; isHost: boolean; onStart: () => void }) {
+            return (
+                <div className="flex flex-col items-center gap-6 p-6">
+                    <div className="text-center">
+                        <h1 className="text-3xl font-bold text-gold">💰 DAS DUELL UM DIE GELD</h1>
+                        <p className="text-muted text-sm mt-2">Raum: <span className="text-gold font-semibold">{game.roomId}</span></p>
+                    </div>
+
+                    <div className="w-full max-w-md bg-card rounded p-6 border">
+                        <h2 className="text-lg font-semibold mb-4">Spieler ({game.players.length}/{game.maxPlayers})</h2>
+                        <div className="flex flex-col gap-2">
+                            {game.players.map((p) => (
+                                <div key={p.id} className="flex items-center justify-between bg-dark p-2 rounded">
+                                    <span className="font-medium">{p.name}</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="chip">{p.chips} 🪙</span>
+                                        {p.isHost && <span className="badge badge-dealer">Host</span>}
+                                        {p.isSelf && <span className="text-sm text-blue">(du)</span>}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-3 w-full max-w-md">
+                        {isHost && (
+                            <button
+                                className="btn btn-gold btn-lg btn-block"
+                                onClick={onStart}
+                                disabled={game.players.length < 2}
+                            >
+                                {game.players.length < 2 ? 'Warte auf Spieler...' : '▶ Spiel starten'}
+                            </button>
+                        )}
+                        <p className="text-sm text-muted">
+                            {isHost
+                                ? game.players.length < 2
+                                    ? 'Mindestens 2 Spieler benötigt'
+                                    : 'Drücke "Spiel starten"'
+                                : 'Warte auf den Host...'}
+                        </p>
+                    </div>
+                </div>
             );
         }
 
-        function GuessingPhase({ game, player, onSubmit }) {
+        // ── Question & Guessing ──
+        function GuessingPhase({
+            game,
+            player,
+            onSubmit,
+        }: {
+            game: GameState;
+            player: Player | undefined;
+            onSubmit: (val: number) => void;
+        }) {
             const [guess, setGuess] = useState('');
             const hasGuessed = player?.status === 'GUESSED';
 
-            if (!game.question) {
-                return React.createElement('div', { className: 'text-center text-muted' }, 'Lade Frage...');
-            }
+            if (!game.question) return <div className="text-center text-muted">Lade Frage...</div>;
 
-            return React.createElement(
-                'div',
-                { className: 'flex flex-col items-center gap-6 animate-fade' },
-                React.createElement(
-                    'div',
-                    { className: 'text-center' },
-                    React.createElement('div', { className: 'text-sm text-muted mb-1' }, 'Runde ', game.roundNumber),
-                    React.createElement('h2', { className: 'text-2xl font-bold' }, game.question.question),
-                    game.question.unit && React.createElement('p', { className: 'text-sm text-muted mt-1' }, 'Einheit: ', game
-                        .question.unit),
-                    React.createElement('div', { className: 'text-xs text-muted mt-1' },
-                        game.question.category, ' · ', game.question.difficulty
-                    )
-                ),
-                hasGuessed ?
-                React.createElement(
-                    'div',
-                    { className: 'bg-green/20 border border-green rounded p-4 text-center' },
-                    React.createElement('p', { className: 'text-green text-lg font-semibold' }, '✓ Schätzung abgegeben'),
-                    React.createElement('p', { className: 'text-sm text-muted' }, 'Deine Zahl: ', React.createElement(
-                        'strong', null, player?.guess)),
-                    React.createElement('p', { className: 'text-xs text-muted mt-2' }, 'Warte auf andere Spieler...')
-                ) :
-                React.createElement(
-                    'div',
-                    { className: 'flex flex-col items-center gap-4' },
-                    React.createElement('label', { className: 'text-lg font-semibold' }, 'Deine Schätzung'),
-                    React.createElement('input', {
-                        type: 'number',
-                        className: 'input guess-input',
-                        value: guess,
-                        onChange: e => setGuess(e.target.value),
-                        placeholder: '?',
-                        autoFocus: true,
-                        onKeyDown: e => {
-                            if (e.key === 'Enter' && guess.trim() !== '') {
-                                const val = Number(guess);
-                                if (!isNaN(val)) onSubmit(val);
-                            }
-                        }
-                    }),
-                    React.createElement(
-                        'button',
-                        {
-                            className: 'btn btn-success btn-lg',
-                            onClick: () => {
-                                const val = Number(guess);
-                                if (!isNaN(val)) onSubmit(val);
-                            },
-                            disabled: guess.trim() === '' || isNaN(Number(guess)),
-                        },
-                        'Schätzung abgeben'
-                    )
-                )
+            return (
+                <div className="flex flex-col items-center gap-6 animate-fade">
+                    <div className="text-center">
+                        <div className="text-sm text-muted mb-1">Runde {game.roundNumber}</div>
+                        <h2 className="text-2xl font-bold">{game.question.question}</h2>
+                        {game.question.unit && <p className="text-sm text-muted mt-1">Einheit: {game.question.unit}</p>}
+                        <div className="text-xs text-muted mt-1">
+                            {game.question.category} · {game.question.difficulty}
+                        </div>
+                    </div>
+
+                    {hasGuessed ? (
+                        <div className="bg-green/20 border border-green rounded p-4 text-center">
+                            <p className="text-green text-lg font-semibold">✓ Schätzung abgegeben</p>
+                            <p className="text-sm text-muted">Deine Zahl: <strong>{player?.guess}</strong></p>
+                            <p className="text-xs text-muted mt-2">Warte auf andere Spieler...</p>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center gap-4">
+                            <label className="text-lg font-semibold">Deine Schätzung</label>
+                            <input
+                                type="number"
+                                className="input guess-input"
+                                value={guess}
+                                onChange={(e) => setGuess(e.target.value)}
+                                placeholder="?"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && guess.trim() !== '') {
+                                        const val = Number(guess);
+                                        if (!isNaN(val)) onSubmit(val);
+                                    }
+                                }}
+                            />
+                            <button
+                                className="btn btn-success btn-lg"
+                                onClick={() => {
+                                    const val = Number(guess);
+                                    if (!isNaN(val)) onSubmit(val);
+                                }}
+                                disabled={guess.trim() === '' || isNaN(Number(guess))}
+                            >
+                                Schätzung abgeben
+                            </button>
+                        </div>
+                    )}
+                </div>
             );
         }
 
-        function BettingPhase({ game, player, isMyTurn, onAct, phaseLabel }) {
+        // ── Betting ──
+        function BettingPhase({
+            game,
+            player,
+            isMyTurn,
+            onAct,
+            phaseLabel,
+        }: {
+            game: GameState;
+            player: Player | undefined;
+            isMyTurn: boolean;
+            onAct: (action: string, amount?: number) => void;
+            phaseLabel: string;
+        }) {
             const [raiseAmount, setRaiseAmount] = useState('');
             const [showRaiseInput, setShowRaiseInput] = useState(false);
             const hasFolded = player?.status === 'FOLD' || player?.status === 'OUT';
             const isAllIn = player?.status === 'ALL_IN';
-            const canCheck = game.currentBet === player?.bet;
-            const canCall = game.currentBet > player?.bet;
-            const callAmount = player ? Math.min(game.currentBet - player.bet, player.chips) : 0;
-            const canRaise = player && player.chips > 0 && !isAllIn && !hasFolded;
-            const canAllIn = player && player.chips > 0 && !isAllIn && !hasFolded;
-            const minRaise = player ? Math.max(game.currentBet + game.bigBlind, game.currentBet + 10) : 0;
-            const maxRaise = player ? player.chips + player.bet : 0;
+            const isActive = player?.status === 'ACTIVE' || player?.status === 'CHECK' || player?.status === 'CALL' || player
+                ?.status === 'RAISE';
+
+            if (!player) return null;
+
+            const minRaise = Math.max(game.currentBet + game.bigBlind, game.currentBet + 10);
+            const maxRaise = player.chips + player.bet;
+
+            const canCheck = game.currentBet === player.bet;
+            const canCall = game.currentBet > player.bet;
+            const callAmount = Math.min(game.currentBet - player.bet, player.chips);
+            const canRaise = player.chips > 0 && !isAllIn && !hasFolded;
+            const canAllIn = player.chips > 0 && !isAllIn && !hasFolded;
 
             const handleRaise = () => {
                 const val = Number(raiseAmount);
@@ -865,204 +960,210 @@
                 }
             };
 
-            if (!player) return null;
+            return (
+                <div className="flex flex-col items-center gap-4 animate-fade w-full max-w-lg">
+                    <div className="flex items-center gap-4 w-full justify-between bg-dark p-3 rounded border">
+                        <div>
+                            <span className="text-sm text-muted">Phase:</span>
+                            <span className="font-semibold ml-2">{phaseLabel}</span>
+                        </div>
+                        <div>
+                            <span className="text-sm text-muted">Einsatz:</span>
+                            <span className="font-semibold ml-2 text-gold">{game.currentBet} 🪙</span>
+                        </div>
+                        <div>
+                            <span className="text-sm text-muted">Pot:</span>
+                            <span className="font-semibold ml-2 text-gold">{game.pot} 🪙</span>
+                        </div>
+                    </div>
 
-            return React.createElement(
-                'div',
-                { className: 'flex flex-col items-center gap-4 animate-fade w-full max-w-lg' },
-                React.createElement(
-                    'div',
-                    { className: 'flex items-center gap-4 w-full justify-between bg-dark p-3 rounded border' },
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement('span', { className: 'text-sm text-muted' }, 'Phase:'),
-                        React.createElement('span', { className: 'font-semibold ml-2' }, phaseLabel)
-                    ),
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement('span', { className: 'text-sm text-muted' }, 'Einsatz:'),
-                        React.createElement('span', { className: 'font-semibold ml-2 text-gold' }, game.currentBet, ' 🪙')
-                    ),
-                    React.createElement(
-                        'div',
-                        null,
-                        React.createElement('span', { className: 'text-sm text-muted' }, 'Pot:'),
-                        React.createElement('span', { className: 'font-semibold ml-2 text-gold' }, game.pot, ' 🪙')
-                    )
-                ),
-                hasFolded ?
-                React.createElement(
-                    'div',
-                    { className: 'bg-red/20 border border-red rounded p-3 text-center w-full' },
-                    React.createElement('span', { className: 'text-red font-semibold' }, '✕ Gefolded')
-                ) :
-                isAllIn ?
-                React.createElement(
-                    'div',
-                    { className: 'bg-red/30 border border-red rounded p-3 text-center w-full' },
-                    React.createElement('span', { className: 'text-red font-semibold animate-pulse' }, 'ALL-IN!')
-                ) :
-                !isMyTurn ?
-                React.createElement(
-                    'div',
-                    { className: 'text-center text-muted' },
-                    game.currentPlayerId ? 'Warte auf anderen Spieler...' : 'Warte...'
-                ) :
-                React.createElement(
-                    'div',
-                    { className: 'w-full' },
-                    React.createElement(
-                        'div',
-                        { className: 'action-grid' },
-                        canCheck && React.createElement('button', { className: 'btn btn-outline', onClick: () => onAct(
-                                'CHECK') }, 'Check'),
-                        canCall && React.createElement('button', { className: 'btn btn-primary', onClick: () => onAct(
-                                'CALL') }, 'Call ', callAmount, ' 🪙'),
-                        canRaise && !showRaiseInput && React.createElement('button', { className: 'btn btn-gold',
-                            onClick: () => setShowRaiseInput(true) }, 'Raise'),
-                        canAllIn && React.createElement('button', { className: 'btn btn-danger', onClick: () => onAct(
-                                'ALL_IN') }, 'All-In'),
-                        !hasFolded && !isAllIn && React.createElement('button', { className: 'btn btn-danger',
-                            onClick: () => onAct('FOLD') }, 'Fold')
-                    ),
-                    showRaiseInput && React.createElement(
-                        'div',
-                        { className: 'flex items-center gap-2 mt-3 w-full' },
-                        React.createElement('input', {
-                            type: 'number',
-                            className: 'input flex-1',
-                            value: raiseAmount,
-                            onChange: e => setRaiseAmount(e.target.value),
-                            placeholder: 'Min ' + minRaise,
-                            autoFocus: true,
-                            onKeyDown: e => {
-                                if (e.key === 'Enter') handleRaise();
-                                if (e.key === 'Escape') setShowRaiseInput(false);
-                            }
-                        }),
-                        React.createElement('button', { className: 'btn btn-success', onClick: handleRaise }, '✓'),
-                        React.createElement('button', { className: 'btn btn-outline', onClick: () => setShowRaiseInput(
-                                false) }, '✕')
-                    )
-                ),
-                game.timeRemaining > 0 && isMyTurn && !hasFolded && !isAllIn && React.createElement(
-                    'div',
-                    { className: 'timer-ring ' + (game.timeRemaining <= 5 ? 'danger' : game.timeRemaining <= 10 ?
-                            'warning' : '') },
-                    game.timeRemaining
-                )
+                    {hasFolded ? (
+                        <div className="bg-red/20 border border-red rounded p-3 text-center w-full">
+                            <span className="text-red font-semibold">✕ Gefolded</span>
+                        </div>
+                    ) : isAllIn ? (
+                        <div className="bg-red/30 border border-red rounded p-3 text-center w-full">
+                            <span className="text-red font-semibold animate-pulse">ALL-IN!</span>
+                        </div>
+                    ) : !isMyTurn ? (
+                        <div className="text-center text-muted">
+                            {game.currentPlayerId ? 'Warte auf anderen Spieler...' : 'Warte...'}
+                        </div>
+                    ) : (
+                        <div className="w-full">
+                            <div className="action-grid">
+                                {canCheck && (
+                                    <button className="btn btn-outline" onClick={() => onAct('CHECK')}>
+                                        Check
+                                    </button>
+                                )}
+                                {canCall && (
+                                    <button className="btn btn-primary" onClick={() => onAct('CALL')}>
+                                        Call {callAmount} 🪙
+                                    </button>
+                                )}
+                                {canRaise && !showRaiseInput && (
+                                    <button className="btn btn-gold" onClick={() => setShowRaiseInput(true)}>
+                                        Raise
+                                    </button>
+                                )}
+                                {canAllIn && (
+                                    <button className="btn btn-danger" onClick={() => onAct('ALL_IN')}>
+                                        All-In
+                                    </button>
+                                )}
+                                {!hasFolded && !isAllIn && (
+                                    <button className="btn btn-danger" onClick={() => onAct('FOLD')}>
+                                        Fold
+                                    </button>
+                                )}
+                            </div>
+
+                            {showRaiseInput && (
+                                <div className="flex items-center gap-2 mt-3 w-full">
+                                    <input
+                                        type="number"
+                                        className="input flex-1"
+                                        value={raiseAmount}
+                                        onChange={(e) => setRaiseAmount(e.target.value)}
+                                        placeholder={`Min ${minRaise}`}
+                                        autoFocus
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') handleRaise();
+                                            if (e.key === 'Escape') setShowRaiseInput(false);
+                                        }}
+                                    />
+                                    <button className="btn btn-success" onClick={handleRaise}>
+                                        ✓
+                                    </button>
+                                    <button className="btn btn-outline" onClick={() => setShowRaiseInput(false)}>
+                                        ✕
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {game.timeRemaining > 0 && isMyTurn && !hasFolded && !isAllIn && (
+                        <div className={`timer-ring ${game.timeRemaining <= 5 ? 'danger' : game.timeRemaining <= 10 ? 'warning' : ''}`}>
+                            {game.timeRemaining}
+                        </div>
+                    )}
+                </div>
             );
         }
 
-        function HintDisplay({ hint, number }) {
-            return React.createElement(
-                'div',
-                { className: 'hint-box animate-fade w-full max-w-md' },
-                React.createElement('div', { className: 'text-sm text-muted' }, '💡 Hinweis ', number),
-                React.createElement('div', { className: 'text-lg font-semibold text-gold' }, hint)
+        // ── Hint Display ──
+        function HintDisplay({ hint, number }: { hint: string; number: number }) {
+            return (
+                <div className="hint-box animate-fade w-full max-w-md">
+                    <div className="text-sm text-muted">💡 Hinweis {number}</div>
+                    <div className="text-lg font-semibold text-gold">{hint}</div>
+                </div>
             );
         }
 
-        function RevealPhase({ game }) {
-            return React.createElement(
-                'div',
-                { className: 'flex flex-col items-center gap-4 animate-slide' },
-                React.createElement('div', { className: 'text-sm text-muted' }, 'Die richtige Antwort ist...'),
-                React.createElement('div', { className: 'text-5xl font-bold text-gold' }, game.correctAnswer),
-                game.question?.unit && React.createElement('div', { className: 'text-sm text-muted' }, game.question.unit),
-                React.createElement('div', { className: 'text-sm text-muted mt-2' }, '⬇ Finale Setzrunde beginnt gleich ⬇')
+        // ── Reveal ──
+        function RevealPhase({ game }: { game: GameState }) {
+            return (
+                <div className="flex flex-col items-center gap-4 animate-slide">
+                    <div className="text-sm text-muted">Die richtige Antwort ist...</div>
+                    <div className="text-5xl font-bold text-gold">{game.correctAnswer}</div>
+                    {game.question?.unit && <div className="text-sm text-muted">{game.question.unit}</div>}
+                    <div className="text-sm text-muted mt-2">⬇ Finale Setzrunde beginnt gleich ⬇</div>
+                </div>
             );
         }
 
-        function Showdown({ game }) {
+        // ── Showdown ──
+        function Showdown({ game }: { game: GameState }) {
             const sorted = [...game.players]
-                .filter(p => p.guess !== undefined && p.status !== 'FOLD' && p.status !== 'OUT')
+                .filter((p) => p.guess !== undefined && p.status !== 'FOLD' && p.status !== 'OUT')
                 .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
 
             const winner = sorted.length > 0 ? sorted[0] : null;
 
-            return React.createElement(
-                'div',
-                { className: 'flex flex-col items-center gap-4 animate-slide w-full max-w-lg' },
-                React.createElement('div', { className: 'text-2xl font-bold text-gold' }, '🏆 SHOWDOWN'),
-                React.createElement('div', { className: 'text-sm text-muted' },
-                    'Richtige Antwort: ', React.createElement('strong', { className: 'text-gold' }, game.correctAnswer)
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'w-full bg-dark rounded p-4 border' },
-                    game.players.map(p => {
-                        const isActive = p.guess !== undefined && p.status !== 'FOLD' && p.status !== 'OUT';
-                        if (!isActive && p.status !== 'FOLD' && p.status !== 'OUT') return null;
-                        const isWinner = winner && p.id === winner.id;
-                        return React.createElement(
-                            'div',
-                            { key: p.id,
-                                className: 'flex items-center justify-between p-2 rounded ' + (isWinner ?
-                                    'bg-gold/20 border border-gold' : '') },
-                            React.createElement('span', { className: 'font-medium' },
-                                p.name, p.isSelf && ' (du)',
-                                isWinner && ' 👑'
-                            ),
-                            p.guess !== undefined ?
-                            React.createElement('span', { className: 'flex items-center gap-3' },
-                                React.createElement('span', null, p.guess),
-                                React.createElement('span', { className: 'text-sm text-muted' }, '→'),
-                                React.createElement('span', { className: 'font-semibold ' + (p.distance === 0 ?
-                                        'text-green' : p.distance && p.distance <= 2 ? 'text-gold' :
-                                        'text-muted') },
-                                    p.distance, ' daneben'
-                                ),
-                                isWinner && React.createElement('span', { className: 'badge badge-dealer' },
-                                    'GEWINNER')
-                            ) :
-                            React.createElement('span', { className: 'text-sm text-muted' }, 'Gefolded')
-                        );
-                    })
-                ),
-                winner && React.createElement(
-                    'div',
-                    { className: 'bg-gold/20 border border-gold rounded p-4 text-center w-full' },
-                    React.createElement('span', { className: 'text-xl font-bold text-gold' },
-                        winner.name, ' gewinnt ', game.winningAmount || game.pot, ' 🪙!'
-                    )
-                )
+            return (
+                <div className="flex flex-col items-center gap-4 animate-slide w-full max-w-lg">
+                    <div className="text-2xl font-bold text-gold">🏆 SHOWDOWN</div>
+                    <div className="text-sm text-muted">Richtige Antwort: <strong className="text-gold">{game.correctAnswer}</strong></div>
+
+                    <div className="w-full bg-dark rounded p-4 border">
+                        {game.players.map((p) => {
+                            const isActive = p.guess !== undefined && p.status !== 'FOLD' && p.status !== 'OUT';
+                            if (!isActive && p.status !== 'FOLD' && p.status !== 'OUT') return null;
+                            const isWinner = winner && p.id === winner.id;
+                            return (
+                                <div
+                                    key={p.id}
+                                    className={`flex items-center justify-between p-2 rounded ${isWinner ? 'bg-gold/20 border border-gold' : ''}`}
+                                >
+                                    <span className="font-medium">
+                                        {p.name} {p.isSelf && '(du)'}
+                                        {isWinner && ' 👑'}
+                                    </span>
+                                    {p.guess !== undefined ? (
+                                        <span className="flex items-center gap-3">
+                                            <span>{p.guess}</span>
+                                            <span className="text-sm text-muted">→</span>
+                                            <span
+                                                className={`font-semibold ${p.distance === 0 ? 'text-green' : p.distance && p.distance <= 2 ? 'text-gold' : 'text-muted'}`}
+                                            >
+                                                {p.distance} daneben
+                                            </span>
+                                            {isWinner && <span className="badge badge-dealer">GEWINNER</span>}
+                                        </span>
+                                    ) : (
+                                        <span className="text-sm text-muted">Gefolded</span>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {winner && (
+                        <div className="bg-gold/20 border border-gold rounded p-4 text-center w-full">
+                            <span className="text-xl font-bold text-gold">
+                                {winner.name} gewinnt {game.winningAmount || game.pot} 🪙!
+                            </span>
+                        </div>
+                    )}
+                </div>
             );
         }
 
-        function ResultPhase({ game, onNext }) {
-            return React.createElement(
-                'div',
-                { className: 'flex flex-col items-center gap-4 animate-slide' },
-                React.createElement('div', { className: 'text-2xl font-bold text-gold' }, 'Runde ', game.roundNumber,
-                    ' beendet'),
-                React.createElement('button', { className: 'btn btn-primary', onClick: onNext }, 'Nächste Runde ➜')
+        // ── Result (next round) ──
+        function ResultPhase({ game, onNext }: { game: GameState; onNext: () => void }) {
+            return (
+                <div className="flex flex-col items-center gap-4 animate-slide">
+                    <div className="text-2xl font-bold text-gold">Runde {game.roundNumber} beendet</div>
+                    <button className="btn btn-primary" onClick={onNext}>
+                        Nächste Runde ➜
+                    </button>
+                </div>
             );
         }
 
+        // ── Game Table ──
         function GameTable() {
             const { state, submitGuess, act, startGame } = useSocket();
             const game = state.game;
-            const player = game?.players.find(p => p.isSelf);
+            const player = game?.players.find((p) => p.isSelf);
 
             if (!game) {
-                return React.createElement(
-                    'div',
-                    { className: 'table flex items-center justify-center min-h-[300px]' },
-                    React.createElement(
-                        'div',
-                        { className: 'text-center text-muted' },
-                        React.createElement('div', { className: 'text-2xl mb-2' }, '♠'),
-                        React.createElement('p', null, 'Verbindung zum Server wird hergestellt...')
-                    )
+                return (
+                    <div className="table flex items-center justify-center min-h-[300px]">
+                        <div className="text-center text-muted">
+                            <div className="text-2xl mb-2">💰</div>
+                            <p>Verbindung zum Server wird hergestellt...</p>
+                        </div>
+                    </div>
                 );
             }
 
             const isHost = player?.isHost || false;
             const isMyTurn = game.currentPlayerId === player?.id && player?.status !== 'FOLD' && player?.status !== 'OUT';
-            const phaseLabels = {
+            const phaseLabels: Record<GamePhase, string> = {
                 LOBBY: 'Lobby',
                 QUESTION: 'Frage',
                 GUESSING: 'Schätzung',
@@ -1080,135 +1181,142 @@
             const renderPhase = () => {
                 switch (game.phase) {
                     case 'LOBBY':
-                        return React.createElement(Lobby, { game, isHost, onStart: startGame });
+                        return <Lobby game={game} isHost={isHost} onStart={startGame} />;
+
                     case 'QUESTION':
                     case 'GUESSING':
-                        return React.createElement(GuessingPhase, { game, player, onSubmit: submitGuess });
+                        return (
+                            <GuessingPhase
+                                game={game}
+                                player={player}
+                                onSubmit={submitGuess}
+                            />
+                        );
+
                     case 'BETTING_1':
                     case 'BETTING_2':
                     case 'BETTING_3':
                     case 'FINAL_BETTING':
-                        return React.createElement(BettingPhase, {
-                            game,
-                            player,
-                            isMyTurn,
-                            onAct: act,
-                            phaseLabel: phaseLabels[game.phase] || game.phase,
-                        });
+                        return (
+                            <BettingPhase
+                                game={game}
+                                player={player}
+                                isMyTurn={isMyTurn}
+                                onAct={act}
+                                phaseLabel={phaseLabels[game.phase] || game.phase}
+                            />
+                        );
+
                     case 'HINT_1':
                     case 'HINT_2': {
                         const idx = game.phase === 'HINT_1' ? 0 : 1;
                         const hint = game.question?.hints?.[idx];
-                        return React.createElement(
-                            'div',
-                            { className: 'flex flex-col items-center gap-4 w-full' },
-                            hint ? React.createElement(HintDisplay, { hint: hint.text, number: idx + 1 }) :
-                            React.createElement('div', { className: 'text-muted' }, 'Kein Hinweis verfügbar'),
-                            React.createElement('div', { className: 'text-sm text-muted' },
-                                'Die nächste Setzrunde beginnt gleich...')
+                        return (
+                            <div className="flex flex-col items-center gap-4 w-full">
+                                {hint ? (
+                                    <HintDisplay hint={hint.text} number={idx + 1} />
+                                ) : (
+                                    <div className="text-muted">Kein Hinweis verfügbar</div>
+                                )}
+                                <div className="text-sm text-muted">Die nächste Setzrunde beginnt gleich...</div>
+                            </div>
                         );
                     }
+
                     case 'REVEAL':
-                        return React.createElement(RevealPhase, { game });
+                        return <RevealPhase game={game} />;
+
                     case 'SHOWDOWN':
-                        return React.createElement(Showdown, { game });
+                        return <Showdown game={game} />;
+
                     case 'RESULT':
-                        return React.createElement(ResultPhase, { game, onNext: () => act('NEXT_ROUND') });
+                        return (
+                            <ResultPhase
+                                game={game}
+                                onNext={() => act('NEXT_ROUND')}
+                            />
+                        );
+
                     default:
-                        return React.createElement('div', { className: 'text-muted' }, 'Unbekannte Phase: ', game.phase);
+                        return <div className="text-muted">Unbekannte Phase: {game.phase}</div>;
                 }
             };
 
-            return React.createElement(
-                'div',
-                { className: 'table' },
-                React.createElement(
-                    'div',
-                    { className: 'flex justify-between items-center mb-4 flex-wrap gap-2' },
-                    React.createElement(
-                        'div',
-                        { className: 'flex items-center gap-3' },
-                        React.createElement('span', { className: 'text-gold font-bold' }, '♠ ', game.roomId),
-                        React.createElement('span', { className: 'text-sm text-muted' }, 'Runde ', game.roundNumber),
-                        React.createElement('span', { className: 'badge badge-dealer' }, phaseLabels[game.phase] || game
-                            .phase)
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'flex items-center gap-3' },
-                        React.createElement('span', { className: 'text-sm text-muted' }, 'Pot:'),
-                        React.createElement('span', { className: 'pot-display text-gold font-bold' }, game.pot, ' 🪙')
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'table-felt' },
-                    React.createElement(
-                        'div',
-                        { className: 'grid grid-cols-2 md:grid-cols-4 gap-2 mb-4' },
-                        game.players.map(p => {
-                            const isSelf = p.isSelf;
-                            const isWinner = p.isWinner;
-                            const isFolded = p.status === 'FOLD' || p.status === 'OUT';
-                            const isActive = p.status === 'ACTIVE' || p.status === 'CHECK' || p.status === 'CALL' ||
-                                p.status === 'RAISE';
-                            const isAllIn = p.status === 'ALL_IN';
-                            const isDealer = p.isDealer;
+            return (
+                <div className="table">
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+                        <div className="flex items-center gap-3">
+                            <span className="text-gold font-bold">💰 {game.roomId}</span>
+                            <span className="text-sm text-muted">Runde {game.roundNumber}</span>
+                            <span className="badge badge-dealer">{phaseLabels[game.phase] || game.phase}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-sm text-muted">Pot:</span>
+                            <span className="pot-display text-gold font-bold">{game.pot} 🪙</span>
+                        </div>
+                    </div>
 
-                            return React.createElement(
-                                'div',
-                                { key: p.id,
-                                    className: 'player-seat ' +
-                                        (isSelf ? 'self ' : '') +
-                                        (isWinner ? 'winner ' : '') +
-                                        (isFolded ? 'folded ' : '') +
-                                        (isActive && game.currentPlayerId === p.id ? 'active' : '')
-                                },
-                                React.createElement(
-                                    'div',
-                                    { className: 'flex items-center justify-between' },
-                                    React.createElement('span', { className: 'font-semibold truncate' }, p.name),
-                                    isSelf && React.createElement('span', { className: 'text-xs text-blue ml-1' },
-                                        'du')
-                                ),
-                                React.createElement(
-                                    'div',
-                                    { className: 'flex items-center gap-1 flex-wrap mt-1' },
-                                    React.createElement('span', { className: 'chip' }, p.chips, ' 🪙'),
-                                    isDealer && React.createElement('span', { className: 'badge badge-dealer' },
-                                        'D'),
-                                    p.isSmallBlind && React.createElement('span', { className: 'badge badge-sb' },
-                                        'SB'),
-                                    p.isBigBlind && React.createElement('span', { className: 'badge badge-bb' },
-                                        'BB'),
-                                    isAllIn && React.createElement('span', { className: 'badge badge-allin' },
-                                        'ALL-IN'),
-                                    isFolded && React.createElement('span', { className: 'badge badge-fold' },
-                                        'FOLD')
-                                ),
-                                p.bet > 0 && React.createElement('div', { className: 'bet-chip mt-1' }, p.bet, ' 🪙'),
-                                p.guess !== undefined && p.guess !== null && game.phase === 'SHOWDOWN' &&
-                                React.createElement('div', { className: 'text-xs text-muted mt-1' }, 'Tipp: ', p
-                                    .guess)
-                            );
-                        })
-                    ),
-                    React.createElement(
-                        'div',
-                        { className: 'flex justify-center items-center min-h-[200px]' },
-                        renderPhase()
-                    )
-                ),
-                state.error && React.createElement(
-                    'div',
-                    { className: 'mt-4 bg-red/20 border border-red rounded p-3 text-center text-red' },
-                    state.error
-                ),
-                !state.connected && React.createElement(
-                    'div',
-                    { className: 'mt-2 text-center text-sm text-red' },
-                    '⚡ Verbindung verloren – Versuche neu zu verbinden...'
-                )
+                    {/* Players (seats) */}
+                    <div className="table-felt">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+                            {game.players.map((p) => {
+                                const isSelf = p.isSelf;
+                                const isWinner = p.isWinner;
+                                const isFolded = p.status === 'FOLD' || p.status === 'OUT';
+                                const isActive = p.status === 'ACTIVE' || p.status === 'CHECK' || p.status === 'CALL' || p
+                                    .status === 'RAISE';
+                                const isAllIn = p.status === 'ALL_IN';
+                                const isDealer = p.isDealer;
+
+                                return (
+                                    <div
+                                        key={p.id}
+                                        className={`player-seat ${isSelf ? 'self' : ''} ${isWinner ? 'winner' : ''} ${isFolded ? 'folded' : ''} ${isActive && game.currentPlayerId === p.id ? 'active' : ''}`}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-semibold truncate">{p.name}</span>
+                                            {isSelf && <span className="text-xs text-blue ml-1">du</span>}
+                                        </div>
+                                        <div className="flex items-center gap-1 flex-wrap mt-1">
+                                            <span className="chip">{p.chips} 🪙</span>
+                                            {isDealer && <span className="badge badge-dealer">D</span>}
+                                            {p.isSmallBlind && <span className="badge badge-sb">SB</span>}
+                                            {p.isBigBlind && <span className="badge badge-bb">BB</span>}
+                                            {isAllIn && <span className="badge badge-allin">ALL-IN</span>}
+                                            {isFolded && <span className="badge badge-fold">FOLD</span>}
+                                        </div>
+                                        {p.bet > 0 && (
+                                            <div className="bet-chip mt-1">{p.bet} 🪙</div>
+                                        )}
+                                        {p.guess !== undefined && p.guess !== null && game.phase === 'SHOWDOWN' && (
+                                            <div className="text-xs text-muted mt-1">Tipp: {p.guess}</div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Center area: phase content */}
+                        <div className="flex justify-center items-center min-h-[200px]">
+                            {renderPhase()}
+                        </div>
+                    </div>
+
+                    {/* Error */}
+                    {state.error && (
+                        <div className="mt-4 bg-red/20 border border-red rounded p-3 text-center text-red">
+                            {state.error}
+                        </div>
+                    )}
+
+                    {/* Connection status */}
+                    {!state.connected && (
+                        <div className="mt-2 text-center text-sm text-red">
+                            ⚡ Verbindung verloren – Versuche neu zu verbinden...
+                        </div>
+                    )}
+                </div>
             );
         }
 
@@ -1221,137 +1329,111 @@
             const [createName, setCreateName] = useState('');
 
             if (state.game && state.game.roomId) {
-                return React.createElement(GameTable);
+                return <GameTable />;
             }
 
-            return React.createElement(
-                'div',
-                { className: 'flex flex-col items-center justify-center min-h-[60vh] gap-6 p-4' },
-                React.createElement(
-                    'div',
-                    { className: 'text-center' },
-                    React.createElement('h1', { className: 'text-4xl font-bold text-gold' }, '♠ SCHÄTZPOKER'),
-                    React.createElement('p', { className: 'text-muted mt-2' }, 'Schätzen · Bluffen · Gewinnen')
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'bg-card rounded p-6 border w-full max-w-md' },
-                    React.createElement(
-                        'div',
-                        { className: 'flex flex-col gap-4' },
-                        React.createElement(
-                            'div',
-                            null,
-                            React.createElement('label', { className: 'block text-sm font-semibold mb-1' },
-                                'Dein Name'),
-                            React.createElement('input', {
-                                className: 'input',
-                                value: name,
-                                onChange: e => setName(e.target.value),
-                                placeholder: 'Dein Spielername',
-                            })
-                        ),
-                        React.createElement(
-                            'div',
-                            { className: 'flex gap-3' },
-                            React.createElement(
-                                'div',
-                                { className: 'flex-1' },
-                                React.createElement('label', { className: 'block text-sm font-semibold mb-1' },
-                                    'Raum beitreten'),
-                                React.createElement(
-                                    'div',
-                                    { className: 'flex gap-2' },
-                                    React.createElement('input', {
-                                        className: 'input',
-                                        value: roomCode,
-                                        onChange: e => setRoomCode(e.target.value.toUpperCase()),
-                                        placeholder: 'Code z.B. K7X4P',
-                                        maxLength: 6,
-                                    }),
-                                    React.createElement(
-                                        'button',
-                                        {
-                                            className: 'btn btn-primary',
-                                            onClick: () => {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 p-4">
+                    <div className="text-center">
+                        <h1 className="text-4xl font-bold text-gold">💰 DAS DUELL UM DIE GELD</h1>
+                        <p className="text-muted mt-2">Schätzen · Bluffen · Gewinnen</p>
+                    </div>
+
+                    <div className="bg-card rounded p-6 border w-full max-w-md">
+                        <div className="flex flex-col gap-4">
+                            <div>
+                                <label className="block text-sm font-semibold mb-1">Dein Name</label>
+                                <input
+                                    className="input"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="Dein Spielername"
+                                />
+                            </div>
+
+                            <div className="flex gap-3">
+                                <div className="flex-1">
+                                    <label className="block text-sm font-semibold mb-1">Raum beitreten</label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            className="input"
+                                            value={roomCode}
+                                            onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                                            placeholder="Code z.B. K7X4P"
+                                            maxLength={6}
+                                        />
+                                        <button
+                                            className="btn btn-primary"
+                                            onClick={() => {
                                                 if (name.trim() && roomCode.trim()) {
                                                     joinRoom(roomCode.trim(), name.trim());
                                                 }
-                                            },
-                                            disabled: !name.trim() || !roomCode.trim(),
-                                        },
-                                        'Join'
-                                    )
-                                )
-                            )
-                        ),
-                        React.createElement(
-                            'div',
-                            { className: 'relative flex items-center gap-4' },
-                            React.createElement('div', { className: 'flex-1 border-t border-gray-600' }),
-                            React.createElement('span', { className: 'text-sm text-muted' }, 'oder'),
-                            React.createElement('div', { className: 'flex-1 border-t border-gray-600' })
-                        ),
-                        React.createElement(
-                            'div',
-                            null,
-                            React.createElement('label', { className: 'block text-sm font-semibold mb-1' },
-                                'Neuen Raum erstellen'),
-                            React.createElement(
-                                'div',
-                                { className: 'flex gap-2' },
-                                React.createElement('input', {
-                                    className: 'input',
-                                    value: createName,
-                                    onChange: e => setCreateName(e.target.value),
-                                    placeholder: 'Dein Name',
-                                }),
-                                React.createElement(
-                                    'button',
-                                    {
-                                        className: 'btn btn-success',
-                                        onClick: () => {
+                                            }}
+                                            disabled={!name.trim() || !roomCode.trim()}
+                                        >
+                                            Join
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="relative flex items-center gap-4">
+                                <div className="flex-1 border-t border-gray-600"></div>
+                                <span className="text-sm text-muted">oder</span>
+                                <div className="flex-1 border-t border-gray-600"></div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold mb-1">Neuen Raum erstellen</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        className="input"
+                                        value={createName}
+                                        onChange={(e) => setCreateName(e.target.value)}
+                                        placeholder="Dein Name"
+                                    />
+                                    <button
+                                        className="btn btn-success"
+                                        onClick={() => {
                                             if (createName.trim()) {
                                                 createRoom(createName.trim());
                                             }
-                                        },
-                                        disabled: !createName.trim(),
-                                    },
-                                    'Erstellen'
-                                )
-                            )
-                        ),
-                        state.error && React.createElement('div', { className: 'text-sm text-red text-center' }, state
-                            .error),
-                        !state.connected && React.createElement('div', { className: 'text-sm text-muted text-center' },
-                            '⏳ Verbindung zum Server wird hergestellt...'
-                        )
-                    )
-                ),
-                React.createElement(
-                    'div',
-                    { className: 'text-xs text-muted text-center max-w-md' },
-                    'Schätzpoker – Ein Multiplayer-Bluffspiel. Schätze Zahlen, setze Chips und bluffe deine Gegner aus.'
-                )
+                                        }}
+                                        disabled={!createName.trim()}
+                                    >
+                                        Erstellen
+                                    </button>
+                                </div>
+                            </div>
+
+                            {state.error && (
+                                <div className="text-sm text-red text-center">{state.error}</div>
+                            )}
+                            {!state.connected && (
+                                <div className="text-sm text-muted text-center">⏳ Verbindung zum Server wird hergestellt...</div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="text-xs text-muted text-center max-w-md">
+                        Das Duell um die Geld – Ein Multiplayer-Bluffspiel. Schätze Zahlen, setze Chips und bluffe deine Gegner aus.
+                    </div>
+                </div>
             );
         }
 
         // ─── Mount ──────────────────────────────────────────────────────
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
+        const root = ReactDOM.createRoot(document.getElementById('root')!);
         root.render(
-            React.createElement(
-                React.StrictMode,
-                null,
-                React.createElement(
-                    SocketProvider,
-                    null,
-                    React.createElement(App)
-                )
-            )
+            <React.StrictMode>
+                <SocketProvider>
+                    <App />
+                </SocketProvider>
+            </React.StrictMode>
         );
 
-        console.log('✅ Schätzpoker client loaded.');
+        console.log('✅ Das Duell um die Geld – Client geladen.');
     </script>
 </body>
 </html>
