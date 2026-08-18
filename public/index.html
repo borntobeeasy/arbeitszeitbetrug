@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>💰 Das Duell um die Geld</title>
     <style>
-        /* ─── CSS ──────────────────────────────────────────────────────── */
+        /* ─── CSS (unverändert) ──────────────────────────────────────── */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0b0e14; color: #e8edf5; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         #root { width: 100%; max-width: 1300px; padding: 16px; margin: 0 auto; }
@@ -230,9 +230,12 @@
                 emit('game:start', settings);
             }, [emit]);
 
-            // 🆕 Neue Funktion für "Nächste Runde"
             const nextRound = useCallback(() => {
                 emit('game:next');
+            }, [emit]);
+
+            const endGame = useCallback(() => {
+                emit('game:end');
             }, [emit]);
 
             const ctxValue = {
@@ -245,6 +248,7 @@
                 act,
                 startGame,
                 nextRound,
+                endGame,
             };
             return React.createElement(SocketContext.Provider, { value: ctxValue }, children);
         }
@@ -564,8 +568,9 @@
             );
         }
 
-        // ─── ResultPhase (jetzt mit nextRound) ────────────────────────────
-        function ResultPhase({ game, onNext }) {
+        // ─── ResultPhase (mit Host-Buttons) ────────────────────────────────
+        function ResultPhase({ game, onNext, onEnd, playerId }) {
+            const isHost = game.hostId === playerId;
             return React.createElement('div', { className: 'flex flex-col items-center gap-4 animate-slide' },
                 React.createElement('div', { className: 'text-2xl font-bold text-gold' }, 'Runde ', game.roundNumber, ' beendet'),
                 game.winnerIds.length > 0 && React.createElement('div', { className: 'bg-gold/20 border border-gold rounded p-4 text-center w-full max-w-md' },
@@ -574,13 +579,16 @@
                         ' gewinnt ', game.winningAmount || game.pot, ' 🪙!'
                     )
                 ),
-                React.createElement('button', { className: 'btn btn-primary', onClick: onNext }, 'Nächste Runde ➜')
+                React.createElement('div', { className: 'flex gap-4 flex-wrap justify-center' },
+                    isHost && React.createElement('button', { className: 'btn btn-primary', onClick: onNext }, 'Nächste Runde ➜'),
+                    isHost && React.createElement('button', { className: 'btn btn-danger', onClick: onEnd }, '⏹ Spiel beenden')
+                )
             );
         }
 
         // ─── GameTable ─────────────────────────────────────────────────────
         function GameTable() {
-            const { state, submitGuess, act, startGame, nextRound } = useSocket();
+            const { state, submitGuess, act, startGame, nextRound, endGame } = useSocket();
             const game = state.game;
             const player = game?.players.find(p => p.isSelf);
             const categories = state.categories || [];
@@ -638,7 +646,12 @@
                     case 'SHOWDOWN':
                         return React.createElement(Showdown, { game });
                     case 'RESULT':
-                        return React.createElement(ResultPhase, { game, onNext: nextRound });
+                        return React.createElement(ResultPhase, {
+                            game,
+                            onNext: nextRound,
+                            onEnd: endGame,
+                            playerId: player?.id,
+                        });
                     default:
                         return React.createElement('div', { className: 'text-muted' }, 'Unbekannte Phase: ', game.phase);
                 }
@@ -764,7 +777,7 @@
                 )
             )
         );
-        console.log('✅ Das Duell um die Geld – Client geladen (mit nextRound).');
+        console.log('✅ Das Duell um die Geld – Client geladen (mit Host-Buttons).');
     </script>
 </body>
 </html>

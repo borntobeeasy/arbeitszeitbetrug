@@ -1,4 +1,4 @@
-// ─── server.js ─── KOMPLETT (Zufallsfragen + fix für "Nächste Runde") ──
+// ─── server.js ─── KOMPLETT (Host-Checks, Spiel beenden, Game-Over) ──
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -25,30 +25,8 @@ try {
 } catch (err) {
   console.warn('⚠️  Keine questions.json – verwende Standard-Fragen.');
   allQuestions = [
-    {
-      id: 'fallback1',
-      question: 'Wie viele Beine hat ein Hund?',
-      answer: 4,
-      unit: 'Beine',
-      category: 'Alltag',
-      difficulty: 'easy',
-      hints: [
-        { text: 'Die Zahl ist kleiner als 10.', type: 'upper' },
-        { text: 'Die Zahl ist größer als 2.', type: 'lower' },
-      ],
-    },
-    {
-      id: 'fallback2',
-      question: 'Wie viele Stunden hat ein Tag?',
-      answer: 24,
-      unit: 'Stunden',
-      category: 'Alltag',
-      difficulty: 'easy',
-      hints: [
-        { text: 'Die Zahl ist kleiner als 30.', type: 'upper' },
-        { text: 'Die Zahl ist größer als 20.', type: 'lower' },
-      ],
-    },
+    { id: 'fallback1', question: 'Wie viele Beine hat ein Hund?', answer: 4, unit: 'Beine', category: 'Alltag', difficulty: 'easy', hints: [ { text: 'Die Zahl ist kleiner als 10.', type: 'upper' }, { text: 'Die Zahl ist größer als 2.', type: 'lower' } ] },
+    { id: 'fallback2', question: 'Wie viele Stunden hat ein Tag?', answer: 24, unit: 'Stunden', category: 'Alltag', difficulty: 'easy', hints: [ { text: 'Die Zahl ist kleiner als 30.', type: 'upper' }, { text: 'Die Zahl ist größer als 20.', type: 'lower' } ] },
   ];
 }
 
@@ -165,7 +143,6 @@ function createRoom(hostId, hostName, settings = {}) {
     allGuessed: false,
     roundEnded: false,
     roundsSinceBlindIncrease: 0,
-    // 🆕 Zufallsfragen: speichert bereits verwendete Fragen-IDs
     usedQuestionIds: new Set(),
   };
   const player = {
@@ -227,15 +204,12 @@ function getQuestionsForCategory(category) {
   return allQuestions.filter(q => q.category === category);
 }
 
-// 🆕 Zufällige Frage aus dem Pool auswählen (ohne Wiederholung)
 function getRandomQuestion(room) {
   const pool = getQuestionsForCategory(room.category);
   if (pool.length === 0) {
-    // Fallback: Alle Fragen
     const fallbackPool = allQuestions;
     const available = fallbackPool.filter(q => !room.usedQuestionIds.has(q.id));
     if (available.length === 0) {
-      // Alle Fragen wurden verwendet – Set zurücksetzen
       room.usedQuestionIds = new Set();
       return fallbackPool[Math.floor(Math.random() * fallbackPool.length)];
     }
@@ -243,10 +217,8 @@ function getRandomQuestion(room) {
     room.usedQuestionIds.add(q.id);
     return q;
   }
-
   const available = pool.filter(q => !room.usedQuestionIds.has(q.id));
   if (available.length === 0) {
-    // Alle Fragen dieser Kategorie wurden verwendet – Set zurücksetzen
     room.usedQuestionIds = new Set();
     const q = pool[Math.floor(Math.random() * pool.length)];
     room.usedQuestionIds.add(q.id);
@@ -280,7 +252,7 @@ function startGame(room, settings) {
   room.started = true;
   room.roundNumber = 1;
   room.roundsSinceBlindIncrease = 0;
-  room.usedQuestionIds = new Set(); // 🆕 Fragen-Set zurücksetzen
+  room.usedQuestionIds = new Set();
   startNextRound(room);
 }
 
@@ -308,7 +280,6 @@ function startNextRound(room) {
   room.bettingIndex = 0;
   room.roundEnded = false;
 
-  // Blind-Erhöhung prüfen
   room.roundsSinceBlindIncrease++;
   if (room.roundsSinceBlindIncrease >= room.blindIncreaseInterval) {
     room.smallBlind = Math.floor(room.smallBlind * 2);
@@ -319,7 +290,6 @@ function startNextRound(room) {
 
   rotateDealer(room);
 
-  // 🆕 Zufällige Frage auswählen
   const q = getRandomQuestion(room);
   room.question = q;
   room.correctAnswer = q.answer;
@@ -401,13 +371,11 @@ function submitGuess(room, playerId, value) {
   return true;
 }
 
-// ─── BETTING ROUND START (mit Reset für finale Runde) ──────────────────
 function startBettingRound(room, phase) {
   if (room.roundEnded) return;
   if (!BETTING_PHASES.includes(phase)) return;
   room.phase = phase;
 
-  // Finale Setzrunde: Bets der Spieler zurücksetzen
   if (phase === PHASES.FINAL_BETTING) {
     room.players.forEach(p => {
       if (p.status !== 'FOLD' && p.status !== 'OUT') {
@@ -638,6 +606,19 @@ function finishBettingRound(room) {
   }
 }
 
+// ─── Game-Over-Prüfung ────────────────────────────────────────────────────
+function checkGameOver(room) {
+  const alive = room.players.filter(p => p.status !== 'OUT');
+  if (alive.length < 2) {
+    room.phase = PHASES.LOBBY;
+    room.started = false;
+    // Host bleibt Host, aber andere können wieder joinen
+    broadcastRoom(room);
+    return true;
+  }
+  return false;
+}
+
 function showDown(room) {
   const answer = room.correctAnswer;
   room.players.forEach(p => {
@@ -666,6 +647,11 @@ function showDown(room) {
   room.phase = PHASES.RESULT;
   room.roundEnded = true;
   broadcastRoom(room);
+
+  // Prüfe, ob nur noch ein Spieler übrig ist
+  if (checkGameOver(room)) {
+    return; // Spiel wurde beendet
+  }
 }
 
 function endRoundEarly(room) {
@@ -680,6 +666,8 @@ function endRoundEarly(room) {
     room.phase = PHASES.RESULT;
     room.roundEnded = true;
     broadcastRoom(room);
+    // Prüfe Game-Over
+    if (checkGameOver(room)) return;
   } else {
     room.roundEnded = true;
     setTimeout(() => {
@@ -778,7 +766,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ─── NÄCHSTE RUNDE (stabilisiert) ──────────────────────────────────────
+  // ─── Nächste Runde (nur Host) ──────────────────────────────────────────
   socket.on('game:next', () => {
     const room = rooms.get(socket.data.roomId);
     if (!room) {
@@ -786,9 +774,16 @@ io.on('connection', (socket) => {
       return;
     }
     if (room.phase !== PHASES.RESULT) {
-      console.warn('⚠️ game:next – Nicht in RESULT-Phase (aktuelle Phase:', room.phase, ')');
+      socket.emit('game:error', 'Spiel befindet sich nicht in der Ergebnisphase.');
       return;
     }
+    if (room.hostId !== socket.id) {
+      socket.emit('game:error', 'Nur der Host kann die nächste Runde starten.');
+      return;
+    }
+
+    // Prüfe erneut, ob Game-Over (falls jemand ausgeschieden ist)
+    if (checkGameOver(room)) return;
 
     // Inkrementiere Rundenzahl
     room.roundNumber++;
@@ -801,16 +796,28 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Nächste Runde starten
     try {
       startNextRound(room);
     } catch (err) {
       console.error('❌ Fehler beim Start der nächsten Runde:', err);
-      // Fallback: Raum in Lobby versetzen
       room.phase = PHASES.LOBBY;
       room.started = false;
       broadcastRoom(room);
     }
+  });
+
+  // ─── Spiel beenden (nur Host) ──────────────────────────────────────────
+  socket.on('game:end', () => {
+    const room = rooms.get(socket.data.roomId);
+    if (!room) return;
+    if (room.hostId !== socket.id) {
+      socket.emit('game:error', 'Nur der Host kann das Spiel beenden.');
+      return;
+    }
+    room.phase = PHASES.LOBBY;
+    room.started = false;
+    broadcastRoom(room);
+    console.log(`🛑 Spiel in Raum ${room.roomId} wurde vom Host beendet.`);
   });
 
   socket.on('disconnect', () => {
@@ -833,7 +840,9 @@ io.on('connection', (socket) => {
       broadcastRoom(room);
       const active = getActivePlayers(room);
       if (active.length < 2 && room.started && room.phase !== PHASES.RESULT && room.phase !== PHASES.LOBBY) {
+        // Runde vorzeitig beenden, danach Game-Over-Prüfung
         endRoundEarly(room);
+        checkGameOver(room);
       }
     }
   });
