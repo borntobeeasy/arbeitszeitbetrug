@@ -6,397 +6,325 @@
     <title>⚽ Sportdirektor-Simulator // Bundesliga &amp; 2. Bundesliga 2026/27</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         /* ================================================================
-           RETRO ARCADE / TELETEXT THEME – enhanced
-        =================================================================== */
+           MODERN EA FC KARRIERE MODUS – STYLE
+           ================================================================ */
         :root {
-            --bg: #05070f;
-            --panel: #0c1024;
-            --panel-2: #10142a;
-            --line: #2a2f52;
-            --red: #e3000f;
-            --gold: #ffd200;
-            --blue: #1e5fff;
-            --green: #39ff14;
-            --text: #e8ecff;
-            --dim: #8890c0;
-            --pixel: 'Press Start 2P', monospace;
-            --mono: 'VT323', 'JetBrains Mono', monospace;
+            --bg: #0b0e14;
+            --panel: #14181f;
+            --panel-2: #1c222b;
+            --line: #2a3340;
+            --red: #e60023;
+            --gold: #f5c400;
+            --blue: #1a6dff;
+            --green: #3ddc84;
+            --text: #eef2f7;
+            --dim: #8a9bb5;
+            --shadow: 0 8px 24px rgba(0,0,0,0.6);
+            --radius: 12px;
+            --font: 'Inter', 'Roboto', sans-serif;
         }
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-        html {
-            scrollbar-color: var(--red) var(--bg);
-        }
         body {
-            font-family: var(--mono);
-            font-size: 20px;
+            font-family: var(--font);
+            font-size: 16px;
             background: var(--bg);
             color: var(--text);
             padding: 20px;
             max-width: 1400px;
             margin: 0 auto;
-            position: relative;
-            line-height: 1.35;
-            background-image: radial-gradient(ellipse at top, rgba(30, 95, 255, 0.12), transparent 60%),
-                radial-gradient(ellipse at bottom, rgba(227, 0, 15, 0.10), transparent 60%);
+            line-height: 1.5;
+            background-image: radial-gradient(ellipse at top, rgba(26,109,255,0.08), transparent 60%);
         }
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 999;
-            background: repeating-linear-gradient(to bottom,
-                    rgba(255, 255, 255, 0.035) 0px,
-                    rgba(255, 255, 255, 0.035) 1px,
-                    transparent 2px,
-                    transparent 3px);
-            mix-blend-mode: overlay;
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 998;
-            box-shadow: inset 0 0 160px rgba(0, 0, 0, 0.75);
-            animation: flicker 6s infinite;
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
         }
-        @keyframes flicker {
-            0%,
-            97%,
-            100% {
-                opacity: 1;
-            }
-            98% {
-                opacity: 0.94;
-            }
-            99% {
-                opacity: 0.98;
-            }
-        }
-        h1,
-        h2,
-        h3 {
-            font-family: var(--pixel);
-            color: var(--gold);
-            text-shadow: 2px 2px 0 var(--red), 4px 4px 0 rgba(0, 0, 0, 0.5);
-            letter-spacing: 1px;
-            line-height: 1.6;
-        }
-        h1 {
-            font-size: 22px;
-            padding: 14px 0;
-            text-align: center;
-        }
-        h2 {
-            font-size: 15px;
-            margin-bottom: 10px;
-        }
-        h3 {
-            font-size: 12px;
-            margin-bottom: 10px;
-            color: var(--blue);
-            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
-        }
-        h4 {
-            font-family: var(--pixel);
-            font-size: 10px;
-            color: var(--green);
-            margin: 10px 0;
-        }
-        p {
-            font-size: 20px;
-        }
-        .small-text {
-            font-size: 16px;
-        }
-        .tiny-text {
-            font-size: 14px;
+        ::-webkit-scrollbar-thumb {
+            background: var(--blue);
+            border-radius: 4px;
         }
 
-        button {
-            font-family: var(--pixel);
-            font-size: 10px;
-            background: var(--red);
-            border: none;
-            outline: 3px solid #7a0009;
-            outline-offset: -3px;
+        h1, h2, h3, h4 {
+            font-family: var(--font);
+            font-weight: 700;
+            letter-spacing: -0.02em;
             color: #fff;
-            padding: 10px 14px;
-            border-radius: 0;
+        }
+        h1 { font-size: 28px; padding: 16px 0; }
+        h2 { font-size: 22px; margin-bottom: 12px; color: var(--gold); }
+        h3 { font-size: 18px; margin-bottom: 10px; color: #fff; }
+        h4 { font-size: 16px; margin: 10px 0; color: var(--dim); }
+
+        p { font-size: 16px; }
+        .small-text { font-size: 14px; }
+        .tiny-text { font-size: 12px; }
+
+        /* Buttons modern */
+        button {
+            font-family: var(--font);
+            font-weight: 600;
+            font-size: 14px;
+            background: var(--blue);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            padding: 10px 20px;
             cursor: pointer;
-            letter-spacing: 0.5px;
-            box-shadow: 4px 4px 0 #000;
-            transition: transform 0.08s ease, box-shadow 0.08s ease;
-            text-transform: uppercase;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            text-transform: none;
+            letter-spacing: 0.3px;
         }
         button:hover {
-            background: #ff2436;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(26,109,255,0.4);
+            background: #2a7aff;
         }
         button:active {
-            transform: translate(4px, 4px);
-            box-shadow: 0 0 0 #000;
-        }
-        button:focus-visible {
-            outline: 3px dashed var(--gold);
-            outline-offset: 2px;
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
         button.secondary {
-            background: var(--blue);
-            outline-color: #0b2a80;
+            background: #2a3340;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button.secondary:hover {
+            background: #3a4555;
         }
         button.success {
-            background: #158a3d;
-            outline-color: #0a4a20;
+            background: var(--green);
+            color: #000;
+        }
+        button.success:hover {
+            background: #4eea8e;
         }
         button.danger {
             background: var(--red);
-            outline-color: #7a0009;
+        }
+        button.danger:hover {
+            background: #ff1a3a;
         }
         button.gold {
             background: var(--gold);
             color: #000;
-            outline-color: #a08600;
+        }
+        button.gold:hover {
+            background: #ffd633;
         }
         button.small {
-            font-size: 8px;
-            padding: 5px 10px;
+            font-size: 12px;
+            padding: 6px 14px;
         }
         button.tiny {
-            font-size: 7px;
-            padding: 3px 8px;
+            font-size: 10px;
+            padding: 4px 10px;
         }
 
-        input,
-        select,
-        textarea {
-            font-family: var(--mono);
-            font-size: 20px;
-            padding: 6px 12px;
-            border-radius: 0;
-            border: 2px solid var(--line);
-            margin: 4px 0;
-            background: #060814;
-            color: var(--green);
+        input, select, textarea {
+            font-family: var(--font);
+            font-size: 16px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: var(--panel-2);
+            color: #fff;
+            width: 100%;
+            max-width: 300px;
         }
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: 2px solid var(--gold);
-            border-color: var(--gold);
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid var(--blue);
+            border-color: var(--blue);
         }
 
+        /* Container / Cards */
         .container {
             background: var(--panel);
-            padding: 20px;
-            border: 2px solid var(--line);
-            border-image: linear-gradient(135deg, var(--red), var(--gold), var(--blue)) 1;
-            margin-top: 14px;
-            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.5);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--line);
         }
         .flex {
             display: flex;
             flex-wrap: wrap;
-            gap: 16px;
-            justify-content: space-between;
+            gap: 20px;
+            justify-content: flex-start;
         }
         .card {
             background: var(--panel-2);
-            padding: 15px;
-            border: 2px solid var(--line);
-            flex: 1 1 200px;
-            position: relative;
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid var(--line);
+            flex: 1 1 220px;
+            transition: all 0.2s;
         }
-        .card h3,
-        .card h4 {
-            margin-top: 0;
+        .card:hover {
+            border-color: var(--blue);
         }
         .card.wide {
             flex: 1 1 100%;
         }
         .card .value {
             font-size: 28px;
+            font-weight: 700;
             color: var(--gold);
-            font-family: var(--pixel);
         }
         .card .label {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--dim);
-            font-family: var(--pixel);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
         }
 
+        /* Menu */
         .menu {
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
-            margin: 15px 0;
+            margin: 20px 0 10px;
+            background: var(--panel);
+            border-radius: var(--radius);
+            padding: 8px 12px;
+            border: 1px solid var(--line);
         }
         .menu button {
-            background: var(--panel-2);
-            outline-color: var(--line);
+            background: transparent;
+            box-shadow: none;
+            border-radius: 8px;
             color: var(--dim);
-            font-size: 9px;
-            padding: 8px 12px;
+            font-weight: 500;
+            padding: 10px 18px;
+            font-size: 14px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .menu button:hover {
+            background: var(--panel-2);
+            color: #fff;
+            transform: none;
+            box-shadow: none;
         }
         .menu button.active {
-            background: var(--red);
+            background: var(--blue);
             color: #fff;
-            outline-color: #7a0009;
+            border-color: var(--blue);
+            box-shadow: 0 4px 12px rgba(26,109,255,0.3);
         }
 
+        /* Tabelle */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 10px 0;
-            font-size: 20px;
+            margin: 12px 0;
+            font-size: 15px;
         }
-        th,
-        td {
-            padding: 5px 10px;
+        th, td {
+            padding: 10px 12px;
             text-align: left;
             border-bottom: 1px solid var(--line);
         }
         th {
             background: var(--panel-2);
             color: var(--gold);
-            font-family: var(--pixel);
-            font-size: 9px;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
             letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--red);
+            border-bottom: 2px solid var(--blue);
         }
-        tr.row-champions td:first-child {
-            box-shadow: inset 4px 0 0 var(--blue);
-        }
-        tr.row-europa td:first-child {
-            box-shadow: inset 4px 0 0 var(--green);
-        }
-        tr.row-playoff td:first-child {
-            box-shadow: inset 4px 0 0 var(--gold);
-        }
-        tr.row-relegation td:first-child {
-            box-shadow: inset 4px 0 0 var(--red);
+        tr:hover td {
+            background: rgba(255,255,255,0.03);
         }
         tr.row-own {
-            background: rgba(255, 210, 0, 0.12);
+            background: rgba(26,109,255,0.12);
         }
         tr.row-own td:first-child {
-            font-weight: bold;
+            font-weight: 700;
             color: var(--gold);
         }
-        tr.clickable {
-            cursor: pointer;
-        }
-        tr.clickable:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
+        .row-champions td:first-child { border-left: 4px solid var(--blue); }
+        .row-europa td:first-child { border-left: 4px solid var(--green); }
+        .row-playoff td:first-child { border-left: 4px solid var(--gold); }
+        .row-relegation td:first-child { border-left: 4px solid var(--red); }
 
-        .highlight {
-            color: var(--gold);
-            font-weight: bold;
-        }
-        .text-green {
-            color: var(--green);
-        }
-        .text-red {
-            color: var(--red);
-        }
-        .text-dim {
-            color: var(--dim);
-        }
+        /* Ticker / News */
         .ticker {
-            background: #010102;
-            border: 2px solid var(--line);
-            padding: 15px;
+            background: var(--panel-2);
+            border-radius: var(--radius);
+            padding: 16px;
             max-height: 400px;
             overflow-y: auto;
-            font-size: 20px;
-            color: var(--green);
+            border: 1px solid var(--line);
         }
         .ticker p {
-            margin: 4px 0;
+            margin: 6px 0;
+            font-size: 15px;
         }
         .ticker hr {
             border: none;
-            border-top: 1px dashed var(--line);
+            border-top: 1px solid var(--line);
             margin: 8px 0;
         }
-        .hidden {
-            display: none !important;
+
+        .news-item {
+            padding: 12px 16px;
+            border-left: 4px solid var(--blue);
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 0 var(--radius) var(--radius) 0;
         }
-        .status {
-            font-family: var(--pixel);
+        .news-item .news-date {
+            color: var(--dim);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .news-item.urgent { border-left-color: var(--red); background: rgba(230,0,35,0.08); }
+        .news-item.success { border-left-color: var(--green); background: rgba(61,220,132,0.06); }
+        .news-item.warning { border-left-color: var(--gold); background: rgba(245,196,0,0.06); }
+
+        .badge {
+            display: inline-block;
             font-size: 11px;
-            padding: 8px 12px;
-            background: var(--panel-2);
-            border: 2px solid var(--red);
-            color: var(--gold);
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin: 0 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin: 10px 0;
-        }
-        .btn-group button {
-            background: var(--blue);
-            outline-color: #0b2a80;
-        }
-        .btn-group button.danger {
-            background: var(--red);
-            outline-color: #7a0009;
-        }
-        .btn-group button.success {
-            background: #158a3d;
-            outline-color: #0a4a20;
-        }
-        .btn-group button.gold {
-            background: var(--gold);
-            color: #000;
-            outline-color: #a08600;
-        }
+        .badge.gold { background: var(--gold); color: #000; }
+        .badge.red { background: var(--red); color: #fff; }
+        .badge.blue { background: var(--blue); color: #fff; }
+        .badge.green { background: var(--green); color: #000; }
+        .badge.dim { background: var(--dim); color: #000; }
 
-        .progress-bar {
-            display: flex;
-            height: 18px;
-            background: #0a0c1a;
-            border: 1px solid var(--line);
-            margin: 4px 0;
-            width: 100%;
-            max-width: 200px;
-        }
-        .progress-bar .fill {
-            height: 100%;
-            background: var(--gold);
-            transition: width 0.3s;
-        }
-        .progress-bar .fill.green {
-            background: var(--green);
-        }
-        .progress-bar .fill.red {
-            background: var(--red);
-        }
-        .progress-bar .fill.blue {
-            background: var(--blue);
-        }
-
+        /* Crest */
         .crest {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 42px;
-            height: 42px;
-            font-family: var(--pixel);
-            font-size: 11px;
+            width: 48px;
+            height: 48px;
+            font-weight: 800;
+            font-size: 14px;
             background: var(--panel-2);
             border: 2px solid var(--gold);
-            box-shadow: 3px 3px 0 #000;
+            border-radius: 50%;
             color: var(--gold);
             flex-shrink: 0;
         }
@@ -404,357 +332,319 @@
             border-color: var(--blue);
             color: var(--blue);
         }
+
+        /* Club Card */
         .club-card {
             display: flex;
             flex-direction: column;
             gap: 8px;
+            background: var(--panel-2);
+            border-radius: var(--radius);
+            padding: 18px;
+            border: 1px solid var(--line);
+            transition: all 0.2s;
+        }
+        .club-card:hover {
+            border-color: var(--blue);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
         .club-card .club-head {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
         .club-card .club-head h3 {
             margin: 0;
-            font-size: 11px;
+            font-size: 18px;
+            font-weight: 700;
         }
+
         .league-tag {
             display: inline-block;
-            font-family: var(--pixel);
-            font-size: 8px;
-            padding: 3px 6px;
-            margin-bottom: 6px;
+            font-weight: 700;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 20px;
             background: var(--red);
             color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .league-tag.tag-2 {
             background: var(--blue);
         }
 
-        .arcade-title {
-            text-align: center;
-            margin-bottom: 4px;
-        }
-        .blink {
-            animation: blink 1s steps(1) infinite;
-        }
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
-        .subtitle {
-            text-align: center;
-            font-family: var(--pixel);
-            font-size: 9px;
-            color: var(--dim);
-            margin-bottom: 18px;
-            letter-spacing: 1px;
-        }
         .league-tabs {
             display: flex;
             gap: 8px;
-            margin: 10px 0 16px;
+            margin: 16px 0 20px;
         }
         .league-tabs button {
             background: var(--panel-2);
             color: var(--dim);
-            outline-color: var(--line);
+            border: 1px solid var(--line);
+            box-shadow: none;
+            border-radius: 30px;
+            padding: 8px 24px;
         }
         .league-tabs button.active {
             background: var(--gold);
             color: #000;
-            outline-color: #a08600;
+            border-color: var(--gold);
+            box-shadow: 0 4px 12px rgba(245,196,0,0.3);
         }
 
-        ::selection {
+        /* Progress / Morale */
+        .progress-bar {
+            display: flex;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--line);
+            overflow: hidden;
+            margin: 4px 0;
+            width: 100%;
+            max-width: 200px;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            border-radius: 4px;
             background: var(--gold);
-            color: #000;
+            transition: width 0.3s;
         }
-        ::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
+        .progress-bar .fill.green { background: var(--green); }
+        .progress-bar .fill.red { background: var(--red); }
+        .progress-bar .fill.blue { background: var(--blue); }
+
+        .morale-bar {
+            display: inline-block;
+            width: 70px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--line);
+            overflow: hidden;
+            vertical-align: middle;
+            margin-right: 6px;
         }
-        ::-webkit-scrollbar-track {
-            background: var(--bg);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--red);
-            border: 2px solid var(--bg);
+        .morale-bar .fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
         }
 
+        /* Spielerzeile */
+        .player-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 4px 0;
+        }
+        .player-row .p-info {
+            flex: 1;
+            min-width: 140px;
+        }
+        .player-row .p-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            color: var(--dim);
+        }
+
+        .task-item {
+            padding: 12px 16px;
+            margin: 6px 0;
+            border-left: 4px solid var(--gold);
+            background: rgba(245,196,0,0.04);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .task-item.urgent { border-left-color: var(--red); background: rgba(230,0,35,0.06); }
+        .task-item.warning { border-left-color: var(--gold); background: rgba(245,196,0,0.06); }
+        .task-item.done { border-left-color: var(--green); background: rgba(61,220,132,0.06); opacity: 0.8; }
+
+        .match-result {
+            padding: 8px 14px;
+            margin: 4px 0;
+            border-left: 4px solid var(--dim);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            background: rgba(255,255,255,0.02);
+        }
+        .match-result.win { border-left-color: var(--green); }
+        .match-result.loss { border-left-color: var(--red); }
+        .match-result.draw { border-left-color: var(--gold); }
+
+        .form-indicator {
+            display: inline-flex;
+            gap: 4px;
+            font-size: 14px;
+        }
+        .form-indicator .w { color: var(--green); }
+        .form-indicator .l { color: var(--red); }
+        .form-indicator .d { color: var(--gold); }
+
+        /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0,0,0,0.75);
             z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            backdrop-filter: blur(4px);
         }
         .modal-box {
             background: var(--panel);
-            border: 3px solid var(--gold);
-            padding: 30px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 32px;
             max-width: 760px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 12px 12px 0 rgba(0, 0, 0, 0.7);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
         }
         .modal-box h2 {
             margin-top: 0;
+            color: var(--gold);
         }
         .modal-box .close-btn {
             float: right;
-            background: var(--red);
-            outline-color: #7a0009;
-            font-size: 14px;
-            padding: 5px 14px;
-        }
-
-        .news-item {
-            padding: 10px;
-            border-left: 4px solid var(--blue);
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.03);
-        }
-        .news-item .news-date {
-            color: var(--dim);
-            font-size: 14px;
-            font-family: var(--pixel);
-        }
-        .news-item .news-title {
-            color: var(--gold);
-            font-weight: bold;
-        }
-        .news-item.urgent {
-            border-left-color: var(--red);
-            background: rgba(227, 0, 15, 0.08);
-        }
-        .news-item.success {
-            border-left-color: var(--green);
-            background: rgba(57, 255, 20, 0.05);
-        }
-        .news-item.warning {
-            border-left-color: var(--gold);
-            background: rgba(255, 210, 0, 0.06);
-        }
-
-        .badge {
-            display: inline-block;
-            font-family: var(--pixel);
-            font-size: 8px;
-            padding: 2px 8px;
-            border-radius: 0;
-            margin: 0 4px;
-        }
-        .badge.gold {
-            background: var(--gold);
-            color: #000;
-        }
-        .badge.red {
-            background: var(--red);
-            color: #fff;
-        }
-        .badge.blue {
-            background: var(--blue);
-            color: #fff;
-        }
-        .badge.green {
-            background: var(--green);
-            color: #000;
-        }
-        .badge.dim {
-            background: var(--dim);
-            color: #000;
-        }
-
-        .player-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .player-row .p-info {
-            flex: 1;
-            min-width: 120px;
-        }
-        .player-row .p-stats {
-            display: flex;
-            gap: 12px;
-            font-size: 16px;
-            color: var(--dim);
-        }
-
-        .morale-bar {
-            display: inline-block;
-            width: 60px;
-            height: 8px;
-            background: #0a0c1a;
+            background: var(--panel-2);
             border: 1px solid var(--line);
-            position: relative;
-        }
-        .morale-bar .fill {
-            height: 100%;
-            transition: width 0.3s;
-        }
-
-        .task-item {
-            padding: 8px 12px;
-            margin: 4px 0;
-            border-left: 3px solid var(--gold);
-            background: rgba(255, 210, 0, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .task-item.urgent {
-            border-left-color: var(--red);
-            background: rgba(227, 0, 15, 0.08);
-        }
-        .task-item.done {
-            border-left-color: var(--green);
-            background: rgba(57, 255, 20, 0.05);
-            opacity: 0.7;
-        }
-
-        .match-result {
-            padding: 6px 12px;
-            margin: 2px 0;
-            border-left: 3px solid var(--dim);
-        }
-        .match-result.win {
-            border-left-color: var(--green);
-        }
-        .match-result.loss {
-            border-left-color: var(--red);
-        }
-        .match-result.draw {
-            border-left-color: var(--gold);
-        }
-
-        .form-indicator {
-            display: inline-flex;
-            gap: 4px;
-            font-size: 16px;
-        }
-        .form-indicator span {
-            width: 24px;
-            text-align: center;
-        }
-        .form-indicator .w {
-            color: var(--green);
-        }
-        .form-indicator .l {
-            color: var(--red);
-        }
-        .form-indicator .d {
-            color: var(--gold);
-        }
-
-        .philosophy-tag {
-            display: inline-block;
-            padding: 2px 10px;
-            font-family: var(--pixel);
-            font-size: 7px;
-            border: 1px solid var(--dim);
             color: var(--dim);
-            margin: 2px;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            box-shadow: none;
         }
-        .philosophy-tag.active {
+        .modal-box .close-btn:hover {
+            background: var(--red);
+            color: #fff;
+        }
+
+        /* Status */
+        .status {
+            font-weight: 600;
+            padding: 8px 16px;
+            background: var(--panel-2);
+            border-radius: 30px;
+            border: 1px solid var(--line);
+            color: var(--dim);
+            font-size: 14px;
+        }
+        .status.gold {
             border-color: var(--gold);
             color: var(--gold);
         }
 
+        /* Start Screen */
+        .start-box {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .start-box h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), #ffd966);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .start-box .sub {
+            font-size: 20px;
+            color: var(--dim);
+            margin-bottom: 32px;
+        }
+        .start-box .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+        .start-box .btn-group button {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            border-radius: 12px;
+        }
+
+        /* misc */
+        .hidden { display: none !important; }
+        .text-green { color: var(--green); }
+        .text-red { color: var(--red); }
+        .text-dim { color: var(--dim); }
+        .highlight { color: var(--gold); font-weight: 700; }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+
+        /* Responsive */
         @media (max-width: 700px) {
-            body {
-                font-size: 16px;
-                padding: 10px;
-            }
-            h1 {
-                font-size: 14px;
-            }
-            h2 {
-                font-size: 11px;
-            }
-            button {
-                font-size: 8px;
-                padding: 6px 10px;
-            }
-            .card {
-                flex: 1 1 100%;
-            }
-            .menu button {
-                font-size: 7px;
-                padding: 5px 8px;
-            }
-            table {
-                font-size: 14px;
-            }
-            th,
-            td {
-                padding: 3px 5px;
-            }
-            .modal-box {
-                padding: 16px;
-            }
-            .task-item {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 6px;
-            }
-            .crest {
-                width: 32px;
-                height: 32px;
-                font-size: 9px;
-            }
+            body { padding: 12px; }
+            h1 { font-size: 22px; }
+            h2 { font-size: 18px; }
+            button { font-size: 13px; padding: 8px 16px; }
+            .card { flex: 1 1 100%; }
+            .menu button { font-size: 12px; padding: 6px 12px; }
+            table { font-size: 13px; }
+            th, td { padding: 6px 8px; }
+            .modal-box { padding: 20px; }
+            .crest { width: 40px; height: 40px; font-size: 12px; }
+            .start-box h1 { font-size: 32px; }
         }
     </style>
 </head>
 <body>
 
-    <h1 class="arcade-title">⚽ SPORTDIREKTOR SIMULATOR</h1>
-    <p class="subtitle">1. BUNDESLIGA <span class="blink">▮</span> 2. BUNDESLIGA — SAISON 2026/27</p>
+    <h1 style="text-align:center; margin-bottom:0;">⚽ SPORTDIREKTOR</h1>
+    <p style="text-align:center; color:var(--dim); font-weight:500; letter-spacing:1px; margin-top:-6px;">BUNDESLIGA &amp; 2. BUNDESLIGA — SAISON 2026/27</p>
 
     <div id="app">
         <!-- ====== START SCREEN ====== -->
-        <div id="start-screen" class="container">
-            <div style="text-align:center;padding:30px 0;">
-                <h1 style="font-size:32px;">⚽ SPORTDIREKTOR</h1>
-                <p style="font-size:28px;color:var(--gold);">BUNDESLIGA MANAGEMENT</p>
-                <p style="font-size:18px;color:var(--dim);margin:20px 0 40px;">SIMULATOR 2026/27</p>
-                <div style="display:flex;flex-direction:column;gap:16px;align-items:center;max-width:300px;margin:0 auto;">
-                    <button id="btn-new-career" style="width:100%;font-size:14px;padding:16px;">🆕 NEUE KARRIERE</button>
-                    <button id="btn-load-career" style="width:100%;font-size:14px;padding:16px;background:var(--blue);outline-color:#0b2a80;">📂 KARRIERE LADEN</button>
+        <div id="start-screen" class="container" style="background:var(--panel-2);">
+            <div class="start-box">
+                <h1>⚽ SPORTDIREKTOR</h1>
+                <p class="sub">Bundesliga Management Simulator</p>
+                <div class="btn-group">
+                    <button id="btn-new-career" style="background:var(--gold);color:#000;">🆕 NEUE KARRIERE</button>
+                    <button id="btn-load-career" class="secondary">📂 KARRIERE LADEN</button>
                 </div>
-                <p style="margin-top:30px;color:var(--dim);font-size:14px;">Alle Daten werden lokal im Browser gespeichert.</p>
-                <p style="color:var(--dim);font-size:12px;margin-top:6px;">⚡ Realistische Kader &amp; Marktwerte 2026/27</p>
+                <p style="margin-top:30px; font-size:14px; color:var(--dim);">Alle Daten werden lokal im Browser gespeichert.</p>
+                <p style="font-size:12px; color:var(--dim);">⚡ Realistische Kader &amp; Marktwerte 2026/27</p>
             </div>
         </div>
 
         <!-- ====== SELECT SCREEN ====== -->
         <div id="select-screen" class="container hidden">
-            <h2>&gt; Wähle deinen Verein_</h2>
+            <h2>&gt; Wähle deinen Verein</h2>
             <div id="league-tabs" class="league-tabs">
                 <button data-league="Bundesliga" class="active">1. Bundesliga</button>
                 <button data-league="2. Bundesliga">2. Bundesliga</button>
             </div>
             <div id="club-list" class="flex"></div>
-            <button id="back-to-start" class="secondary" style="margin-top:14px;">⬅ Zurück</button>
+            <button id="back-to-start" class="secondary" style="margin-top:20px;">⬅ Zurück</button>
         </div>
 
         <!-- ====== MAIN GAME UI ====== -->
         <div id="game-screen" class="hidden">
             <!-- Header -->
-            <div class="flex" style="justify-content:space-between;align-items:center;">
-                <h2 id="club-name-header"></h2>
-                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <div class="flex" style="justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+                <h2 id="club-name-header" style="margin:0;"></h2>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
                     <span id="season-display" class="status">Saison 2026/27</span>
                     <span id="matchday-display" class="status">Spieltag 0</span>
-                    <span id="budget-display" class="status" style="border-color:var(--gold);">€0.0M</span>
+                    <span id="budget-display" class="status gold">€0.0M</span>
                 </div>
             </div>
 
@@ -2979,7 +2869,7 @@
                 const crest = getCrest(club.name);
                 const crestClass = club.league === "2. Bundesliga" ? "crest league-2" : "crest";
                 const div = document.createElement('div');
-                div.className = 'card club-card';
+                div.className = 'club-card';
                 const diff = club.reputation > 75 ? "★☆☆☆☆" :
                     club.reputation > 65 ? "★★☆☆☆" :
                     club.reputation > 55 ? "★★★☆☆" :
@@ -4282,9 +4172,8 @@
 
         window.appState = appState;
 
-        console.log("⚽ Sportdirektor-Simulator 2026/27 – Realistische Daten geladen!");
+        console.log("⚽ Sportdirektor-Simulator 2026/27 – EA FC Style Interface");
         console.log(`📊 ${appState.clubs.length} Vereine, ${appState.clubs.reduce((a,c) => a + c.players.length, 0)} Spieler generiert.`);
-        console.log("🏆 Bundesliga & 2. Bundesliga mit echten Kadern 2026/27");
     </script>
 </body>
 </html>
