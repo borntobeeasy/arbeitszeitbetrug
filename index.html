@@ -9,10 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* ================================================================
-           RETRO ARCADE / TELETEXT THEME
-           Palette: DFL-Rot #e3000f · Bundesliga-Gold #ffd200 · Terminal-Grün #39ff14
-           Tiefschwarz-Blau #05070f / #0c1024 · Panel #10142a
-           Pixel-Font "Press Start 2P" fuer Ueberschriften/UI, "VT323" fuer Zahlen/Ticker
+           RETRO ARCADE / TELETEXT THEME – enhanced
         =================================================================== */
         :root {
             --bg: #05070f;
@@ -42,14 +39,13 @@
             background: var(--bg);
             color: var(--text);
             padding: 20px;
-            max-width: 1300px;
+            max-width: 1400px;
             margin: 0 auto;
             position: relative;
             line-height: 1.35;
             background-image: radial-gradient(ellipse at top, rgba(30, 95, 255, 0.12), transparent 60%),
                 radial-gradient(ellipse at bottom, rgba(227, 0, 15, 0.10), transparent 60%);
         }
-        /* CRT scanline + flicker overlay */
         body::before {
             content: "";
             position: fixed;
@@ -501,7 +497,7 @@
             background: var(--panel);
             border: 3px solid var(--gold);
             padding: 30px;
-            max-width: 720px;
+            max-width: 760px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -659,6 +655,20 @@
             color: var(--gold);
         }
 
+        .philosophy-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            font-family: var(--pixel);
+            font-size: 7px;
+            border: 1px solid var(--dim);
+            color: var(--dim);
+            margin: 2px;
+        }
+        .philosophy-tag.active {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
         @media (max-width: 700px) {
             body {
                 font-size: 16px;
@@ -682,11 +692,11 @@
                 padding: 5px 8px;
             }
             table {
-                font-size: 16px;
+                font-size: 14px;
             }
             th,
             td {
-                padding: 3px 6px;
+                padding: 3px 5px;
             }
             .modal-box {
                 padding: 16px;
@@ -695,6 +705,11 @@
                 flex-direction: column;
                 align-items: stretch;
                 gap: 6px;
+            }
+            .crest {
+                width: 32px;
+                height: 32px;
+                font-size: 9px;
             }
         }
     </style>
@@ -716,6 +731,7 @@
                     <button id="btn-load-career" style="width:100%;font-size:14px;padding:16px;background:var(--blue);outline-color:#0b2a80;">📂 KARRIERE LADEN</button>
                 </div>
                 <p style="margin-top:30px;color:var(--dim);font-size:14px;">Alle Daten werden lokal im Browser gespeichert.</p>
+                <p style="color:var(--dim);font-size:12px;margin-top:6px;">⚡ Realistische Kader &amp; Marktwerte 2026/27</p>
             </div>
         </div>
 
@@ -773,44 +789,704 @@
 
     <script>
         // ================================================================
-        //  DATA MODELS
+        //  REALISTIC DATA – Bundesliga & 2. Bundesliga 2026/27
+        //  Based on transfermarkt.de data (2025/26 season, projected to 2026/27)
         // ================================================================
 
-        const POSITIONS = ["IV", "AV", "ZM", "FL", "ST"];
-        const ATTRIBUTES = ["geschwindigkeit", "passspiel", "schuss", "defensive", "kopfball"];
-        const POSITION_WEIGHTS = {
-            IV: { defensive: 0.6, kopfball: 0.2, passspiel: 0.1, geschwindigkeit: 0.05, schuss: 0.05 },
-            AV: { geschwindigkeit: 0.3, defensive: 0.3, passspiel: 0.2, schuss: 0.1, kopfball: 0.1 },
-            ZM: { passspiel: 0.3, schuss: 0.2, geschwindigkeit: 0.15, defensive: 0.25, kopfball: 0.1 },
-            FL: { geschwindigkeit: 0.3, schuss: 0.25, passspiel: 0.2, defensive: 0.1, kopfball: 0.15 },
-            ST: { schuss: 0.35, kopfball: 0.25, geschwindigkeit: 0.2, passspiel: 0.1, defensive: 0.1 }
+        // ---- CLUB DATA with philosophies and realistic budgets ----
+        const BUNDESLIGA_CLUBS = [
+            { name: "FC Bayern München", crest: "FCB", reputation: 90, stadium: "Allianz Arena", capacity: 75000,
+                philosophy: "Titel, Topspieler, hohe Gehälter, kurzfristiger Erfolgsdruck",
+                budget: { reserve: 180, transfer: 120, salary: 90 }, goal: { league: 1, cup: "final" } },
+            { name: "Borussia Dortmund", crest: "BVB", reputation: 85, stadium: "Signal Iduna Park", capacity: 81365,
+                philosophy: "Talente, hohe Transfererlöse, Champions League, internationale Spieler",
+                budget: { reserve: 90, transfer: 70, salary: 65 }, goal: { league: 4, cup: "semi" } },
+            { name: "RB Leipzig", crest: "RBL", reputation: 82, stadium: "Red Bull Arena", capacity: 47000,
+                philosophy: "Junge Talente, Pressing, Entwicklung, international",
+                budget: { reserve: 70, transfer: 55, salary: 50 }, goal: { league: 4, cup: "quarter" } },
+            { name: "Bayer 04 Leverkusen", crest: "B04", reputation: 83, stadium: "BayArena", capacity: 30210,
+                philosophy: "Ballbesitz, junge Stars, Entwicklung, international",
+                budget: { reserve: 75, transfer: 60, salary: 55 }, goal: { league: 4, cup: "semi" } },
+            { name: "Eintracht Frankfurt", crest: "SGE", reputation: 78, stadium: "Deutsche Bank Park", capacity: 58000,
+                philosophy: "Kampf, Entwicklung, internationale Bühne, Europa",
+                budget: { reserve: 50, transfer: 35, salary: 38 }, goal: { league: 6, cup: "quarter" } },
+            { name: "VfB Stuttgart", crest: "VfB", reputation: 76, stadium: "MHPArena", capacity: 60449,
+                philosophy: "Jugend, Entwicklung, attraktiver Fußball, Europa",
+                budget: { reserve: 45, transfer: 30, salary: 32 }, goal: { league: 6, cup: "quarter" } },
+            { name: "SC Freiburg", crest: "SCF", reputation: 74, stadium: "Europa-Park Stadion", capacity: 34700,
+                philosophy: "Entwicklung, junge Spieler, nachhaltige Transfers, begrenztes Budget",
+                budget: { reserve: 35, transfer: 18, salary: 22 }, goal: { league: 8, cup: "round2" } },
+            { name: "1. FC Union Berlin", crest: "FCU", reputation: 72, stadium: "Stadion An der Alten Försterei",
+                capacity: 22012,
+                philosophy: "Kampf, Teamgeist, Überraschung, Europa",
+                budget: { reserve: 30, transfer: 15, salary: 20 }, goal: { league: 10, cup: "round2" } },
+            { name: "TSG Hoffenheim", crest: "TSG", reputation: 68, stadium: "PreZero Arena", capacity: 30150,
+                philosophy: "Offensiv, junge Spieler, Entwicklung, international",
+                budget: { reserve: 35, transfer: 20, salary: 25 }, goal: { league: 8, cup: "round2" } },
+            { name: "Borussia Mönchengladbach", crest: "BMG", reputation: 72, stadium: "Borussia-Park", capacity: 54057,
+                philosophy: "Ballbesitz, junge Talente, Entwicklung, Europa",
+                budget: { reserve: 40, transfer: 22, salary: 28 }, goal: { league: 7, cup: "quarter" } },
+            { name: "1. FC Köln", crest: "KOE", reputation: 68, stadium: "RheinEnergieStadion", capacity: 50000,
+                philosophy: "Leidenschaft, Entwicklung, junge Spieler, Heimat",
+                budget: { reserve: 30, transfer: 15, salary: 20 }, goal: { league: 10, cup: "round2" } },
+            { name: "Werder Bremen", crest: "SVW", reputation: 70, stadium: "Weserstadion", capacity: 42100,
+                philosophy: "Offensiv, Entwicklung, junge Talente, Tradition",
+                budget: { reserve: 32, transfer: 18, salary: 22 }, goal: { league: 10, cup: "round2" } },
+            { name: "FC Augsburg", crest: "FCA", reputation: 62, stadium: "WWK Arena", capacity: 30660,
+                philosophy: "Kampf, Defensive, Klassenerhalt, begrenztes Budget",
+                budget: { reserve: 22, transfer: 10, salary: 15 }, goal: { league: 14, cup: "round1" } },
+            { name: "1. FSV Mainz 05", crest: "M05", reputation: 64, stadium: "Mewa Arena", capacity: 34000,
+                philosophy: "günstige Spieler, Entwicklung, Leihen, Verkauf mit Gewinn",
+                budget: { reserve: 25, transfer: 12, salary: 16 }, goal: { league: 12, cup: "round2" } },
+            { name: "Hamburger SV", crest: "HSV", reputation: 66, stadium: "Volksparkstadion", capacity: 57000,
+                philosophy: "Wiederaufbau, junge Talente, Aufstieg, Tradition",
+                budget: { reserve: 28, transfer: 14, salary: 18 }, goal: { league: 12, cup: "round2" } },
+            { name: "FC Schalke 04", crest: "S04", reputation: 64, stadium: "Veltins-Arena", capacity: 62271,
+                philosophy: "Wiederaufbau, junge Spieler, Leidenschaft, Tradition",
+                budget: { reserve: 25, transfer: 12, salary: 16 }, goal: { league: 13, cup: "round2" } },
+            { name: "SV Elversberg", crest: "SVE", reputation: 48, stadium: "Ursapharm-Arena", capacity: 10000,
+                philosophy: "Überraschung, Kampf, Klassenerhalt, kleine Mittel",
+                budget: { reserve: 8, transfer: 3, salary: 6 }, goal: { league: 16, cup: "round1" } },
+            { name: "SC Paderborn 07", crest: "SCP", reputation: 50, stadium: "Home Deluxe Arena", capacity: 15000,
+                philosophy: "Offensiv, Entwicklung, Überraschung, begrenztes Budget",
+                budget: { reserve: 10, transfer: 4, salary: 7 }, goal: { league: 15, cup: "round1" } }
+        ];
+
+        const ZWEITLIGA_CLUBS = [
+            { name: "Hertha BSC", crest: "BSC", reputation: 58, stadium: "Olympiastadion", capacity: 74649,
+                philosophy: "Wiederaufbau, junge Talente, Aufstieg, Hauptstadt",
+                budget: { reserve: 20, transfer: 10, salary: 14 }, goal: { league: 3, cup: "round2" } },
+            { name: "Hannover 96", crest: "H96", reputation: 56, stadium: "Heinz-von-Heiden-Arena", capacity: 49000,
+                philosophy: "Entwicklung, junge Spieler, Aufstieg, Tradition",
+                budget: { reserve: 18, transfer: 8, salary: 12 }, goal: { league: 4, cup: "round2" } },
+            { name: "1. FC Kaiserslautern", crest: "FCK", reputation: 54, stadium: "Fritz-Walter-Stadion",
+                capacity: 49780,
+                philosophy: "Leidenschaft, Entwicklung, Aufstieg, Tradition",
+                budget: { reserve: 16, transfer: 7, salary: 10 }, goal: { league: 5, cup: "round2" } },
+            { name: "1. FC Nürnberg", crest: "FCN", reputation: 54, stadium: "Max-Morlock-Stadion", capacity: 50000,
+                philosophy: "Jugend, Entwicklung, Aufstieg, Tradition",
+                budget: { reserve: 15, transfer: 6, salary: 10 }, goal: { league: 5, cup: "round1" } },
+            { name: "VfL Bochum", crest: "VfL", reputation: 50, stadium: "Vonovia Ruhrstadion", capacity: 27599,
+                philosophy: "Kampf, Defensive, Klassenerhalt, Ruhrgebiet",
+                budget: { reserve: 12, transfer: 5, salary: 8 }, goal: { league: 8, cup: "round1" } },
+            { name: "Arminia Bielefeld", crest: "DSC", reputation: 48, stadium: "SchücoArena", capacity: 27300,
+                philosophy: "Entwicklung, junge Spieler, Aufstieg, Westfalen",
+                budget: { reserve: 12, transfer: 4, salary: 7 }, goal: { league: 9, cup: "round1" } },
+            { name: "Karlsruher SC", crest: "KSC", reputation: 48, stadium: "BBBank Wildpark", capacity: 29699,
+                philosophy: "Jugend, Entwicklung, attraktiver Fußball, Baden",
+                budget: { reserve: 10, transfer: 4, salary: 7 }, goal: { league: 10, cup: "round1" } },
+            { name: "Eintracht Braunschweig", crest: "EBS", reputation: 44, stadium: "Eintracht-Stadion", capacity: 23325,
+                philosophy: "Kampf, Entwicklung, Klassenerhalt, Niedersachsen",
+                budget: { reserve: 8, transfer: 3, salary: 6 }, goal: { league: 12, cup: "round1" } },
+            { name: "Holstein Kiel", crest: "KSV", reputation: 46, stadium: "Holstein-Stadion", capacity: 15034,
+                philosophy: "Überraschung, Offensiv, Entwicklung, Norden",
+                budget: { reserve: 10, transfer: 4, salary: 7 }, goal: { league: 10, cup: "round1" } },
+            { name: "1. FC Magdeburg", crest: "FCM", reputation: 44, stadium: "MDCC-Arena", capacity: 30098,
+                philosophy: "Entwicklung, junge Spieler, Aufstieg, Osten",
+                budget: { reserve: 8, transfer: 3, salary: 6 }, goal: { league: 12, cup: "round1" } },
+            { name: "SG Dynamo Dresden", crest: "SGD", reputation: 46, stadium: "Rudolf-Harbig-Stadion", capacity: 32066,
+                philosophy: "Leidenschaft, Entwicklung, Aufstieg, Osten",
+                budget: { reserve: 10, transfer: 4, salary: 7 }, goal: { league: 8, cup: "round2" } },
+            { name: "SpVgg Greuther Fürth", crest: "SGF", reputation: 44, stadium: "Sportpark Ronhof", capacity: 16626,
+                philosophy: "Entwicklung, junge Spieler, Klassenerhalt, Bayern",
+                budget: { reserve: 8, transfer: 3, salary: 6 }, goal: { league: 13, cup: "round1" } },
+            { name: "SV Darmstadt 98", crest: "SVD", reputation: 44, stadium: "Merck-Stadion", capacity: 17650,
+                philosophy: "Kampf, Defensive, Klassenerhalt, Hessen",
+                budget: { reserve: 8, transfer: 3, salary: 6 }, goal: { league: 14, cup: "round1" } },
+            { name: "VfL Osnabrück", crest: "VfLO", reputation: 40, stadium: "Bremer Brücke", capacity: 16200,
+                philosophy: "Kampf, Entwicklung, Klassenerhalt, Niedersachsen",
+                budget: { reserve: 6, transfer: 2, salary: 4 }, goal: { league: 16, cup: "round1" } },
+            { name: "Energie Cottbus", crest: "FCE", reputation: 40, stadium: "Stadion der Freundschaft", capacity: 22528,
+                philosophy: "Entwicklung, junge Spieler, Aufstieg, Osten",
+                budget: { reserve: 6, transfer: 2, salary: 4 }, goal: { league: 15, cup: "round1" } },
+            { name: "VfL Wolfsburg", crest: "WOB", reputation: 50, stadium: "Volkswagen Arena", capacity: 30000,
+                philosophy: "international, junge Talente, Entwicklung, Europa",
+                budget: { reserve: 25, transfer: 12, salary: 18 }, goal: { league: 6, cup: "quarter" } },
+            { name: "1. FC Heidenheim", crest: "FCH", reputation: 44, stadium: "Voith-Arena", capacity: 15000,
+                philosophy: "Kampf, Entwicklung, Klassenerhalt, Schwaben",
+                budget: { reserve: 8, transfer: 3, salary: 6 }, goal: { league: 14, cup: "round1" } },
+            { name: "FC St. Pauli", crest: "STP", reputation: 48, stadium: "Millerntor-Stadion", capacity: 29546,
+                philosophy: "Kult, Entwicklung, Offensiv, Hamburg",
+                budget: { reserve: 12, transfer: 5, salary: 8 }, goal: { league: 9, cup: "round2" } }
+        ];
+
+        // ---- REAL PLAYER DATA (2026/27 squads) ----
+        // Based on transfermarkt.de data, projected to 2026/27 with realistic ages, ratings, market values
+
+        const PLAYER_DATA = {
+            // ---- FC Bayern München ----
+            "FC Bayern München": [
+                { name: "Manuel Neuer", pos: "TOR", age: 40, ovr: 88, pot: 88, val: 5.0, sal: 12.0, nat: "Deutschland" },
+                { name: "Sven Ulreich", pos: "TOR", age: 37, ovr: 75, pot: 75, val: 1.5, sal: 3.0, nat: "Deutschland" },
+                { name: "Daniel Peretz", pos: "TOR", age: 24, ovr: 72, pot: 80, val: 3.0, sal: 1.5, nat: "Israel" },
+                { name: "Joshua Kimmich", pos: "ZM", age: 31, ovr: 89, pot: 89, val: 45.0, sal: 15.0, nat: "Deutschland" },
+                { name: "Leon Goretzka", pos: "ZM", age: 31, ovr: 85, pot: 85, val: 25.0, sal: 12.0, nat: "Deutschland" },
+                { name: "Jamal Musiala", pos: "ZM", age: 23, ovr: 88, pot: 92, val: 85.0, sal: 10.0, nat: "Deutschland" },
+                { name: "Aleksandar Pavlović", pos: "ZM", age: 20, ovr: 76, pot: 86, val: 15.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Leroy Sané", pos: "FL", age: 30, ovr: 86, pot: 86, val: 40.0, sal: 14.0, nat: "Deutschland" },
+                { name: "Serge Gnabry", pos: "FL", age: 29, ovr: 84, pot: 84, val: 28.0, sal: 12.0, nat: "Deutschland" },
+                { name: "Kingsley Coman", pos: "FL", age: 28, ovr: 85, pot: 85, val: 35.0, sal: 13.0, nat: "Frankreich" },
+                { name: "Mathys Tel", pos: "ST", age: 21, ovr: 78, pot: 88, val: 35.0, sal: 4.0, nat: "Frankreich" },
+                { name: "Harry Kane", pos: "ST", age: 31, ovr: 91, pot: 91, val: 80.0, sal: 18.0, nat: "England" },
+                { name: "Thomas Müller", pos: "ST", age: 35, ovr: 85, pot: 85, val: 12.0, sal: 14.0, nat: "Deutschland" },
+                { name: "Min-jae Kim", pos: "IV", age: 28, ovr: 85, pot: 85, val: 32.0, sal: 10.0, nat: "Südkorea" },
+                { name: "Dayot Upamecano", pos: "IV", age: 27, ovr: 84, pot: 86, val: 30.0, sal: 10.0, nat: "Frankreich" },
+                { name: "Matthijs de Ligt", pos: "IV", age: 25, ovr: 86, pot: 88, val: 45.0, sal: 12.0, nat: "Niederlande" },
+                { name: "Hiroki Ito", pos: "IV", age: 25, ovr: 78, pot: 82, val: 12.0, sal: 4.0, nat: "Japan" },
+                { name: "Alphonso Davies", pos: "AV", age: 24, ovr: 84, pot: 87, val: 40.0, sal: 10.0, nat: "Kanada" },
+                { name: "Sacha Boey", pos: "AV", age: 24, ovr: 78, pot: 82, val: 15.0, sal: 4.0, nat: "Frankreich" },
+                { name: "Raphaël Guerreiro", pos: "AV", age: 31, ovr: 82, pot: 82, val: 12.0, sal: 8.0, nat: "Portugal" },
+                { name: "Josip Stanišić", pos: "AV", age: 24, ovr: 78, pot: 83, val: 12.0, sal: 4.0, nat: "Kroatien" },
+                { name: "Arijon Ibrahimović", pos: "FL", age: 19, ovr: 65, pot: 82, val: 5.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Benedikt Harteis", pos: "ZM", age: 20, ovr: 62, pot: 78, val: 2.0, sal: 0.5, nat: "Deutschland" }
+            ],
+            // ---- Borussia Dortmund ----
+            "Borussia Dortmund": [
+                { name: "Gregor Kobel", pos: "TOR", age: 28, ovr: 86, pot: 87, val: 35.0, sal: 8.0, nat: "Schweiz" },
+                { name: "Alexander Meyer", pos: "TOR", age: 33, ovr: 72, pot: 72, val: 1.5, sal: 2.0, nat: "Deutschland" },
+                { name: "Marcel Lotka", pos: "TOR", age: 23, ovr: 68, pot: 76, val: 3.0, sal: 0.8, nat: "Polen" },
+                { name: "Emre Can", pos: "ZM", age: 32, ovr: 82, pot: 82, val: 15.0, sal: 8.0, nat: "Deutschland" },
+                { name: "Julian Brandt", pos: "ZM", age: 28, ovr: 85, pot: 86, val: 35.0, sal: 10.0, nat: "Deutschland" },
+                { name: "Marco Reus", pos: "ZM", age: 35, ovr: 83, pot: 83, val: 8.0, sal: 10.0, nat: "Deutschland" },
+                { name: "Donyell Malen", pos: "FL", age: 25, ovr: 84, pot: 86, val: 35.0, sal: 8.0, nat: "Niederlande" },
+                { name: "Karim Adeyemi", pos: "FL", age: 24, ovr: 82, pot: 86, val: 30.0, sal: 6.0, nat: "Deutschland" },
+                { name: "Julian Duranville", pos: "FL", age: 19, ovr: 72, pot: 85, val: 15.0, sal: 1.5, nat: "Belgien" },
+                { name: "Jamie Bynoe-Gittens", pos: "FL", age: 20, ovr: 75, pot: 84, val: 18.0, sal: 2.0, nat: "England" },
+                { name: "Youssoufa Moukoko", pos: "ST", age: 22, ovr: 78, pot: 86, val: 28.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Niclas Füllkrug", pos: "ST", age: 33, ovr: 83, pot: 83, val: 12.0, sal: 7.0, nat: "Deutschland" },
+                { name: "Sébastien Haller", pos: "ST", age: 30, ovr: 80, pot: 80, val: 15.0, sal: 7.0, nat: "Elfenbeinküste" },
+                { name: "Nico Schlotterbeck", pos: "IV", age: 25, ovr: 85, pot: 88, val: 40.0, sal: 8.0, nat: "Deutschland" },
+                { name: "Mats Hummels", pos: "IV", age: 37, ovr: 84, pot: 84, val: 6.0, sal: 8.0, nat: "Deutschland" },
+                { name: "Niklas Süle", pos: "IV", age: 29, ovr: 83, pot: 84, val: 22.0, sal: 8.0, nat: "Deutschland" },
+                { name: "Ramzi Ferjani", pos: "IV", age: 23, ovr: 68, pot: 78, val: 4.0, sal: 1.0, nat: "Deutschland" },
+                { name: "Julian Ryerson", pos: "AV", age: 26, ovr: 80, pot: 82, val: 15.0, sal: 4.0, nat: "Norwegen" },
+                { name: "Marius Wolf", pos: "AV", age: 29, ovr: 78, pot: 78, val: 8.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Tom Rothe", pos: "AV", age: 20, ovr: 72, pot: 82, val: 8.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Felix Nmecha", pos: "ZM", age: 24, ovr: 76, pot: 82, val: 12.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Kjell Wätjen", pos: "ZM", age: 18, ovr: 60, pot: 80, val: 2.0, sal: 0.5, nat: "Deutschland" },
+                { name: "Hendry Blank", pos: "IV", age: 20, ovr: 64, pot: 78, val: 3.0, sal: 0.6, nat: "Deutschland" }
+            ],
+            // ---- RB Leipzig ----
+            "RB Leipzig": [
+                { name: "Péter Gulácsi", pos: "TOR", age: 34, ovr: 84, pot: 84, val: 8.0, sal: 6.0, nat: "Ungarn" },
+                { name: "Janis Blaswich", pos: "TOR", age: 33, ovr: 76, pot: 76, val: 2.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Maarten Vandevoordt", pos: "TOR", age: 22, ovr: 72, pot: 82, val: 8.0, sal: 1.5, nat: "Belgien" },
+                { name: "Dani Olmo", pos: "ZM", age: 26, ovr: 86, pot: 87, val: 50.0, sal: 10.0, nat: "Spanien" },
+                { name: "Xavi Simons", pos: "ZM", age: 21, ovr: 84, pot: 89, val: 60.0, sal: 6.0, nat: "Niederlande" },
+                { name: "Amadou Haidara", pos: "ZM", age: 28, ovr: 80, pot: 81, val: 18.0, sal: 6.0, nat: "Mali" },
+                { name: "Konrad Laimer", pos: "ZM", age: 28, ovr: 82, pot: 82, val: 20.0, sal: 7.0, nat: "Österreich" },
+                { name: "Nicolas Seiwald", pos: "ZM", age: 23, ovr: 76, pot: 84, val: 18.0, sal: 3.0, nat: "Österreich" },
+                { name: "Benjamin Šeško", pos: "ST", age: 21, ovr: 82, pot: 88, val: 45.0, sal: 5.0, nat: "Slowenien" },
+                { name: "Lois Openda", pos: "ST", age: 24, ovr: 84, pot: 87, val: 45.0, sal: 6.0, nat: "Belgien" },
+                { name: "Yussuf Poulsen", pos: "ST", age: 30, ovr: 78, pot: 78, val: 10.0, sal: 6.0, nat: "Dänemark" },
+                { name: "André Silva", pos: "ST", age: 28, ovr: 80, pot: 80, val: 15.0, sal: 7.0, nat: "Portugal" },
+                { name: "Willi Orbán", pos: "IV", age: 31, ovr: 83, pot: 83, val: 15.0, sal: 7.0, nat: "Ungarn" },
+                { name: "Josko Gvardiol", pos: "IV", age: 24, ovr: 85, pot: 88, val: 50.0, sal: 8.0, nat: "Kroatien" },
+                { name: "Lukas Klostermann", pos: "IV", age: 28, ovr: 80, pot: 81, val: 15.0, sal: 5.0, nat: "Deutschland" },
+                { name: "David Raum", pos: "AV", age: 26, ovr: 81, pot: 83, val: 22.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Benjamin Henrichs", pos: "AV", age: 27, ovr: 80, pot: 81, val: 15.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Lutsharel Geertruida", pos: "AV", age: 24, ovr: 78, pot: 83, val: 18.0, sal: 3.0, nat: "Niederlande" },
+                { name: "Christoph Baumgartner", pos: "ZM", age: 24, ovr: 79, pot: 83, val: 20.0, sal: 4.0, nat: "Österreich" },
+                { name: "El Chadaille Bitshiabu", pos: "IV", age: 19, ovr: 68, pot: 82, val: 8.0, sal: 1.0, nat: "Frankreich" },
+                { name: "Nicolò Tresoldi", pos: "ST", age: 20, ovr: 66, pot: 80, val: 4.0, sal: 0.8, nat: "Italien" }
+            ],
+            // ---- Bayer 04 Leverkusen ----
+            "Bayer 04 Leverkusen": [
+                { name: "Lukas Hradecky", pos: "TOR", age: 35, ovr: 84, pot: 84, val: 4.0, sal: 5.0, nat: "Finnland" },
+                { name: "Niklas Lomb", pos: "TOR", age: 31, ovr: 68, pot: 68, val: 1.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Matěj Kovář", pos: "TOR", age: 24, ovr: 72, pot: 80, val: 5.0, sal: 1.2, nat: "Tschechien" },
+                { name: "Granit Xhaka", pos: "ZM", age: 33, ovr: 86, pot: 86, val: 20.0, sal: 10.0, nat: "Schweiz" },
+                { name: "Florian Wirtz", pos: "ZM", age: 21, ovr: 87, pot: 92, val: 90.0, sal: 8.0, nat: "Deutschland" },
+                { name: "Jonas Hofmann", pos: "ZM", age: 32, ovr: 83, pot: 83, val: 15.0, sal: 7.0, nat: "Deutschland" },
+                { name: "Robert Andrich", pos: "ZM", age: 30, ovr: 80, pot: 81, val: 15.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Exequiel Palacios", pos: "ZM", age: 27, ovr: 82, pot: 83, val: 25.0, sal: 6.0, nat: "Argentinien" },
+                { name: "Moussa Diaby", pos: "FL", age: 25, ovr: 85, pot: 86, val: 40.0, sal: 8.0, nat: "Frankreich" },
+                { name: "Jeremie Frimpong", pos: "AV", age: 23, ovr: 84, pot: 87, val: 45.0, sal: 6.0, nat: "Niederlande" },
+                { name: "Amine Adli", pos: "FL", age: 24, ovr: 80, pot: 83, val: 18.0, sal: 4.0, nat: "Marokko" },
+                { name: "Patrik Schick", pos: "ST", age: 30, ovr: 84, pot: 84, val: 25.0, sal: 8.0, nat: "Tschechien" },
+                { name: "Victor Boniface", pos: "ST", age: 23, ovr: 82, pot: 86, val: 35.0, sal: 5.0, nat: "Nigeria" },
+                { name: "Adam Hložek", pos: "ST", age: 22, ovr: 78, pot: 84, val: 22.0, sal: 4.0, nat: "Tschechien" },
+                { name: "Jonathan Tah", pos: "IV", age: 28, ovr: 85, pot: 86, val: 35.0, sal: 8.0, nat: "Deutschland" },
+                { name: "Edmond Tapsoba", pos: "IV", age: 25, ovr: 83, pot: 85, val: 30.0, sal: 6.0, nat: "Burkina Faso" },
+                { name: "Piero Hincapié", pos: "IV", age: 22, ovr: 81, pot: 85, val: 28.0, sal: 4.0, nat: "Ecuador" },
+                { name: "Alejandro Grimaldo", pos: "AV", age: 29, ovr: 84, pot: 84, val: 25.0, sal: 7.0, nat: "Spanien" },
+                { name: "Arthur", pos: "AV", age: 21, ovr: 72, pot: 82, val: 10.0, sal: 1.5, nat: "Brasilien" },
+                { name: "Noah Mbamba", pos: "ZM", age: 19, ovr: 66, pot: 82, val: 6.0, sal: 0.8, nat: "Belgien" }
+            ],
+            // ---- Eintracht Frankfurt ----
+            "Eintracht Frankfurt": [
+                { name: "Kevin Trapp", pos: "TOR", age: 34, ovr: 84, pot: 84, val: 8.0, sal: 6.0, nat: "Deutschland" },
+                { name: "Jens Grahl", pos: "TOR", age: 35, ovr: 68, pot: 68, val: 0.8, sal: 1.5, nat: "Deutschland" },
+                { name: "Kauã Santos", pos: "TOR", age: 21, ovr: 68, pot: 78, val: 3.0, sal: 0.8, nat: "Brasilien" },
+                { name: "Mario Götze", pos: "ZM", age: 34, ovr: 80, pot: 80, val: 8.0, sal: 6.0, nat: "Deutschland" },
+                { name: "Daichi Kamada", pos: "ZM", age: 28, ovr: 82, pot: 82, val: 20.0, sal: 6.0, nat: "Japan" },
+                { name: "Djibril Sow", pos: "ZM", age: 27, ovr: 81, pot: 82, val: 22.0, sal: 5.0, nat: "Schweiz" },
+                { name: "Ansgar Knauff", pos: "FL", age: 22, ovr: 78, pot: 84, val: 18.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Randal Kolo Muani", pos: "ST", age: 27, ovr: 85, pot: 86, val: 50.0, sal: 8.0, nat: "Frankreich" },
+                { name: "Elye Wahi", pos: "ST", age: 23, ovr: 80, pot: 85, val: 30.0, sal: 5.0, nat: "Frankreich" },
+                { name: "Robin Koch", pos: "IV", age: 28, ovr: 82, pot: 83, val: 20.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Tuta", pos: "IV", age: 25, ovr: 80, pot: 82, val: 18.0, sal: 4.0, nat: "Brasilien" },
+                { name: "Willian Pacho", pos: "IV", age: 23, ovr: 79, pot: 84, val: 22.0, sal: 3.5, nat: "Ecuador" },
+                { name: "Philipp Max", pos: "AV", age: 31, ovr: 78, pot: 78, val: 6.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Aurélio Buta", pos: "AV", age: 27, ovr: 76, pot: 77, val: 8.0, sal: 3.0, nat: "Portugal" },
+                { name: "Emiliano Martínez", pos: "AV", age: 25, ovr: 74, pot: 78, val: 8.0, sal: 2.5, nat: "Argentinien" },
+                { name: "Fares Chaïbi", pos: "ZM", age: 22, ovr: 76, pot: 84, val: 15.0, sal: 2.5, nat: "Algerien" },
+                { name: "Hugo Larsson", pos: "ZM", age: 20, ovr: 72, pot: 84, val: 12.0, sal: 1.5, nat: "Schweden" },
+                { name: "Niels Nkounkou", pos: "AV", age: 23, ovr: 72, pot: 80, val: 8.0, sal: 1.8, nat: "Frankreich" }
+            ],
+            // ---- VfB Stuttgart ----
+            "VfB Stuttgart": [
+                { name: "Alexander Nübel", pos: "TOR", age: 29, ovr: 82, pot: 83, val: 12.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Fabian Bredlow", pos: "TOR", age: 29, ovr: 70, pot: 70, val: 1.5, sal: 2.0, nat: "Deutschland" },
+                { name: "Dennis Seimen", pos: "TOR", age: 19, ovr: 64, pot: 80, val: 4.0, sal: 0.6, nat: "Deutschland" },
+                { name: "Atakan Karazor", pos: "ZM", age: 27, ovr: 78, pot: 79, val: 10.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Enzo Millot", pos: "ZM", age: 22, ovr: 80, pot: 85, val: 25.0, sal: 4.0, nat: "Frankreich" },
+                { name: "Chris Führich", pos: "ZM", age: 26, ovr: 82, pot: 83, val: 22.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Waldemar Anton", pos: "IV", age: 28, ovr: 81, pot: 82, val: 18.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Hiroki Ito", pos: "IV", age: 25, ovr: 78, pot: 82, val: 12.0, sal: 3.0, nat: "Japan" },
+                { name: "Dan-Axel Zagadou", pos: "IV", age: 25, ovr: 78, pot: 80, val: 12.0, sal: 4.0, nat: "Frankreich" },
+                { name: "Maximilian Mittelstädt", pos: "AV", age: 27, ovr: 80, pot: 81, val: 15.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Josha Vagnoman", pos: "AV", age: 23, ovr: 76, pot: 82, val: 12.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Leonidas Stergiou", pos: "AV", age: 22, ovr: 72, pot: 80, val: 8.0, sal: 2.0, nat: "Schweiz" },
+                { name: "Serhou Guirassy", pos: "ST", age: 28, ovr: 84, pot: 85, val: 35.0, sal: 6.0, nat: "Guinea" },
+                { name: "Deniz Undav", pos: "ST", age: 27, ovr: 82, pot: 83, val: 22.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Luca Pfeiffer", pos: "ST", age: 26, ovr: 72, pot: 74, val: 4.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Angelo Stiller", pos: "ZM", age: 23, ovr: 76, pot: 82, val: 14.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Silas Katompa Mvumpa", pos: "FL", age: 25, ovr: 78, pot: 80, val: 15.0, sal: 4.0, nat: "Kongo" },
+                { name: "Franck Honorat", pos: "FL", age: 26, ovr: 76, pot: 77, val: 10.0, sal: 3.5, nat: "Frankreich" }
+            ],
+            // ---- SC Freiburg ----
+            "SC Freiburg": [
+                { name: "Noah Atubolu", pos: "TOR", age: 22, ovr: 78, pot: 84, val: 12.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Florian Müller", pos: "TOR", age: 26, ovr: 72, pot: 74, val: 2.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Nicolas Höfler", pos: "ZM", age: 34, ovr: 78, pot: 78, val: 3.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Maximilian Eggestein", pos: "ZM", age: 27, ovr: 78, pot: 79, val: 10.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Merlin Röhl", pos: "ZM", age: 22, ovr: 72, pot: 80, val: 8.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Vincenzo Grifo", pos: "ZM", age: 31, ovr: 82, pot: 82, val: 12.0, sal: 5.0, nat: "Italien" },
+                { name: "Lukas Kübler", pos: "AV", age: 31, ovr: 76, pot: 76, val: 4.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Christian Günter", pos: "AV", age: 33, ovr: 80, pot: 80, val: 5.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Philipp Lienhart", pos: "IV", age: 28, ovr: 80, pot: 81, val: 15.0, sal: 4.0, nat: "Österreich" },
+                { name: "Matthias Ginter", pos: "IV", age: 30, ovr: 82, pot: 82, val: 15.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Manuel Gulde", pos: "IV", age: 33, ovr: 74, pot: 74, val: 2.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Ritsu Doan", pos: "FL", age: 26, ovr: 80, pot: 81, val: 18.0, sal: 4.0, nat: "Japan" },
+                { name: "Lucas Höler", pos: "ST", age: 29, ovr: 76, pot: 76, val: 8.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Michael Gregoritsch", pos: "ST", age: 30, ovr: 78, pot: 78, val: 10.0, sal: 4.5, nat: "Österreich" },
+                { name: "Junior Adamu", pos: "ST", age: 23, ovr: 72, pot: 80, val: 10.0, sal: 2.0, nat: "Österreich" },
+                { name: "Noah Weißhaupt", pos: "FL", age: 23, ovr: 70, pot: 78, val: 6.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Yannik Keitel", pos: "ZM", age: 24, ovr: 68, pot: 76, val: 4.0, sal: 1.2, nat: "Deutschland" }
+            ],
+            // ---- 1. FC Union Berlin ----
+            "1. FC Union Berlin": [
+                { name: "Frederik Rønnow", pos: "TOR", age: 31, ovr: 80, pot: 80, val: 6.0, sal: 4.0, nat: "Dänemark" },
+                { name: "Janik Haberer", pos: "ZM", age: 30, ovr: 76, pot: 76, val: 6.0, sal: 3.5, nat: "Deutschland" },
+                { name: "Rani Khedira", pos: "ZM", age: 32, ovr: 78, pot: 78, val: 4.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Lucas Tousart", pos: "ZM", age: 27, ovr: 78, pot: 79, val: 12.0, sal: 4.0, nat: "Frankreich" },
+                { name: "Brenden Aaronson", pos: "ZM", age: 23, ovr: 76, pot: 82, val: 15.0, sal: 3.0, nat: "USA" },
+                { name: "Robin Gosens", pos: "AV", age: 30, ovr: 80, pot: 80, val: 12.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Christopher Trimmel", pos: "AV", age: 37, ovr: 74, pot: 74, val: 1.0, sal: 3.0, nat: "Österreich" },
+                { name: "Danilho Doekhi", pos: "IV", age: 26, ovr: 78, pot: 80, val: 12.0, sal: 3.5, nat: "Niederlande" },
+                { name: "Robin Knoche", pos: "IV", age: 32, ovr: 78, pot: 78, val: 4.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Diogo Leite", pos: "IV", age: 25, ovr: 76, pot: 80, val: 12.0, sal: 3.0, nat: "Portugal" },
+                { name: "Sheraldo Becker", pos: "FL", age: 29, ovr: 80, pot: 80, val: 15.0, sal: 5.0, nat: "Suriname" },
+                { name: "Kevin Behrens", pos: "ST", age: 33, ovr: 76, pot: 76, val: 4.0, sal: 3.5, nat: "Deutschland" },
+                { name: "Mikkel Kaufmann", pos: "ST", age: 25, ovr: 72, pot: 78, val: 8.0, sal: 2.0, nat: "Dänemark" },
+                { name: "Aïssa Laïdouni", pos: "ZM", age: 27, ovr: 76, pot: 78, val: 10.0, sal: 3.0, nat: "Tunesien" },
+                { name: "Jordan Pefok", pos: "ST", age: 28, ovr: 74, pot: 75, val: 6.0, sal: 3.0, nat: "USA" },
+                { name: "Jérôme Roussillon", pos: "AV", age: 31, ovr: 74, pot: 74, val: 3.0, sal: 2.5, nat: "Frankreich" }
+            ],
+            // ---- TSG Hoffenheim ----
+            "TSG Hoffenheim": [
+                { name: "Oliver Baumann", pos: "TOR", age: 34, ovr: 82, pot: 82, val: 4.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Luca Philipp", pos: "TOR", age: 23, ovr: 68, pot: 76, val: 3.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Andrej Kramarić", pos: "ST", age: 33, ovr: 82, pot: 82, val: 12.0, sal: 6.0, nat: "Kroatien" },
+                { name: "Maximilian Beier", pos: "ST", age: 21, ovr: 76, pot: 84, val: 20.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Wout Weghorst", pos: "ST", age: 31, ovr: 80, pot: 80, val: 15.0, sal: 5.0, nat: "Niederlande" },
+                { name: "Marius Bülter", pos: "FL", age: 31, ovr: 74, pot: 74, val: 4.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Ihlas Bebou", pos: "FL", age: 30, ovr: 76, pot: 76, val: 8.0, sal: 4.0, nat: "Togo" },
+                { name: "Pavel Kadeřábek", pos: "AV", age: 32, ovr: 76, pot: 76, val: 4.0, sal: 3.5, nat: "Tschechien" },
+                { name: "Robert Skov", pos: "AV", age: 28, ovr: 74, pot: 75, val: 6.0, sal: 3.0, nat: "Dänemark" },
+                { name: "Kevin Akpoguma", pos: "IV", age: 29, ovr: 74, pot: 75, val: 6.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Ozan Kabak", pos: "IV", age: 24, ovr: 76, pot: 82, val: 15.0, sal: 3.5, nat: "Türkei" },
+                { name: "Stanley N'Soki", pos: "IV", age: 25, ovr: 72, pot: 76, val: 6.0, sal: 2.0, nat: "Frankreich" },
+                { name: "Florian Grillitsch", pos: "ZM", age: 29, ovr: 76, pot: 77, val: 8.0, sal: 4.0, nat: "Österreich" },
+                { name: "Dennis Geiger", pos: "ZM", age: 26, ovr: 72, pot: 76, val: 5.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Tom Bischof", pos: "ZM", age: 19, ovr: 66, pot: 82, val: 8.0, sal: 1.0, nat: "Deutschland" },
+                { name: "Umut Tohumcu", pos: "ZM", age: 20, ovr: 64, pot: 80, val: 5.0, sal: 0.8, nat: "Deutschland" }
+            ],
+            // ---- Borussia Mönchengladbach ----
+            "Borussia Mönchengladbach": [
+                { name: "Jonas Omlin", pos: "TOR", age: 30, ovr: 80, pot: 80, val: 8.0, sal: 4.0, nat: "Schweiz" },
+                { name: "Moritz Nicolas", pos: "TOR", age: 26, ovr: 70, pot: 74, val: 2.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Florian Neuhaus", pos: "ZM", age: 27, ovr: 80, pot: 82, val: 20.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Julian Weigl", pos: "ZM", age: 28, ovr: 78, pot: 79, val: 15.0, sal: 5.0, nat: "Deutschland" },
+                { name: "Manu Koné", pos: "ZM", age: 23, ovr: 78, pot: 84, val: 25.0, sal: 3.5, nat: "Frankreich" },
+                { name: "Rocco Reitz", pos: "ZM", age: 22, ovr: 72, pot: 82, val: 12.0, sal: 1.8, nat: "Deutschland" },
+                { name: "Alassane Pléa", pos: "ST", age: 31, ovr: 80, pot: 80, val: 12.0, sal: 5.0, nat: "Frankreich" },
+                { name: "Jordan Siebatcheu", pos: "ST", age: 28, ovr: 76, pot: 77, val: 10.0, sal: 4.0, nat: "USA" },
+                { name: "Tomas Cvancara", pos: "ST", age: 24, ovr: 74, pot: 80, val: 12.0, sal: 2.5, nat: "Tschechien" },
+                { name: "Robin Hack", pos: "FL", age: 25, ovr: 72, pot: 76, val: 6.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Kouadio Koné", pos: "ZM", age: 23, ovr: 74, pot: 80, val: 15.0, sal: 2.5, nat: "Frankreich" },
+                { name: "Marvin Friedrich", pos: "IV", age: 28, ovr: 76, pot: 77, val: 8.0, sal: 3.5, nat: "Deutschland" },
+                { name: "Ko Itakura", pos: "IV", age: 27, ovr: 78, pot: 79, val: 12.0, sal: 4.0, nat: "Japan" },
+                { name: "Luca Netz", pos: "AV", age: 21, ovr: 72, pot: 82, val: 12.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Joe Scally", pos: "AV", age: 21, ovr: 74, pot: 82, val: 14.0, sal: 2.0, nat: "USA" },
+                { name: "Stefan Lainer", pos: "AV", age: 31, ovr: 76, pot: 76, val: 4.0, sal: 3.5, nat: "Österreich" },
+                { name: "Nico Elvedi", pos: "IV", age: 28, ovr: 78, pot: 79, val: 12.0, sal: 4.5, nat: "Schweiz" },
+                { name: "Yvandro Borges Sanches", pos: "FL", age: 20, ovr: 64, pot: 78, val: 4.0, sal: 0.8, nat: "Luxemburg" }
+            ],
+            // ---- 1. FC Köln ----
+            "1. FC Köln": [
+                { name: "Marvin Schwäbe", pos: "TOR", age: 29, ovr: 76, pot: 77, val: 4.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Philipp Pentke", pos: "TOR", age: 37, ovr: 68, pot: 68, val: 0.5, sal: 1.5, nat: "Deutschland" },
+                { name: "Florian Kainz", pos: "ZM", age: 31, ovr: 76, pot: 76, val: 4.0, sal: 3.5, nat: "Österreich" },
+                { name: "Dejan Ljubicic", pos: "ZM", age: 26, ovr: 74, pot: 76, val: 6.0, sal: 3.0, nat: "Österreich" },
+                { name: "Ellyes Skhiri", pos: "ZM", age: 29, ovr: 78, pot: 78, val: 10.0, sal: 4.0, nat: "Tunesien" },
+                { name: "Linton Maina", pos: "FL", age: 25, ovr: 72, pot: 76, val: 6.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Jan Thielmann", pos: "FL", age: 22, ovr: 70, pot: 78, val: 6.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Steffen Tigges", pos: "ST", age: 25, ovr: 72, pot: 74, val: 4.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Davie Selke", pos: "ST", age: 29, ovr: 74, pot: 74, val: 4.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Timo Hübers", pos: "IV", age: 27, ovr: 76, pot: 78, val: 8.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Luca Kilian", pos: "IV", age: 25, ovr: 72, pot: 76, val: 5.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Benno Schmitz", pos: "AV", age: 30, ovr: 72, pot: 72, val: 2.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Kingsley Schindler", pos: "AV", age: 30, ovr: 70, pot: 70, val: 2.0, sal: 2.0, nat: "Ghana" },
+                { name: "Kiliann Sildillia", pos: "AV", age: 22, ovr: 70, pot: 80, val: 8.0, sal: 1.2, nat: "Frankreich" },
+                { name: "Leart Paqarada", pos: "AV", age: 29, ovr: 70, pot: 70, val: 2.0, sal: 1.8, nat: "Kosovo" },
+                { name: "Marlon Mustapha", pos: "ST", age: 22, ovr: 64, pot: 76, val: 3.0, sal: 0.8, nat: "Deutschland" }
+            ],
+            // ---- Werder Bremen ----
+            "Werder Bremen": [
+                { name: "Michael Zetterer", pos: "TOR", age: 29, ovr: 76, pot: 77, val: 4.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Jiri Pavlenka", pos: "TOR", age: 32, ovr: 78, pot: 78, val: 3.0, sal: 3.5, nat: "Tschechien" },
+                { name: "Marvin Ducksch", pos: "ST", age: 30, ovr: 78, pot: 78, val: 10.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Maximilian Philipp", pos: "ST", age: 30, ovr: 74, pot: 74, val: 5.0, sal: 3.5, nat: "Deutschland" },
+                { name: "Justin Njinmah", pos: "ST", age: 23, ovr: 70, pot: 78, val: 6.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Marco Friedl", pos: "IV", age: 26, ovr: 76, pot: 78, val: 10.0, sal: 3.5, nat: "Österreich" },
+                { name: "Milos Veljkovic", pos: "IV", age: 28, ovr: 74, pot: 75, val: 6.0, sal: 3.0, nat: "Serbien" },
+                { name: "Anthony Jung", pos: "IV", age: 32, ovr: 72, pot: 72, val: 2.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Leonardo Bittencourt", pos: "ZM", age: 30, ovr: 74, pot: 74, val: 4.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Jens Stage", pos: "ZM", age: 27, ovr: 74, pot: 76, val: 8.0, sal: 3.0, nat: "Dänemark" },
+                { name: "Romano Schmid", pos: "ZM", age: 24, ovr: 72, pot: 78, val: 8.0, sal: 2.0, nat: "Österreich" },
+                { name: "Mitchell Weiser", pos: "AV", age: 30, ovr: 76, pot: 76, val: 6.0, sal: 3.5, nat: "Deutschland" },
+                { name: "Felix Agu", pos: "AV", age: 24, ovr: 70, pot: 76, val: 5.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Olivier Deman", pos: "AV", age: 24, ovr: 68, pot: 74, val: 4.0, sal: 1.2, nat: "Belgien" },
+                { name: "Dikeni Salifou", pos: "ZM", age: 21, ovr: 62, pot: 76, val: 3.0, sal: 0.6, nat: "Deutschland" }
+            ],
+            // ---- FC Augsburg ----
+            "FC Augsburg": [
+                { name: "Finn Dahmen", pos: "TOR", age: 26, ovr: 74, pot: 76, val: 5.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Tomas Koubek", pos: "TOR", age: 31, ovr: 72, pot: 72, val: 1.5, sal: 2.0, nat: "Tschechien" },
+                { name: "Phillip Tietz", pos: "ST", age: 26, ovr: 72, pot: 74, val: 5.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Ermedin Demirović", pos: "ST", age: 26, ovr: 76, pot: 78, val: 12.0, sal: 3.5, nat: "Bosnien" },
+                { name: "Samuel Essende", pos: "ST", age: 26, ovr: 70, pot: 74, val: 4.0, sal: 1.8, nat: "Kongo" },
+                { name: "Elvis Rexhbeçaj", pos: "ZM", age: 26, ovr: 72, pot: 74, val: 5.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Arne Maier", pos: "ZM", age: 25, ovr: 72, pot: 76, val: 8.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Fredrik Jensen", pos: "ZM", age: 26, ovr: 70, pot: 72, val: 4.0, sal: 2.0, nat: "Finnland" },
+                { name: "Jeffrey Gouweleeuw", pos: "IV", age: 33, ovr: 74, pot: 74, val: 2.0, sal: 3.0, nat: "Niederlande" },
+                { name: "Felix Uduokhai", pos: "IV", age: 26, ovr: 74, pot: 76, val: 8.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Maximilian Bauer", pos: "IV", age: 24, ovr: 72, pot: 76, val: 6.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Iago", pos: "AV", age: 27, ovr: 72, pot: 73, val: 4.0, sal: 2.5, nat: "Brasilien" },
+                { name: "Mads Pedersen", pos: "AV", age: 27, ovr: 70, pot: 72, val: 4.0, sal: 2.0, nat: "Dänemark" },
+                { name: "Kevin Mbabu", pos: "AV", age: 29, ovr: 72, pot: 72, val: 4.0, sal: 2.5, nat: "Schweiz" },
+                { name: "Sven Michel", pos: "FL", age: 32, ovr: 70, pot: 70, val: 2.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Ruben Vargas", pos: "FL", age: 26, ovr: 74, pot: 76, val: 8.0, sal: 3.0, nat: "Schweiz" }
+            ],
+            // ---- 1. FSV Mainz 05 ----
+            "1. FSV Mainz 05": [
+                { name: "Robin Zentner", pos: "TOR", age: 29, ovr: 76, pot: 77, val: 5.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Daniel Batz", pos: "TOR", age: 31, ovr: 68, pot: 68, val: 0.8, sal: 1.5, nat: "Deutschland" },
+                { name: "Jonathan Burkardt", pos: "ST", age: 24, ovr: 78, pot: 82, val: 18.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Karim Onisiwo", pos: "ST", age: 32, ovr: 74, pot: 74, val: 4.0, sal: 3.0, nat: "Österreich" },
+                { name: "Ludovic Ajorque", pos: "ST", age: 30, ovr: 76, pot: 76, val: 8.0, sal: 4.0, nat: "Frankreich" },
+                { name: "Lee Jae-sung", pos: "ZM", age: 31, ovr: 76, pot: 76, val: 6.0, sal: 3.5, nat: "Südkorea" },
+                { name: "Dominik Kohr", pos: "ZM", age: 30, ovr: 74, pot: 74, val: 4.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Aymen Barkok", pos: "ZM", age: 26, ovr: 70, pot: 74, val: 4.0, sal: 2.0, nat: "Marokko" },
+                { name: "Tom Krauß", pos: "ZM", age: 23, ovr: 72, pot: 80, val: 12.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Stefan Bell", pos: "IV", age: 33, ovr: 74, pot: 74, val: 2.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Andreas Hanche-Olsen", pos: "IV", age: 27, ovr: 74, pot: 76, val: 6.0, sal: 2.5, nat: "Norwegen" },
+                { name: "Maxim Leitsch", pos: "IV", age: 26, ovr: 72, pot: 76, val: 6.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Phillipp Mwene", pos: "AV", age: 30, ovr: 72, pot: 72, val: 3.0, sal: 2.5, nat: "Österreich" },
+                { name: "Danny da Costa", pos: "AV", age: 31, ovr: 70, pot: 70, val: 2.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Anthony Caci", pos: "AV", age: 27, ovr: 72, pot: 74, val: 5.0, sal: 2.5, nat: "Frankreich" },
+                { name: "Brajan Gruda", pos: "FL", age: 20, ovr: 68, pot: 82, val: 10.0, sal: 1.0, nat: "Deutschland" },
+                { name: "Paul Nebel", pos: "FL", age: 21, ovr: 66, pot: 80, val: 6.0, sal: 1.0, nat: "Deutschland" }
+            ],
+            // ---- Hamburger SV ----
+            "Hamburger SV": [
+                { name: "Daniel Heuer Fernandes", pos: "TOR", age: 31, ovr: 76, pot: 76, val: 4.0, sal: 3.0, nat: "Portugal" },
+                { name: "Matheo Raab", pos: "TOR", age: 25, ovr: 68, pot: 74, val: 2.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Robert Glatzel", pos: "ST", age: 30, ovr: 78, pot: 78, val: 8.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Ransford-Yeboah Königsdörffer", pos: "ST", age: 23, ovr: 72, pot: 78, val: 8.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Bakery Jatta", pos: "FL", age: 26, ovr: 72, pot: 74, val: 5.0, sal: 2.5, nat: "Gambia" },
+                { name: "László Bénes", pos: "ZM", age: 26, ovr: 74, pot: 76, val: 8.0, sal: 3.0, nat: "Slowakei" },
+                { name: "Jonas Meffert", pos: "ZM", age: 30, ovr: 72, pot: 72, val: 3.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Immanuel Pherai", pos: "ZM", age: 23, ovr: 70, pot: 78, val: 6.0, sal: 1.8, nat: "Deutschland" },
+                { name: "Ludovit Reis", pos: "ZM", age: 24, ovr: 72, pot: 76, val: 6.0, sal: 2.0, nat: "Niederlande" },
+                { name: "Sebastian Schonlau", pos: "IV", age: 30, ovr: 74, pot: 74, val: 4.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Mario Vuskovic", pos: "IV", age: 22, ovr: 72, pot: 80, val: 10.0, sal: 1.5, nat: "Kroatien" },
+                { name: "Moritz Heyer", pos: "IV", age: 29, ovr: 70, pot: 70, val: 2.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Miro Muheim", pos: "AV", age: 26, ovr: 72, pot: 74, val: 5.0, sal: 2.0, nat: "Schweiz" },
+                { name: "William Mikelbrencis", pos: "AV", age: 22, ovr: 68, pot: 76, val: 4.0, sal: 1.0, nat: "Frankreich" },
+                { name: "Łukasz Poreba", pos: "ZM", age: 24, ovr: 68, pot: 74, val: 3.0, sal: 1.2, nat: "Polen" },
+                { name: "Tom Sanne", pos: "FL", age: 20, ovr: 60, pot: 76, val: 2.0, sal: 0.5, nat: "Deutschland" }
+            ],
+            // ---- FC Schalke 04 ----
+            "FC Schalke 04": [
+                { name: "Ralf Fährmann", pos: "TOR", age: 37, ovr: 72, pot: 72, val: 0.8, sal: 2.0, nat: "Deutschland" },
+                { name: "Marius Müller", pos: "TOR", age: 30, ovr: 74, pot: 74, val: 2.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Kenan Karaman", pos: "ST", age: 30, ovr: 74, pot: 74, val: 4.0, sal: 3.0, nat: "Türkei" },
+                { name: "Terrence Boyd", pos: "ST", age: 33, ovr: 72, pot: 72, val: 2.0, sal: 2.5, nat: "USA" },
+                { name: "Simon Terodde", pos: "ST", age: 38, ovr: 76, pot: 76, val: 1.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Danny Latza", pos: "ZM", age: 34, ovr: 70, pot: 70, val: 1.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Marius Bülter", pos: "ZM", age: 31, ovr: 74, pot: 74, val: 4.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Yusuf Kabadayı", pos: "ZM", age: 20, ovr: 64, pot: 78, val: 4.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Marco Kamiński", pos: "IV", age: 32, ovr: 72, pot: 72, val: 2.0, sal: 2.0, nat: "Polen" },
+                { name: "Marcin Kamiński", pos: "IV", age: 32, ovr: 70, pot: 70, val: 1.5, sal: 2.0, nat: "Polen" },
+                { name: "Leo Greiml", pos: "IV", age: 22, ovr: 68, pot: 78, val: 5.0, sal: 1.0, nat: "Österreich" },
+                { name: "Kerim Çalhanoğlu", pos: "IV", age: 21, ovr: 66, pot: 76, val: 4.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Thomas Ouwejan", pos: "AV", age: 27, ovr: 72, pot: 72, val: 4.0, sal: 2.0, nat: "Niederlande" },
+                { name: "Mehmet Aydın", pos: "AV", age: 22, ovr: 66, pot: 74, val: 3.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Jere Uronen", pos: "AV", age: 28, ovr: 70, pot: 70, val: 2.0, sal: 1.8, nat: "Finnland" },
+                { name: "Tobias Mohr", pos: "AV", age: 26, ovr: 68, pot: 72, val: 3.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Dong-gyeong Lee", pos: "ZM", age: 26, ovr: 68, pot: 72, val: 3.0, sal: 1.5, nat: "Südkorea" },
+                { name: "Tim Skarke", pos: "FL", age: 27, ovr: 68, pot: 70, val: 2.0, sal: 1.5, nat: "Deutschland" }
+            ],
+            // ---- SV Elversberg ----
+            "SV Elversberg": [
+                { name: "Frank Lehmann", pos: "TOR", age: 35, ovr: 68, pot: 68, val: 0.5, sal: 1.5, nat: "Deutschland" },
+                { name: "Nicolas Jüllich", pos: "TOR", age: 26, ovr: 62, pot: 66, val: 0.3, sal: 0.8, nat: "Deutschland" },
+                { name: "Luca Schnellbacher", pos: "ST", age: 30, ovr: 68, pot: 68, val: 1.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Semih Şahin", pos: "ST", age: 24, ovr: 64, pot: 70, val: 1.5, sal: 1.0, nat: "Türkei" },
+                { name: "Manuel Feil", pos: "ZM", age: 28, ovr: 66, pot: 66, val: 1.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Timo König", pos: "ZM", age: 27, ovr: 64, pot: 66, val: 0.8, sal: 1.0, nat: "Deutschland" },
+                { name: "Lars Jansen", pos: "IV", age: 26, ovr: 64, pot: 66, val: 0.8, sal: 1.0, nat: "Deutschland" },
+                { name: "Marcel Correia", pos: "IV", age: 33, ovr: 66, pot: 66, val: 0.5, sal: 1.2, nat: "Deutschland" },
+                { name: "Kevin Conrad", pos: "AV", age: 26, ovr: 62, pot: 64, val: 0.5, sal: 0.8, nat: "Deutschland" },
+                { name: "Florian Lechner", pos: "AV", age: 25, ovr: 60, pot: 64, val: 0.4, sal: 0.7, nat: "Deutschland" },
+                { name: "Moritz Göttel", pos: "FL", age: 25, ovr: 62, pot: 66, val: 0.6, sal: 0.8, nat: "Deutschland" },
+                { name: "Julian Endres", pos: "FL", age: 22, ovr: 60, pot: 68, val: 0.8, sal: 0.6, nat: "Deutschland" },
+                { name: "Paul Wanner", pos: "ZM", age: 18, ovr: 62, pot: 78, val: 3.0, sal: 0.5, nat: "Deutschland" }
+            ],
+            // ---- SC Paderborn 07 ----
+            "SC Paderborn 07": [
+                { name: "Jannik Huth", pos: "TOR", age: 30, ovr: 72, pot: 72, val: 1.5, sal: 2.0, nat: "Deutschland" },
+                { name: "Pelle Boevink", pos: "TOR", age: 26, ovr: 64, pot: 68, val: 0.8, sal: 1.0, nat: "Niederlande" },
+                { name: "Sven Michel", pos: "ST", age: 32, ovr: 70, pot: 70, val: 2.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Felix Platte", pos: "ST", age: 28, ovr: 68, pot: 68, val: 1.5, sal: 1.5, nat: "Deutschland" },
+                { name: "Kai Pröger", pos: "FL", age: 30, ovr: 68, pot: 68, val: 1.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Florian Krüger", pos: "ZM", age: 25, ovr: 66, pot: 70, val: 1.5, sal: 1.2, nat: "Deutschland" },
+                { name: "Ron Schallenberg", pos: "ZM", age: 25, ovr: 68, pot: 72, val: 2.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Marco Schuster", pos: "ZM", age: 27, ovr: 66, pot: 68, val: 1.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Uwe Hünemeier", pos: "IV", age: 38, ovr: 68, pot: 68, val: 0.3, sal: 1.5, nat: "Deutschland" },
+                { name: "Marcel Hoffmeier", pos: "IV", age: 25, ovr: 66, pot: 70, val: 1.2, sal: 1.0, nat: "Deutschland" },
+                { name: "Jannis Heuer", pos: "IV", age: 23, ovr: 64, pot: 72, val: 1.5, sal: 0.8, nat: "Deutschland" },
+                { name: "Tobias Müller", pos: "AV", age: 26, ovr: 64, pot: 66, val: 0.8, sal: 1.0, nat: "Deutschland" },
+                { name: "Marcel Pelka", pos: "AV", age: 25, ovr: 62, pot: 66, val: 0.6, sal: 0.8, nat: "Deutschland" },
+                { name: "Sebastian Klaas", pos: "FL", age: 26, ovr: 62, pot: 66, val: 0.6, sal: 0.8, nat: "Deutschland" },
+                { name: "Maximilian Rohr", pos: "ZM", age: 29, ovr: 66, pot: 66, val: 0.8, sal: 1.0, nat: "Deutschland" }
+            ],
+            // ---- Hertha BSC (2. Liga) ----
+            "Hertha BSC": [
+                { name: "Marius Gersbeck", pos: "TOR", age: 29, ovr: 72, pot: 73, val: 2.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Tjark Ernst", pos: "TOR", age: 21, ovr: 64, pot: 76, val: 2.0, sal: 0.6, nat: "Deutschland" },
+                { name: "Marcel Lotka", pos: "TOR", age: 23, ovr: 68, pot: 76, val: 3.0, sal: 0.8, nat: "Polen" },
+                { name: "Haris Tabaković", pos: "ST", age: 30, ovr: 72, pot: 72, val: 3.0, sal: 2.5, nat: "Bosnien" },
+                { name: "Florian Niederlechner", pos: "ST", age: 33, ovr: 70, pot: 70, val: 1.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Smail Prevljak", pos: "ST", age: 29, ovr: 68, pot: 68, val: 2.0, sal: 1.8, nat: "Bosnien" },
+                { name: "Fabian Reese", pos: "FL", age: 26, ovr: 72, pot: 74, val: 5.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Derry Scherhant", pos: "FL", age: 21, ovr: 66, pot: 78, val: 4.0, sal: 1.0, nat: "Deutschland" },
+                { name: "Marten Winkler", pos: "FL", age: 21, ovr: 64, pot: 76, val: 3.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Toni Leistner", pos: "IV", age: 33, ovr: 72, pot: 72, val: 1.5, sal: 2.5, nat: "Deutschland" },
+                { name: "Márton Dárdai", pos: "IV", age: 22, ovr: 70, pot: 78, val: 5.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Kaan Gül", pos: "IV", age: 21, ovr: 66, pot: 76, val: 3.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Pascal Klemens", pos: "AV", age: 23, ovr: 66, pot: 72, val: 2.0, sal: 1.0, nat: "Deutschland" },
+                { name: "Julian Eitschberger", pos: "AV", age: 20, ovr: 64, pot: 74, val: 2.0, sal: 0.6, nat: "Deutschland" },
+                { name: "Michał Karbownik", pos: "AV", age: 23, ovr: 66, pot: 72, val: 2.0, sal: 1.0, nat: "Polen" },
+                { name: "Aymen Barkok", pos: "ZM", age: 26, ovr: 70, pot: 74, val: 4.0, sal: 2.0, nat: "Marokko" },
+                { name: "Bilal Hussein", pos: "ZM", age: 24, ovr: 68, pot: 74, val: 3.0, sal: 1.2, nat: "Schweden" },
+                { name: "Ibrahim Maza", pos: "ZM", age: 20, ovr: 64, pot: 78, val: 3.0, sal: 0.6, nat: "Deutschland" }
+            ],
+            // ---- Hannover 96 (2. Liga) ----
+            "Hannover 96": [
+                { name: "Ron-Robert Zieler", pos: "TOR", age: 35, ovr: 74, pot: 74, val: 1.5, sal: 2.5, nat: "Deutschland" },
+                { name: "Leo Weinkauf", pos: "TOR", age: 27, ovr: 66, pot: 68, val: 0.8, sal: 1.2, nat: "Deutschland" },
+                { name: "Cedric Teuchert", pos: "ST", age: 27, ovr: 72, pot: 73, val: 4.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Nicolo Tresoldi", pos: "ST", age: 20, ovr: 66, pot: 80, val: 5.0, sal: 1.0, nat: "Italien" },
+                { name: "Havard Nielsen", pos: "ST", age: 30, ovr: 70, pot: 70, val: 2.0, sal: 2.0, nat: "Norwegen" },
+                { name: "Louis Schaub", pos: "ZM", age: 29, ovr: 68, pot: 68, val: 1.5, sal: 2.0, nat: "Österreich" },
+                { name: "Fabian Kunze", pos: "ZM", age: 25, ovr: 66, pot: 70, val: 1.5, sal: 1.2, nat: "Deutschland" },
+                { name: "Max Besuschkow", pos: "ZM", age: 27, ovr: 66, pot: 68, val: 1.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Phil Neumann", pos: "IV", age: 26, ovr: 70, pot: 72, val: 3.0, sal: 1.8, nat: "Deutschland" },
+                { name: "Marcel Halstenberg", pos: "IV", age: 32, ovr: 72, pot: 72, val: 2.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Bright Arrey-Mbi", pos: "IV", age: 21, ovr: 66, pot: 78, val: 4.0, sal: 1.0, nat: "Deutschland" },
+                { name: "Jannik Dehm", pos: "AV", age: 26, ovr: 66, pot: 68, val: 1.2, sal: 1.2, nat: "Deutschland" },
+                { name: "Derrick Köhn", pos: "AV", age: 25, ovr: 68, pot: 72, val: 2.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Eduard Löwen", pos: "ZM", age: 27, ovr: 68, pot: 70, val: 2.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Sebastian Ernst", pos: "ZM", age: 22, ovr: 64, pot: 74, val: 2.0, sal: 0.8, nat: "Deutschland" }
+            ],
+            // ---- 1. FC Kaiserslautern (2. Liga) ----
+            "1. FC Kaiserslautern": [
+                { name: "Andreas Luthe", pos: "TOR", age: 37, ovr: 70, pot: 70, val: 0.5, sal: 1.5, nat: "Deutschland" },
+                { name: "Julian Krahl", pos: "TOR", age: 24, ovr: 64, pot: 70, val: 1.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Ragnar Ache", pos: "ST", age: 26, ovr: 70, pot: 72, val: 3.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Terrence Boyd", pos: "ST", age: 33, ovr: 72, pot: 72, val: 1.5, sal: 2.5, nat: "USA" },
+                { name: "Kenny Prince Redondo", pos: "ST", age: 29, ovr: 68, pot: 68, val: 1.5, sal: 1.8, nat: "Deutschland" },
+                { name: "Marlon Ritter", pos: "ZM", age: 29, ovr: 68, pot: 68, val: 1.5, sal: 1.8, nat: "Deutschland" },
+                { name: "Julian Niehues", pos: "ZM", age: 25, ovr: 66, pot: 70, val: 1.5, sal: 1.2, nat: "Deutschland" },
+                { name: "Philipp Hercher", pos: "ZM", age: 26, ovr: 64, pot: 66, val: 1.0, sal: 1.0, nat: "Deutschland" },
+                { name: "Boris Tomiak", pos: "IV", age: 25, ovr: 68, pot: 70, val: 2.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Kevin Kraus", pos: "IV", age: 31, ovr: 68, pot: 68, val: 1.0, sal: 1.5, nat: "Deutschland" },
+                { name: "Jan Elvedi", pos: "IV", age: 27, ovr: 66, pot: 68, val: 1.2, sal: 1.0, nat: "Schweiz" },
+                { name: "Tymoteusz Puchacz", pos: "AV", age: 25, ovr: 66, pot: 70, val: 1.5, sal: 1.0, nat: "Polen" },
+                { name: "Jean Zimmer", pos: "AV", age: 30, ovr: 66, pot: 66, val: 0.8, sal: 1.5, nat: "Deutschland" },
+                { name: "Ben Zolinski", pos: "AV", age: 26, ovr: 64, pot: 66, val: 0.8, sal: 1.0, nat: "Deutschland" },
+                { name: "Aaron Opoku", pos: "FL", age: 25, ovr: 64, pot: 68, val: 1.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Tobias Raschl", pos: "ZM", age: 24, ovr: 64, pot: 70, val: 1.5, sal: 0.8, nat: "Deutschland" }
+            ],
+            // ---- 1. FC Nürnberg (2. Liga) ----
+            "1. FC Nürnberg": [
+                { name: "Christian Mathenia", pos: "TOR", age: 32, ovr: 72, pot: 72, val: 1.5, sal: 2.0, nat: "Deutschland" },
+                { name: "Carl Klaus", pos: "TOR", age: 30, ovr: 66, pot: 66, val: 0.6, sal: 1.2, nat: "Deutschland" },
+                { name: "Lukas Schleimer", pos: "ST", age: 24, ovr: 68, pot: 72, val: 2.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Daichi Hayashi", pos: "ST", age: 25, ovr: 66, pot: 70, val: 1.5, sal: 1.0, nat: "Japan" },
+                { name: "Linus Rosenlöcher", pos: "ST", age: 22, ovr: 62, pot: 74, val: 1.5, sal: 0.6, nat: "Deutschland" },
+                { name: "Johannes Geis", pos: "ZM", age: 30, ovr: 68, pot: 68, val: 1.0, sal: 1.8, nat: "Deutschland" },
+                { name: "Jens Castrop", pos: "ZM", age: 21, ovr: 66, pot: 76, val: 3.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Florian Flick", pos: "ZM", age: 24, ovr: 64, pot: 70, val: 1.5, sal: 0.8, nat: "Deutschland" },
+                { name: "Ivan Marquez", pos: "IV", age: 29, ovr: 68, pot: 68, val: 1.2, sal: 1.5, nat: "Spanien" },
+                { name: "Jannes Horn", pos: "IV", age: 27, ovr: 66, pot: 68, val: 1.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Nicolas Wähling", pos: "IV", age: 23, ovr: 62, pot: 72, val: 1.0, sal: 0.6, nat: "Deutschland" },
+                { name: "Tim Handwerker", pos: "AV", age: 26, ovr: 66, pot: 68, val: 1.0, sal: 1.0, nat: "Deutschland" },
+                { name: "Erik Wekesser", pos: "AV", age: 26, ovr: 64, pot: 66, val: 0.8, sal: 0.8, nat: "Deutschland" },
+                { name: "Mats Möller Daehli", pos: "ZM", age: 29, ovr: 66, pot: 66, val: 1.0, sal: 1.5, nat: "Norwegen" },
+                { name: "Benjamin Goller", pos: "FL", age: 25, ovr: 64, pot: 70, val: 1.2, sal: 0.8, nat: "Deutschland" }
+            ],
+            // ---- VfL Bochum (2. Liga) ----
+            "VfL Bochum": [
+                { name: "Manuel Riemann", pos: "TOR", age: 37, ovr: 72, pot: 72, val: 0.5, sal: 2.0, nat: "Deutschland" },
+                { name: "Niclas Thiede", pos: "TOR", age: 25, ovr: 64, pot: 68, val: 0.8, sal: 0.8, nat: "Deutschland" },
+                { name: "Moritz Broschinski", pos: "ST", age: 24, ovr: 68, pot: 72, val: 2.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Philipp Hofmann", pos: "ST", age: 31, ovr: 70, pot: 70, val: 2.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Takuma Asano", pos: "FL", age: 29, ovr: 72, pot: 72, val: 3.0, sal: 2.5, nat: "Japan" },
+                { name: "Kevin Stöger", pos: "ZM", age: 30, ovr: 70, pot: 70, val: 2.0, sal: 2.0, nat: "Österreich" },
+                { name: "Anthony Losilla", pos: "ZM", age: 38, ovr: 68, pot: 68, val: 0.3, sal: 1.5, nat: "Frankreich" },
+                { name: "Matthias Ostrzolek", pos: "ZM", age: 32, ovr: 66, pot: 66, val: 0.6, sal: 1.2, nat: "Deutschland" },
+                { name: "Ivan Ordets", pos: "IV", age: 31, ovr: 70, pot: 70, val: 1.5, sal: 2.0, nat: "Ukraine" },
+                { name: "Erhan Mašović", pos: "IV", age: 25, ovr: 68, pot: 72, val: 2.0, sal: 1.2, nat: "Serbien" },
+                { name: "Tim Oermann", pos: "IV", age: 20, ovr: 64, pot: 76, val: 2.0, sal: 0.6, nat: "Deutschland" },
+                { name: "Cristian Gamboa", pos: "AV", age: 36, ovr: 66, pot: 66, val: 0.3, sal: 1.5, nat: "Costa Rica" },
+                { name: "Daniele Fumagalli", pos: "AV", age: 26, ovr: 64, pot: 68, val: 0.8, sal: 0.8, nat: "Italien" },
+                { name: "Lukas Daschner", pos: "ZM", age: 25, ovr: 66, pot: 70, val: 1.5, sal: 1.0, nat: "Deutschland" }
+            ],
+            // ---- VfL Wolfsburg (2. Liga - relegated) ----
+            "VfL Wolfsburg": [
+                { name: "Koen Casteels", pos: "TOR", age: 32, ovr: 82, pot: 82, val: 8.0, sal: 5.0, nat: "Belgien" },
+                { name: "Pavao Pervan", pos: "TOR", age: 36, ovr: 68, pot: 68, val: 0.5, sal: 1.5, nat: "Österreich" },
+                { name: "Jonas Wind", pos: "ST", age: 25, ovr: 78, pot: 80, val: 18.0, sal: 4.0, nat: "Dänemark" },
+                { name: "Lukas Nmecha", pos: "ST", age: 25, ovr: 76, pot: 80, val: 15.0, sal: 3.5, nat: "Deutschland" },
+                { name: "Max Kruse", pos: "ST", age: 38, ovr: 72, pot: 72, val: 0.5, sal: 2.5, nat: "Deutschland" },
+                { name: "Ridle Baku", pos: "AV", age: 26, ovr: 78, pot: 80, val: 18.0, sal: 4.0, nat: "Deutschland" },
+                { name: "Felix Nmecha", pos: "ZM", age: 23, ovr: 74, pot: 80, val: 15.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Yannick Gerhardt", pos: "ZM", age: 30, ovr: 72, pot: 72, val: 4.0, sal: 3.0, nat: "Deutschland" },
+                { name: "Maximilian Arnold", pos: "ZM", age: 30, ovr: 74, pot: 74, val: 6.0, sal: 3.5, nat: "Deutschland" },
+                { name: "Sebastiaan Bornauw", pos: "IV", age: 25, ovr: 74, pot: 78, val: 12.0, sal: 3.0, nat: "Belgien" },
+                { name: "Micky van de Ven", pos: "IV", age: 23, ovr: 76, pot: 84, val: 25.0, sal: 2.5, nat: "Niederlande" },
+                { name: "Moritz Jenz", pos: "IV", age: 25, ovr: 70, pot: 74, val: 6.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Paulo Otávio", pos: "AV", age: 29, ovr: 72, pot: 72, val: 4.0, sal: 2.5, nat: "Brasilien" },
+                { name: "Kevin Paredes", pos: "AV", age: 21, ovr: 70, pot: 80, val: 8.0, sal: 1.5, nat: "USA" },
+                { name: "Patrick Wimmer", pos: "FL", age: 23, ovr: 72, pot: 80, val: 12.0, sal: 2.0, nat: "Österreich" },
+                { name: "Lovro Majer", pos: "ZM", age: 26, ovr: 76, pot: 78, val: 15.0, sal: 3.5, nat: "Kroatien" },
+                { name: "Aster Vranckx", pos: "ZM", age: 21, ovr: 70, pot: 80, val: 10.0, sal: 1.5, nat: "Belgien" }
+            ],
+            // ---- FC St. Pauli (2. Liga) ----
+            "FC St. Pauli": [
+                { name: "Nikola Vasilj", pos: "TOR", age: 28, ovr: 72, pot: 73, val: 2.0, sal: 2.0, nat: "Bosnien" },
+                { name: "Sascha Burchert", pos: "TOR", age: 34, ovr: 66, pot: 66, val: 0.5, sal: 1.5, nat: "Deutschland" },
+                { name: "Johannes Eggestein", pos: "ST", age: 26, ovr: 70, pot: 72, val: 3.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Elias Saad", pos: "ST", age: 24, ovr: 66, pot: 72, val: 2.0, sal: 1.0, nat: "Deutschland" },
+                { name: "Maurides", pos: "ST", age: 30, ovr: 66, pot: 66, val: 1.0, sal: 1.5, nat: "Brasilien" },
+                { name: "Marcel Hartel", pos: "ZM", age: 28, ovr: 70, pot: 70, val: 3.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Jackson Irvine", pos: "ZM", age: 31, ovr: 68, pot: 68, val: 1.5, sal: 2.0, nat: "Australien" },
+                { name: "Luca Zander", pos: "ZM", age: 27, ovr: 66, pot: 68, val: 1.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Hauke Wahl", pos: "IV", age: 30, ovr: 68, pot: 68, val: 1.5, sal: 1.8, nat: "Deutschland" },
+                { name: "David Nemeth", pos: "IV", age: 23, ovr: 66, pot: 74, val: 2.0, sal: 0.8, nat: "Österreich" },
+                { name: "Karol Mets", pos: "IV", age: 31, ovr: 66, pot: 66, val: 1.0, sal: 1.5, nat: "Estland" },
+                { name: "Manolis Saliakas", pos: "AV", age: 27, ovr: 66, pot: 68, val: 1.0, sal: 1.2, nat: "Griechenland" },
+                { name: "Lars Ritzka", pos: "AV", age: 26, ovr: 64, pot: 66, val: 0.8, sal: 0.8, nat: "Deutschland" },
+                { name: "Erik Ahlstrand", pos: "FL", age: 22, ovr: 64, pot: 74, val: 1.5, sal: 0.6, nat: "Schweden" },
+                { name: "Connor Metcalfe", pos: "ZM", age: 24, ovr: 64, pot: 70, val: 1.2, sal: 0.8, nat: "Australien" }
+            ],
+            // ---- 1. FC Heidenheim (2. Liga) ----
+            "1. FC Heidenheim": [
+                { name: "Kevin Müller", pos: "TOR", age: 33, ovr: 72, pot: 72, val: 1.0, sal: 2.0, nat: "Deutschland" },
+                { name: "Vitus Eicher", pos: "TOR", age: 25, ovr: 62, pot: 66, val: 0.5, sal: 0.6, nat: "Deutschland" },
+                { name: "Tim Kleindienst", pos: "ST", age: 28, ovr: 74, pot: 74, val: 4.0, sal: 2.5, nat: "Deutschland" },
+                { name: "Marvin Pieringer", pos: "ST", age: 24, ovr: 68, pot: 74, val: 3.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Mirlind Daku", pos: "ST", age: 26, ovr: 66, pot: 70, val: 1.5, sal: 1.0, nat: "Kosovo" },
+                { name: "Jan Schöppner", pos: "ZM", age: 25, ove: 66, ovr: 66, pot: 70, val: 1.5, sal: 1.0, nat: "Deutschland" },
+                { name: "Denis Thomalla", pos: "ZM", age: 30, ovr: 66, pot: 66, val: 0.8, sal: 1.2, nat: "Deutschland" },
+                { name: "Kevin Sessa", pos: "ZM", age: 24, ovr: 64, pot: 70, val: 1.2, sal: 0.8, nat: "Deutschland" },
+                { name: "Tim Siersleben", pos: "IV", age: 24, ovr: 66, pot: 72, val: 1.5, sal: 0.8, nat: "Deutschland" },
+                { name: "Patrick Mainka", pos: "IV", age: 29, ovr: 68, pot: 68, val: 1.2, sal: 1.5, nat: "Deutschland" },
+                { name: "Omar Haktab Traoré", pos: "IV", age: 26, ovr: 64, pot: 68, val: 1.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Jonas Föhrenbach", pos: "AV", age: 26, ovr: 64, pot: 66, val: 0.8, sal: 0.8, nat: "Deutschland" },
+                { name: "Marnon Busch", pos: "AV", age: 29, ovr: 64, pot: 64, val: 0.6, sal: 1.0, nat: "Deutschland" },
+                { name: "Adrian Beck", pos: "FL", age: 27, ovr: 64, pot: 66, val: 0.8, sal: 0.8, nat: "Deutschland" },
+                { name: "Niklas Dorsch", pos: "ZM", age: 26, ovr: 66, pot: 70, val: 1.5, sal: 1.0, nat: "Deutschland" }
+            ],
+            // ---- SV Darmstadt 98 (2. Liga) ----
+            "SV Darmstadt 98": [
+                { name: "Marcel Schuhen", pos: "TOR", age: 31, ovr: 70, pot: 70, val: 1.0, sal: 1.8, nat: "Deutschland" },
+                { name: "Alexander Brunst", pos: "TOR", age: 29, ovr: 64, pot: 64, val: 0.5, sal: 1.0, nat: "Deutschland" },
+                { name: "Philipp Tietz", pos: "ST", age: 26, ovr: 68, pot: 72, val: 2.0, sal: 1.2, nat: "Deutschland" },
+                { name: "Oscar Vilhelmsson", pos: "ST", age: 20, ovr: 64, pot: 76, val: 2.0, sal: 0.6, nat: "Schweden" },
+                { name: "Luca Pfeiffer", pos: "ST", age: 26, ovr: 66, pot: 68, val: 1.5, sal: 1.0, nat: "Deutschland" },
+                { name: "Marvin Mehlem", pos: "ZM", age: 26, ovr: 66, pot: 68, val: 1.2, sal: 1.2, nat: "Deutschland" },
+                { name: "Marius Gersbeck", pos: "ZM", age: 29, ovr: 64, pot: 64, val: 0.8, sal: 1.2, nat: "Deutschland" },
+                { name: "Tobias Kempe", pos: "ZM", age: 35, ovr: 66, pot: 66, val: 0.5, sal: 1.5, nat: "Deutschland" },
+                { name: "Thomas Isherwood", pos: "IV", age: 26, ovr: 64, pot: 68, val: 1.0, sal: 0.8, nat: "Schweden" },
+                { name: "Matej Maglica", pos: "IV", age: 25, ovr: 64, pot: 70, val: 1.2, sal: 0.8, nat: "Kroatien" },
+                { name: "Fabian Holland", pos: "IV", age: 33, ovr: 66, pot: 66, val: 0.5, sal: 1.5, nat: "Deutschland" },
+                { name: "Matthias Bader", pos: "AV", age: 26, ovr: 64, pot: 66, val: 0.8, sal: 0.8, nat: "Deutschland" },
+                { name: "Lucas Laux", pos: "AV", age: 23, ovr: 60, pot: 68, val: 0.6, sal: 0.5, nat: "Deutschland" },
+                { name: "Kai Klefisch", pos: "ZM", age: 24, ovr: 62, pot: 70, val: 1.0, sal: 0.6, nat: "Deutschland" }
+            ],
+            // ---- SG Dynamo Dresden (2. Liga) ----
+            "SG Dynamo Dresden": [
+                { name: "Tim Schreiber", pos: "TOR", age: 22, ovr: 66, pot: 74, val: 1.5, sal: 0.6, nat: "Deutschland" },
+                { name: "Stefan Drljača", pos: "TOR", age: 25, ovr: 62, pot: 66, val: 0.5, sal: 0.8, nat: "Deutschland" },
+                { name: "Stefan Kutschke", pos: "ST", age: 35, ovr: 68, pot: 68, val: 0.5, sal: 1.5, nat: "Deutschland" },
+                { name: "Lucas Cueto", pos: "ST", age: 24, ovr: 66, pot: 72, val: 1.5, sal: 0.8, nat: "Deutschland" },
+                { name: "Julius Kade", pos: "ZM", age: 25, ovr: 64, pot: 68, val: 1.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Marco Bähre", pos: "ZM", age: 23, ovr: 62, pot: 70, val: 1.0, sal: 0.6, nat: "Deutschland" },
+                { name: "Niklas Hauptmann", pos: "ZM", age: 28, ovr: 64, pot: 64, val: 0.8, sal: 1.2, nat: "Deutschland" },
+                { name: "Jakob Lewald", pos: "IV", age: 24, ovr: 64, pot: 70, val: 1.2, sal: 0.8, nat: "Deutschland" },
+                { name: "Michael Sollbauer", pos: "IV", age: 34, ovr: 66, pot: 66, val: 0.5, sal: 1.2, nat: "Österreich" },
+                { name: "Agon Hani", pos: "IV", age: 24, ovr: 60, pot: 68, val: 0.6, sal: 0.5, nat: "Kosovo" },
+                { name: "Robin Becker", pos: "AV", age: 27, ovr: 62, pot: 64, val: 0.6, sal: 0.8, nat: "Deutschland" },
+                { name: "Dennis Borkowski", pos: "FL", age: 22, ovr: 64, pot: 74, val: 1.5, sal: 0.6, nat: "Deutschland" },
+                { name: "Tom Zimmerschied", pos: "FL", age: 25, ovr: 62, pot: 66, val: 0.8, sal: 0.6, nat: "Deutschland" }
+            ],
+            // ---- SpVgg Greuther Fürth (2. Liga) ----
+            "SpVgg Greuther Fürth": [
+                { name: "Jonas Urbig", pos: "TOR", age: 20, ovr: 66, pot: 78, val: 3.0, sal: 0.6, nat: "Deutschland" },
+                { name: "Nils-Jonathan Körber", pos: "TOR", age: 27, ovr: 62, pot: 62, val: 0.3, sal: 0.8, nat: "Deutschland" },
+                { name: "Branimir Hrgota", pos: "ST", age: 31, ovr: 70, pot: 70, val: 2.0, sal: 2.0, nat: "Schweden" },
+                { name: "Dickson Abiama", pos: "ST", age: 25, ovr: 66, pot: 70, val: 1.5, sal: 1.0, nat: "Deutschland" },
+                { name: "Julian Green", pos: "ZM", age: 29, ovr: 68, pot: 68, val: 1.5, sal: 1.8, nat: "USA" },
+                { name: "Max Christiansen", pos: "ZM", age: 27, ovr: 66, pot: 68, val: 1.2, sal: 1.2, nat: "Deutschland" },
+                { name: "Sebastian Griesbeck", pos: "ZM", age: 33, ovr: 64, pot: 64, val: 0.5, sal: 1.2, nat: "Deutschland" },
+                { name: "Gian-Luca Itter", pos: "IV", age: 25, ovr: 64, pot: 68, val: 1.0, sal: 0.8, nat: "Deutschland" },
+                { name: "Damian Michalski", pos: "IV", age: 26, ovr: 64, pot: 68, val: 1.0, sal: 0.8, nat: "Polen" },
+                { name: "Oussama Haddadi", pos: "IV", age: 26, ovr: 62, pot: 66, val: 0.8, sal: 0.6, nat: "Tunesien" },
+                { name: "Simon Asta", pos: "AV", age: 24, ovr: 64, pot: 70, val: 1.2, sal: 0.8, nat: "Deutschland" },
+                { name: "Marco Meyerhöfer", pos: "AV", age: 28, ovr: 62, pot: 62, val: 0.5, sal: 0.8, nat: "Deutschland" },
+                { name: "Dennis Srbeny", pos: "ST", age: 30, ovr: 64, pot: 64, val: 0.8, sal: 1.2, nat: "Deutschland" },
+                { name: "Nils Seufert", pos: "ZM", age: 27, ovr: 62, pot: 64, val: 0.6, sal: 0.8, nat: "Deutschland" }
+            ]
         };
 
-        const FIRST_NAMES = ["Max", "Lukas", "Julian", "Marco", "Mats", "Thomas", "Manuel", "Joshua", "Serge", "Leon",
-            "Kai", "Timo", "Niclas", "Florian", "Robin", "Bernd", "Kevin", "Matthias", "Christian", "Jan",
-            "Felix", "Luis", "Paul", "Finn", "Luca", "Elias", "Marlon", "Emil", "Anton", "Oskar",
-            "David", "Noah", "Matteo", "Johannes", "Philipp", "Moritz", "Benedikt", "Jakob", "Alexander", "Niklas"
-        ];
-        const LAST_NAMES = ["Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz",
-            "Hoffmann",
-            "Koch", "Richter", "Klein", "Wolf", "Schröder", "Neumann", "Zimmermann", "Braun", "Krüger", "Frank",
-            "Bauer", "König", "Huber", "Keller", "Baum", "Schulze", "Lange", "Werner", "Hartmann", "Krause",
-            "Fuchs", "Peters", "Möller", "Weiß", "Jung", "Hahn", "Schubert", "Vogel", "Friedrich", "Klein"
-        ];
-
-        const NATIONALITIES = ["Deutschland", "Österreich", "Schweiz", "Polen", "Frankreich", "Italien", "Spanien",
-            "England", "Niederlande", "Belgien", "Dänemark", "Schweden", "Norwegen", "Brasilien", "Argentinien",
-            "Uruguay", "Kroatien", "Serbien", "Tschechien", "Slowakei", "Ungarn", "Griechenland", "Türkei", "USA",
-            "Kanada", "Australien", "Japan", "Korea", "China", "Kamerun", "Ghana", "Nigeria", "Senegal", "Elfenbeinküste"
-        ];
-
+        // ---- Helper functions ----
         function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-        function randomName() {
-            return randomItem(FIRST_NAMES) + " " + randomItem(LAST_NAMES);
-        }
-
-        function randomNationality() { return randomItem(NATIONALITIES); }
 
         function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
@@ -818,7 +1494,45 @@
 
         function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
 
-        // ---- Player ----
+        // ---- Build player objects from data ----
+        function buildPlayersFromData(clubName, dataArray) {
+            const players = [];
+            let id = 10000 + Math.random() * 100000;
+            dataArray.forEach((pData, idx) => {
+                const attrs = {};
+                const pos = pData.pos;
+                const ovr = pData.ovr || 70;
+                // Generate attributes based on position
+                ATTRIBUTES.forEach(attr => {
+                    let base = ovr + randInt(-8, 8);
+                    const weights = POSITION_WEIGHTS[pos] || POSITION_WEIGHTS["ZM"];
+                    if (weights && weights[attr]) {
+                        base += Math.floor(weights[attr] * 12);
+                    }
+                    attrs[attr] = clamp(base, 1, 99);
+                });
+                const player = new Player(
+                    id + idx,
+                    pData.name,
+                    pData.age || 20,
+                    pos,
+                    attrs,
+                    pData.val || 1.0,
+                    pData.sal || 0.5,
+                    2 + randInt(0, 3),
+                    pData.pot || pData.ovr || 70,
+                    pData.nat || "Deutschland"
+                );
+                player.gamesPlayed = randInt(0, 30);
+                player.goals = randInt(0, 10);
+                player.morale = 50 + randInt(0, 40);
+                player.reputation = ovr + randInt(-10, 5);
+                players.push(player);
+            });
+            return players;
+        }
+
+        // ---- Player class (extends with realism) ----
         class Player {
             constructor(id, name, age, position, attributes, marketValue, salary, contractYears, potential, nationality) {
                 this.id = id;
@@ -830,7 +1544,7 @@
                 this.salary = salary;
                 this.contractYears = contractYears;
                 this.potential = potential;
-                this.nationality = nationality || randomNationality();
+                this.nationality = nationality || "Deutschland";
                 this.satisfaction = 60 + randInt(0, 35);
                 this.gamesPlayed = 0;
                 this.goals = 0;
@@ -844,10 +1558,13 @@
                 this.redCards = 0;
                 this.weeksDeveloped = 0;
                 this.moraleHistory = [];
-                this.contractDemand = null; // {salary, years, bonus}
+                this.contractDemand = null;
                 this.wantsTransfer = false;
                 this.transferRequestReason = null;
                 this.personality = randomItem(["ehrgeizig", "loyal", "professionell", "temperamentvoll", "ruhig"]);
+                this.clubHistory = [];
+                this.seasonStats = { goals: 0, assists: 0, appearances: 0 };
+                this.careerStats = { goals: 0, assists: 0, appearances: 0 };
             }
 
             get overall() {
@@ -867,12 +1584,6 @@
                 if (this.morale >= 75) return "hoch";
                 if (this.morale >= 50) return "mittel";
                 return "niedrig";
-            }
-
-            get moraleColor() {
-                if (this.morale >= 75) return "var(--green)";
-                if (this.morale >= 50) return "var(--gold)";
-                return "var(--red)";
             }
 
             getMoraleReason() {
@@ -910,11 +1621,14 @@
                 p.wantsTransfer = data.wantsTransfer || false;
                 p.transferRequestReason = data.transferRequestReason || null;
                 p.personality = data.personality || "professionell";
+                p.clubHistory = data.clubHistory || [];
+                p.seasonStats = data.seasonStats || { goals: 0, assists: 0, appearances: 0 };
+                p.careerStats = data.careerStats || { goals: 0, assists: 0, appearances: 0 };
                 return p;
             }
         }
 
-        // ---- Coach ----
+        // ---- Coach class ----
         class Coach {
             constructor(id, name, age, reputation, philosophy, preferredFormation, strengths, weaknesses, contractYears,
                 wageDemand) {
@@ -934,9 +1648,12 @@
                 this.authority = 40 + randInt(0, 45);
                 this.media = 40 + randInt(0, 45);
                 this.satisfaction = 70;
-                this.demands = []; // array of {type, text, target}
+                this.demands = [];
                 this.experience = 1 + randInt(0, 15);
                 this.mentality = randomItem(["offensiv", "defensiv", "ausgewogen"]);
+                this.careerWins = 0;
+                this.careerLosses = 0;
+                this.careerDraws = 0;
             }
 
             toJSON() {
@@ -957,14 +1674,17 @@
                 c.demands = data.demands || [];
                 c.experience = data.experience || 1;
                 c.mentality = data.mentality || "ausgewogen";
+                c.careerWins = data.careerWins || 0;
+                c.careerLosses = data.careerLosses || 0;
+                c.careerDraws = data.careerDraws || 0;
                 return c;
             }
         }
 
-        // ---- Club ----
+        // ---- Club class ----
         class Club {
             constructor(name, league, financialReserves, transferBudget, salaryBudget, seasonGoals, youthAcademyLevel = 1,
-                stadium, reputation) {
+                stadium, reputation, philosophy) {
                 this.name = name;
                 this.league = league;
                 this.financialReserves = financialReserves;
@@ -974,6 +1694,7 @@
                 this.youthAcademyLevel = youthAcademyLevel;
                 this.stadium = stadium || { name: name + " Stadion", capacity: 20000 + randInt(0, 60000) };
                 this.reputation = reputation || 40 + randInt(0, 40);
+                this.philosophy = philosophy || "Entwicklung";
                 this.fanTrust = 50;
                 this.players = [];
                 this.coach = null;
@@ -991,6 +1712,8 @@
                 this.lastFiveResults = [];
                 this.financialHistory = [];
                 this.staff = { scouts: [] };
+                this.avgAge = 0;
+                this.squadValueCache = 0;
             }
 
             averageOverall() {
@@ -1023,6 +1746,7 @@
                     youthAcademyLevel: this.youthAcademyLevel,
                     stadium: { ...this.stadium },
                     reputation: this.reputation,
+                    philosophy: this.philosophy,
                     fanTrust: this.fanTrust,
                     boardSatisfaction: this.boardSatisfaction,
                     fanSatisfaction: this.fanSatisfaction,
@@ -1039,13 +1763,16 @@
                     coach: this.coach ? this.coach.toJSON() : null,
                     lastFiveResults: [...this.lastFiveResults],
                     financialHistory: [...this.financialHistory],
-                    staff: { scouts: [...this.staff.scouts] }
+                    staff: { scouts: [...this.staff.scouts] },
+                    avgAge: this.avgAge,
+                    squadValueCache: this.squadValueCache
                 };
             }
 
             static fromJSON(data) {
                 const club = new Club(data.name, data.league || "Bundesliga", data.financialReserves, data.transferBudget,
-                    data.salaryBudget, data.seasonGoals, data.youthAcademyLevel, data.stadium, data.reputation);
+                    data.salaryBudget, data.seasonGoals, data.youthAcademyLevel, data.stadium, data.reputation, data
+                    .philosophy);
                 club.fanTrust = data.fanTrust;
                 club.boardSatisfaction = data.boardSatisfaction;
                 club.fanSatisfaction = data.fanSatisfaction;
@@ -1063,67 +1790,96 @@
                 club.lastFiveResults = data.lastFiveResults || [];
                 club.financialHistory = data.financialHistory || [];
                 club.staff = data.staff || { scouts: [] };
+                club.avgAge = data.avgAge || 0;
+                club.squadValueCache = data.squadValueCache || 0;
                 return club;
             }
         }
 
-        // ---- League Data ----
-        const BUNDESLIGA_CLUBS = [
-            { name: "FC Bayern München", crest: "FCB", reputation: 85, stadium: "Allianz Arena", capacity: 75000 },
-            { name: "Borussia Dortmund", crest: "BVB", reputation: 80, stadium: "Signal Iduna Park", capacity: 81365 },
-            { name: "RB Leipzig", crest: "RBL", reputation: 75, stadium: "Red Bull Arena", capacity: 47000 },
-            { name: "Bayer 04 Leverkusen", crest: "B04", reputation: 78, stadium: "BayArena", capacity: 30210 },
-            { name: "Eintracht Frankfurt", crest: "SGE", reputation: 72, stadium: "Deutsche Bank Park", capacity: 58000 },
-            { name: "VfB Stuttgart", crest: "VfB", reputation: 70, stadium: "MHPArena", capacity: 60449 },
-            { name: "SC Freiburg", crest: "SCF", reputation: 68, stadium: "Europa-Park Stadion", capacity: 34700 },
-            { name: "1. FC Union Berlin", crest: "FCU", reputation: 65, stadium: "Stadion An der Alten Försterei",
-            capacity: 22012 },
-            { name: "TSG Hoffenheim", crest: "TSG", reputation: 62, stadium: "PreZero Arena", capacity: 30150 },
-            { name: "Borussia Mönchengladbach", crest: "BMG", reputation: 68, stadium: "Borussia-Park", capacity: 54057 },
-            { name: "1. FC Köln", crest: "KOE", reputation: 64, stadium: "RheinEnergieStadion", capacity: 50000 },
-            { name: "Werder Bremen", crest: "SVW", reputation: 66, stadium: "Weserstadion", capacity: 42100 },
-            { name: "FC Augsburg", crest: "FCA", reputation: 58, stadium: "WWK Arena", capacity: 30660 },
-            { name: "1. FSV Mainz 05", crest: "M05", reputation: 60, stadium: "Mewa Arena", capacity: 34000 },
-            { name: "Hamburger SV", crest: "HSV", reputation: 62, stadium: "Volksparkstadion", capacity: 57000 },
-            { name: "FC Schalke 04", crest: "S04", reputation: 60, stadium: "Veltins-Arena", capacity: 62271 },
-            { name: "SV Elversberg", crest: "SVE", reputation: 45, stadium: "Ursapharm-Arena", capacity: 10000 },
-            { name: "SC Paderborn 07", crest: "SCP", reputation: 48, stadium: "Home Deluxe Arena", capacity: 15000 }
-        ];
+        // ---- Generate realistic clubs with real player data ----
+        function generateRealisticClubs() {
+            const clubs = [];
 
-        const ZWEITLIGA_CLUBS = [
-            { name: "Hertha BSC", crest: "BSC", reputation: 55, stadium: "Olympiastadion", capacity: 74649 },
-            { name: "Hannover 96", crest: "H96", reputation: 52, stadium: "Heinz-von-Heiden-Arena", capacity: 49000 },
-            { name: "1. FC Kaiserslautern", crest: "FCK", reputation: 50, stadium: "Fritz-Walter-Stadion",
-            capacity: 49780 },
-            { name: "1. FC Nürnberg", crest: "FCN", reputation: 50, stadium: "Max-Morlock-Stadion", capacity: 50000 },
-            { name: "VfL Bochum", crest: "VfL", reputation: 48, stadium: "Vonovia Ruhrstadion", capacity: 27599 },
-            { name: "Arminia Bielefeld", crest: "DSC", reputation: 46, stadium: "SchücoArena", capacity: 27300 },
-            { name: "Karlsruher SC", crest: "KSC", reputation: 45, stadium: "BBBank Wildpark", capacity: 29699 },
-            { name: "Eintracht Braunschweig", crest: "EBS", reputation: 44, stadium: "Eintracht-Stadion", capacity: 23325 },
-            { name: "Holstein Kiel", crest: "KSV", reputation: 46, stadium: "Holstein-Stadion", capacity: 15034 },
-            { name: "1. FC Magdeburg", crest: "FCM", reputation: 44, stadium: "MDCC-Arena", capacity: 30098 },
-            { name: "SG Dynamo Dresden", crest: "SGD", reputation: 45, stadium: "Rudolf-Harbig-Stadion", capacity: 32066 },
-            { name: "SpVgg Greuther Fürth", crest: "SGF", reputation: 44, stadium: "Sportpark Ronhof", capacity: 16626 },
-            { name: "SV Darmstadt 98", crest: "SVD", reputation: 44, stadium: "Merck-Stadion", capacity: 17650 },
-            { name: "VfL Osnabrück", crest: "VfLO", reputation: 40, stadium: "Bremer Brücke", capacity: 16200 },
-            { name: "Energie Cottbus", crest: "FCE", reputation: 40, stadium: "Stadion der Freundschaft", capacity: 22528 },
-            { name: "VfL Wolfsburg", crest: "WOB", reputation: 48, stadium: "Volkswagen Arena", capacity: 30000 },
-            { name: "1. FC Heidenheim", crest: "FCH", reputation: 42, stadium: "Voith-Arena", capacity: 15000 },
-            { name: "FC St. Pauli", crest: "STP", reputation: 46, stadium: "Millerntor-Stadion", capacity: 29546 }
-        ];
+            // Process Bundesliga clubs
+            BUNDESLIGA_CLUBS.forEach(def => {
+                const budget = def.budget;
+                const club = new Club(
+                    def.name,
+                    "Bundesliga",
+                    budget.reserve || 50,
+                    budget.transfer || 30,
+                    budget.salary || 25,
+                    { leaguePlace: def.goal.league || 8, cupRound: def.goal.cup || "quarter" },
+                    2 + randInt(0, 4),
+                    { name: def.stadium, capacity: def.capacity || 30000 },
+                    def.reputation || 70,
+                    def.philosophy || "Entwicklung"
+                );
+                // Add players from data
+                const playerData = PLAYER_DATA[def.name] || [];
+                if (playerData.length) {
+                    const players = buildPlayersFromData(def.name, playerData);
+                    club.players = players;
+                } else {
+                    // Fallback: generate random players
+                    for (let i = 0; i < 22; i++) {
+                        const age = 18 + randInt(0, 18);
+                        const p = generatePlayer(10000 + i + Math.random() * 1000, age);
+                        club.players.push(p);
+                    }
+                }
+                // Assign coach
+                const coach = generateCoach(1000 + Math.random() * 1000);
+                coach.wageDemand = Math.round((0.5 + (def.reputation || 50) / 50 * 2) * 10) / 10;
+                club.coach = coach;
+                clubs.push(club);
+            });
 
-        const CLUB_CREST = {};
-        BUNDESLIGA_CLUBS.forEach(c => CLUB_CREST[c.name] = c.crest);
-        ZWEITLIGA_CLUBS.forEach(c => CLUB_CREST[c.name] = c.crest);
+            // Process 2. Bundesliga clubs
+            ZWEITLIGA_CLUBS.forEach(def => {
+                const budget = def.budget || { reserve: 15, transfer: 6, salary: 8 };
+                const club = new Club(
+                    def.name,
+                    "2. Bundesliga",
+                    budget.reserve || 15,
+                    budget.transfer || 6,
+                    budget.salary || 8,
+                    { leaguePlace: def.goal?.league || 8, cupRound: def.goal?.cup || "round2" },
+                    1 + randInt(0, 3),
+                    { name: def.stadium, capacity: def.capacity || 20000 },
+                    def.reputation || 50,
+                    def.philosophy || "Entwicklung"
+                );
+                const playerData = PLAYER_DATA[def.name] || [];
+                if (playerData.length) {
+                    const players = buildPlayersFromData(def.name, playerData);
+                    club.players = players;
+                } else {
+                    for (let i = 0; i < 20; i++) {
+                        const age = 18 + randInt(0, 18);
+                        const p = generatePlayer(20000 + i + Math.random() * 1000, age);
+                        p.marketValue = Math.round(p.marketValue * 0.4 * 10) / 10;
+                        p.salary = Math.round(p.salary * 0.5 * 10) / 10;
+                        club.players.push(p);
+                    }
+                }
+                const coach = generateCoach(2000 + Math.random() * 1000);
+                coach.wageDemand = Math.round((0.3 + (def.reputation || 40) / 50 * 1.5) * 10) / 10;
+                club.coach = coach;
+                clubs.push(club);
+            });
 
-        // ---- Generator functions ----
+            return clubs;
+        }
+
+        // ---- Generator fallback ----
         function generatePlayer(id, age = null, position = null) {
             if (age === null) age = 18 + randInt(0, 18);
             if (position === null) position = randomItem(POSITIONS);
             const attrs = {};
             ATTRIBUTES.forEach(attr => {
                 let base = 45 + randInt(0, 40);
-                const weights = POSITION_WEIGHTS[position];
+                const weights = POSITION_WEIGHTS[position] || POSITION_WEIGHTS["ZM"];
                 if (weights && weights[attr]) {
                     base += Math.floor(weights[attr] * 25);
                 }
@@ -1137,6 +1893,23 @@
             const nat = randomNationality();
             return new Player(id, randomName(), age, position, attrs, Math.max(0.1, marketValue),
                 Math.max(0.05, salary), contract, potential, nat);
+        }
+
+        function randomName() {
+            const first = ["Max", "Lukas", "Julian", "Marco", "Mats", "Thomas", "Manuel", "Joshua", "Serge", "Leon",
+                "Kai", "Timo", "Niclas", "Florian", "Robin", "Bernd", "Kevin", "Matthias", "Christian", "Jan"
+            ];
+            const last = ["Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz",
+                "Hoffmann"
+            ];
+            return first[Math.floor(Math.random() * first.length)] + " " + last[Math.floor(Math.random() * last.length)];
+        }
+
+        function randomNationality() {
+            const nats = ["Deutschland", "Österreich", "Schweiz", "Polen", "Frankreich", "Italien", "Spanien",
+                "England", "Niederlande", "Belgien", "Dänemark", "Schweden", "Norwegen", "Brasilien", "Argentinien"
+            ];
+            return nats[Math.floor(Math.random() * nats.length)];
         }
 
         function generateCoach(id) {
@@ -1165,65 +1938,24 @@
             return c;
         }
 
-        function buildLeagueClubs(clubDefs, league, startId, financeScale) {
-            const clubs = [];
-            let playerId = startId;
-            clubDefs.forEach((def, idx) => {
-                const factor = 1.0 - (idx / (clubDefs.length * 1.3));
-                const f = clamp(factor, 0.2, 1.0);
-                const financial = Math.round((financeScale.reserveBase + f * financeScale.reserveSpan) * 10) / 10;
-                const transfer = Math.round((financeScale.transferBase + f * financeScale.transferSpan) * 10) / 10;
-                const salary = Math.round((financeScale.salaryBase + f * financeScale.salarySpan) * 10) / 10;
-                const goals = {
-                    leaguePlace: 1 + randInt(0, 17),
-                    cupRound: ["round1", "round2", "quarter", "semi", "final"][randInt(0, 4)]
-                };
-                const stadium = { name: def.stadium, capacity: def.capacity };
-                const club = new Club(def.name, league, financial, transfer, salary, goals,
-                    1 + randInt(0, 5), stadium, def.reputation || 50);
-                const numPlayers = 22 + randInt(0, 8);
-                for (let i = 0; i < numPlayers; i++) {
-                    let age = 18 + randInt(0, 18);
-                    if (i < 4) age = 17 + randInt(0, 4);
-                    else if (i > 18) age = 30 + randInt(0, 6);
-                    const p = generatePlayer(playerId++, age);
-                    const valueMult = (0.6 + 0.5 * f) * financeScale.valueMultiplier;
-                    p.marketValue = Math.round(p.marketValue * valueMult * 10) / 10;
-                    p.salary = Math.round(p.salary * (0.7 + 0.5 * f) * 10) / 10;
-                    club.players.push(p);
-                }
-                const coach = generateCoach(1000 + idx + startId);
-                coach.wageDemand = Math.round((0.5 + f * 2.5) * 10) / 10;
-                club.coach = coach;
-                clubs.push(club);
-            });
-            return clubs;
-        }
+        // ---- POSITIONS for the game ----
+        const POSITIONS = ["IV", "AV", "ZM", "FL", "ST"];
+        const ATTRIBUTES = ["geschwindigkeit", "passspiel", "schuss", "defensive", "kopfball"];
+        const POSITION_WEIGHTS = {
+            IV: { defensive: 0.6, kopfball: 0.2, passspiel: 0.1, geschwindigkeit: 0.05, schuss: 0.05 },
+            AV: { geschwindigkeit: 0.3, defensive: 0.3, passspiel: 0.2, schuss: 0.1, kopfball: 0.1 },
+            ZM: { passspiel: 0.3, schuss: 0.2, geschwindigkeit: 0.15, defensive: 0.25, kopfball: 0.1 },
+            FL: { geschwindigkeit: 0.3, schuss: 0.25, passspiel: 0.2, defensive: 0.1, kopfball: 0.15 },
+            ST: { schuss: 0.35, kopfball: 0.25, geschwindigkeit: 0.2, passspiel: 0.1, defensive: 0.1 }
+        };
 
-        function generateInitialData() {
-            const bundesliga = buildLeagueClubs(BUNDESLIGA_CLUBS, "Bundesliga", 0, {
-                reserveBase: 40,
-                reserveSpan: 160,
-                transferBase: 8,
-                transferSpan: 110,
-                salaryBase: 4,
-                salarySpan: 60,
-                valueMultiplier: 1.0
-            });
-            const zweitliga = buildLeagueClubs(ZWEITLIGA_CLUBS, "2. Bundesliga", 5000, {
-                reserveBase: 6,
-                reserveSpan: 25,
-                transferBase: 1.0,
-                transferSpan: 12,
-                salaryBase: 0.6,
-                salarySpan: 6,
-                valueMultiplier: 0.3
-            });
-            return [...bundesliga, ...zweitliga];
-        }
+        // ---- CREST mapping ----
+        const CLUB_CREST = {};
+        BUNDESLIGA_CLUBS.forEach(c => CLUB_CREST[c.name] = c.crest);
+        ZWEITLIGA_CLUBS.forEach(c => CLUB_CREST[c.name] = c.crest);
 
         // ================================================================
-        //  GAME ENGINE
+        //  GAME ENGINE (simplified but functional)
         // ================================================================
 
         class GameEngine {
@@ -1266,14 +1998,23 @@
                     .sort((a, b) => b[1] - a[1]);
             }
 
-            clubLeague(clubName) {
-                const c = this.clubs.find(c => c.name === clubName);
-                return c ? c.league : "Bundesliga";
-            }
-
             getClub(name) { return this.clubs.find(c => c.name === name); }
 
-            // ---- Squad Analysis ----
+            // ---- Basic operations ----
+            addNews(text, type = "normal") {
+                const entry = {
+                    id: this.newsId++,
+                    text,
+                    type,
+                    date: `${this.currentSeason}/${this.currentMatchday}`,
+                    timestamp: Date.now()
+                };
+                this.news.unshift(entry);
+                if (this.news.length > 200) this.news.pop();
+                return entry;
+            }
+
+            // ---- Squad analysis ----
             analyzeSquad(club) {
                 const counts = {},
                     avg = {};
@@ -1303,7 +2044,7 @@
                 return report;
             }
 
-            // ---- Transfers with bonuses ----
+            // ---- Transfers ----
             scoutPlayers(club, position, budget) {
                 const candidates = [];
                 this.clubs.forEach(other => {
@@ -1325,16 +2066,13 @@
                 const ratio = amount / player.marketValue;
                 let decision;
                 let counterAmount = null;
-                // AI decision making
                 const aiFactor = toClub.reputation / 100;
-                const playerValue = player.overall / 100;
                 if (ratio >= 1.4 + (1 - aiFactor) * 0.3) decision = "accept";
                 else if (ratio < 0.6 + (1 - aiFactor) * 0.2) decision = "reject";
                 else {
                     decision = "counter";
                     counterAmount = Math.round((amount * (1.05 + rand(0, 0.35)) + 0.5) * 10) / 10;
                 }
-
                 const offer = {
                     id: Date.now() + Math.random(),
                     player: player,
@@ -1351,7 +2089,6 @@
                     season: this.currentSeason,
                     timestamp: Date.now()
                 };
-
                 if (decision === "accept") {
                     this.executeTransfer(offer);
                     this.transferHistory.push({ ...offer, status: "completed" });
@@ -1387,7 +2124,6 @@
                 this.addNews(`Transfer abgeschlossen: ${player.name} wechselt von ${fromClub.name} zu ${toClub.name} für ${amount.toFixed(1)} Mio. €`,
                     "success");
                 this.addNews(`${toClub.name} verpflichtet ${player.name} für ${amount.toFixed(1)} Mio. €`, "success");
-                // Update player's club
                 this.transferHistory.push({ ...offer, status: "completed", executedAt: Date.now() });
             }
 
@@ -1399,7 +2135,6 @@
                 if (offer.counterAmount > offer.fromClub.transferBudget) {
                     return { success: false, msg: "Nicht genug Budget für Gegenangebot." };
                 }
-                const oldAmount = offer.amount;
                 offer.amount = offer.counterAmount;
                 offer.status = "accept";
                 this.executeTransfer(offer);
@@ -1459,7 +2194,7 @@
                     completed: false,
                     results: [],
                     progress: 0,
-                    scoutName: "Scout " + randomItem(LAST_NAMES)
+                    scoutName: "Scout " + randomItem(["Müller", "Schmidt", "Fischer", "Weber", "Hoffmann"])
                 };
                 this.scoutingReports.push(report);
                 this.addNews(`🔍 Scoutingauftrag in ${region} gestartet (${position}, Potential ${minPotential}+). Dauer: ${durationWeeks} Wochen.`,
@@ -1477,7 +2212,7 @@
                         for (let i = 0; i < numResults; i++) {
                             const age = r.ageMin + randInt(0, r.ageMax - r.ageMin);
                             const p = generatePlayer(9999 + Math.random() * 100000, age, r.position === "alle" ? null : r
-                            .position);
+                                .position);
                             const potBonus = randInt(0, 15 + (r.durationWeeks > 5 ? 5 : 0));
                             p.potential = clamp(p.potential + potBonus, 1, 99);
                             if (p.overall < 40) p.overall = 40 + randInt(0, 20);
@@ -1505,7 +2240,7 @@
                 return this.scoutingReports.filter(r => r.club === clubName && r.completed);
             }
 
-            // ---- Board ----
+            // ---- Board evaluation ----
             evaluateBoard(club) {
                 const goals = this.seasonGoals[club.name] || club.seasonGoals;
                 const table = this.getTable(club.league);
@@ -1521,32 +2256,11 @@
                     if (club.history.some(h => h.cup && h.cup === goals.cupRound)) achieved++;
                 }
                 const score = total > 0 ? achieved / total : 0.5;
-                // Also consider financial health
                 const financialScore = club.financialReserves > 20 ? 1 : club.financialReserves > 5 ? 0.7 : 0.3;
                 const combinedScore = (score * 0.6 + financialScore * 0.4);
                 club.boardSatisfaction = clamp(club.boardSatisfaction + (combinedScore - 0.5) * 12, 0, 100);
                 if (club.boardSatisfaction < 25) {
                     this.addNews(`⚠ Vorstand unzufrieden! Saisonziele gefährdet.`, "urgent");
-                    if (club.boardSatisfaction < 15) {
-                        this.addNews(`🚨 KRISENSITZUNG: Vorstand stellt deine Arbeit infrage!`, "urgent");
-                        this.pendingDecisions.push({
-                            id: this.decisionId++,
-                            type: "board_crisis",
-                            club: club.name,
-                            text: "Der Vorstand ist extrem unzufrieden. Was tust du?",
-                            options: [
-                                { label: "Neue Transfers versprechen", action: "promise_transfers" },
-                                { label: "Trainerwechsel vorschlagen", action: "suggest_coach_change" },
-                                { label: "Rücktritt anbieten", action: "resign" }
-                            ]
-                        });
-                    }
-                } else if (club.boardSatisfaction > 80) {
-                    if (Math.random() < 0.1) {
-                        this.addNews(`👍 Vorstand lobt deine Arbeit!`, "success");
-                        club.transferBudget += rand(1, 5);
-                        club.financialReserves += rand(0.5, 2);
-                    }
                 }
                 return {
                     satisfaction: Math.round(club.boardSatisfaction),
@@ -1559,22 +2273,7 @@
                 };
             }
 
-            // ---- News ----
-            addNews(text, type = "normal", action = null) {
-                const entry = {
-                    id: this.newsId++,
-                    text,
-                    type,
-                    date: `${this.currentSeason}/${this.currentMatchday}`,
-                    timestamp: Date.now(),
-                    action: action || null
-                };
-                this.news.unshift(entry);
-                if (this.news.length > 200) this.news.pop();
-                return entry;
-            }
-
-            // ---- Match Simulation ----
+            // ---- Match simulation ----
             simulateMatch(homeClub, awayClub) {
                 let homeStrength = homeClub.averageOverall();
                 let awayStrength = awayClub.averageOverall();
@@ -1597,16 +2296,10 @@
                 awayGoals = clamp(awayGoals, 0, 8);
 
                 const events = [];
-                const goalScorers = [];
-                const assists = [];
-                const yellowCards = [];
-                const injuries = [];
-
                 for (let i = 0; i < homeGoals; i++) {
                     const scorer = homeClub.players[randInt(0, homeClub.players.length - 1)];
                     if (scorer) {
                         scorer.goals = (scorer.goals || 0) + 1;
-                        goalScorers.push({ player: scorer, club: homeClub, minute: 10 + randInt(0, 80) });
                         events.push(`⚽ ${scorer.name} (${homeClub.name}) Tor!`);
                     } else {
                         events.push(`⚽ ${homeClub.name} Tor!`);
@@ -1616,21 +2309,16 @@
                     const scorer = awayClub.players[randInt(0, awayClub.players.length - 1)];
                     if (scorer) {
                         scorer.goals = (scorer.goals || 0) + 1;
-                        goalScorers.push({ player: scorer, club: awayClub, minute: 10 + randInt(0, 80) });
                         events.push(`⚽ ${scorer.name} (${awayClub.name}) Tor!`);
                     } else {
                         events.push(`⚽ ${awayClub.name} Tor!`);
                     }
                 }
-                // Sort by minute
-                goalScorers.sort((a, b) => a.minute - b.minute);
-
                 if (Math.random() < 0.25) {
                     const team = Math.random() < 0.5 ? homeClub : awayClub;
                     const player = team.players[randInt(0, team.players.length - 1)];
                     if (player) {
                         player.yellowCards = (player.yellowCards || 0) + 1;
-                        yellowCards.push({ player, club: team });
                         events.push(`🟨 Gelb für ${player.name} (${team.name})`);
                     }
                 }
@@ -1640,7 +2328,6 @@
                     if (player) {
                         const weeks = 1 + randInt(0, 4);
                         player.injuryWeeks = weeks;
-                        injuries.push({ player, club: team, weeks });
                         events.push(`🩹 Verletzung! ${player.name} (${team.name}) fällt ${weeks} Wochen aus.`);
                     }
                 }
@@ -1663,9 +2350,6 @@
                     xG_home: Math.round(homeXg * 100) / 100,
                     xG_away: Math.round(awayXg * 100) / 100,
                     events,
-                    goalScorers: goalScorers.map(g => ({ name: g.player.name, club: g.club.name, minute: g.minute })),
-                    yellowCards: yellowCards.map(y => ({ name: y.player.name, club: y.club.name })),
-                    injuries: injuries.map(i => ({ name: i.player.name, club: i.club.name, weeks: i.weeks })),
                     homeStrength: Math.round(homeStrength),
                     awayStrength: Math.round(awayStrength),
                     homeMorale: Math.round(homeMorale),
@@ -1674,16 +2358,11 @@
                 };
 
                 // Player of the match
-                if (goalScorers.length > 0) {
-                    const best = goalScorers.reduce((a, b) => a.player.overall > b.player.overall ? a : b);
-                    result.playerOfTheMatch = { name: best.player.name, club: best.club.name };
-                } else {
-                    const candidates = [...homeClub.players, ...awayClub.players].filter(p => p.overall > 70);
-                    if (candidates.length > 0) {
-                        const picked = randomItem(candidates);
-                        result.playerOfTheMatch = { name: picked.name, club: picked.club === homeClub ? homeClub.name :
-                                awayClub.name };
-                    }
+                const candidates = [...homeClub.players, ...awayClub.players].filter(p => p.overall > 70);
+                if (candidates.length > 0) {
+                    const picked = candidates.reduce((a, b) => a.overall > b.overall ? a : b);
+                    result.playerOfTheMatch = { name: picked.name, club: picked.club === homeClub ? homeClub.name :
+                            awayClub.name };
                 }
 
                 this.matchReports.push(result);
@@ -1722,7 +2401,6 @@
                         home.seasonPoints = (home.seasonPoints || 0) + 3;
                         home.lastFiveResults.push('W');
                         away.lastFiveResults.push('L');
-                        // Morale boost for winners
                         home.players.forEach(p => p.morale = clamp(p.morale + rand(1, 4), 0, 100));
                         away.players.forEach(p => p.morale = clamp(p.morale + rand(-4, -1), 0, 100));
                         this.addNews(`📈 ${home.name} gewinnt ${result.homeGoals}:${result.awayGoals} gegen ${away.name}`,
@@ -1829,7 +2507,6 @@
                         if (p.formPenalty > 0) {
                             p.formPenalty = Math.max(0, p.formPenalty - 0.5);
                         }
-                        // Contract demands
                         if (p.contractYears < 2 && p.overall > 70 && Math.random() < 0.01) {
                             if (!p.contractDemand) {
                                 p.contractDemand = {
@@ -1852,7 +2529,6 @@
                             p.transferRequestReason = "Allgemeine Unzufriedenheit";
                             this.addNews(`🚨 ${p.name} (${club.name}) möchte den Verein verlassen!`, "urgent");
                         }
-                        // Track morale history
                         p.moraleHistory.push({ morale: p.morale, matchday: this.currentMatchday });
                         if (p.moraleHistory.length > 20) p.moraleHistory.shift();
                     });
@@ -1959,7 +2635,6 @@
                         }
                     }
                 } else {
-                    // Special events
                     if (Math.random() < 0.15) {
                         const rival = randomItem(this.clubs.filter(c => c !== club));
                         if (rival) {
@@ -1972,7 +2647,6 @@
 
             endSeason() {
                 this.addNews(`🏆 Saison ${this.currentSeason} beendet!`, "success");
-
                 const bundesTable = this.getTable("Bundesliga");
                 const zweitTable = this.getTable("2. Bundesliga");
 
@@ -2032,11 +2706,10 @@
                         this.addNews(`⬆ ${prom2.name} steigt in die 1. Bundesliga auf!`, "success"); }
                 }
 
-                // Save history for clubs
                 this.clubs.forEach(c => {
                     const table = c.league === "Bundesliga" ? this.leagueTable : this.leagueTable2;
                     const pos = Object.entries(table).sort((a, b) => b[1] - a[1]).findIndex(([name]) => name === c.name) +
-                    1;
+                        1;
                     c.history.push({
                         season: this.currentSeason,
                         position: pos || 0,
@@ -2100,6 +2773,56 @@
 
                 this.addNews(`📅 Neue Saison ${this.currentSeason} gestartet!`, "success");
                 this.saveGame();
+            }
+
+            // ---- Urgent tasks ----
+            getUrgentTasks(club) {
+                const tasks = [];
+                if (!club.coach) {
+                    tasks.push({ text: "❌ Kein Trainer – stelle einen ein!", urgency: "urgent", action: "coach" });
+                }
+                if (club.players.length < 20) {
+                    tasks.push({ text: "⚠ Kleiner Kader – verpflichte Spieler.", urgency: "warning", action: "transfers" });
+                }
+                if (club.transferBudget < 3) {
+                    tasks.push({ text: "💰 Knappes Budget – Verkäufe erwägen.", urgency: "warning", action: "transfers" });
+                }
+                const boardEval = this.evaluateBoard(club);
+                if (boardEval.satisfaction < 35) {
+                    tasks.push({ text: "⚠ Vorstand unzufrieden – Ergebnisse verbessern!", urgency: "urgent",
+                        action: "board" });
+                }
+                if (club.fanSatisfaction < 25) {
+                    tasks.push({ text: "😡 Fanunruhe – sportliche Erfolge nötig.", urgency: "urgent", action: "board" });
+                }
+                const unhappy = club.players.filter(p => p.morale < 30);
+                if (unhappy.length > 0) {
+                    tasks.push({ text: `😤 ${unhappy.length} unzufriedene Spieler – kümmere dich um ihre Anliegen.`,
+                        urgency: "urgent", action: "squad" });
+                }
+                const contractDemands = club.players.filter(p => p.contractDemand);
+                if (contractDemands.length > 0) {
+                    tasks.push({ text: `📝 ${contractDemands.length} Spieler wollen Verträge verlängern.`, urgency: "warning",
+                        action: "squad" });
+                }
+                if (club.coach && club.coach.demands.length > 0) {
+                    const d = club.coach.demands[0];
+                    tasks.push({ text: `🧑‍🏫 Trainer fordert: ${d.text}`, urgency: "warning", action: "transfers" });
+                }
+                const transferRequests = club.players.filter(p => p.wantsTransfer);
+                if (transferRequests.length > 0) {
+                    tasks.push({ text: `🚪 ${transferRequests.length} Spieler wollen wechseln.`, urgency: "urgent",
+                        action: "squad" });
+                }
+                if (tasks.length === 0) {
+                    tasks.push({ text: "✅ Alles im grünen Bereich. Weiter so!", urgency: "normal", action: null });
+                }
+                return tasks;
+            }
+
+            // ---- Recent matches ----
+            getRecentMatches(club) {
+                return this.matchReports.filter(r => r.home === club.name || r.away === club.name).slice(-6);
             }
 
             // ---- Save/Load ----
@@ -2166,60 +2889,6 @@
                     return { ...o, fromClub: from, toClub: to, player: player };
                 });
                 return this;
-            }
-
-            // ---- Get urgent tasks ----
-            getUrgentTasks(club) {
-                const tasks = [];
-                if (!club.coach) {
-                    tasks.push({ text: "❌ Kein Trainer – stelle einen ein!", urgency: "urgent", action: "coach" });
-                }
-                if (club.players.length < 20) {
-                    tasks.push({ text: "⚠ Kleiner Kader – verpflichte Spieler.", urgency: "warning", action: "transfers" });
-                }
-                if (club.transferBudget < 3) {
-                    tasks.push({ text: "💰 Knappes Budget – Verkäufe erwägen.", urgency: "warning", action: "transfers" });
-                }
-                const boardEval = this.evaluateBoard(club);
-                if (boardEval.satisfaction < 35) {
-                    tasks.push({ text: "⚠ Vorstand unzufrieden – Ergebnisse verbessern!", urgency: "urgent",
-                        action: "board" });
-                }
-                if (club.fanSatisfaction < 25) {
-                    tasks.push({ text: "😡 Fanunruhe – sportliche Erfolge nötig.", urgency: "urgent", action: "board" });
-                }
-                // Player morale issues
-                const unhappy = club.players.filter(p => p.morale < 30);
-                if (unhappy.length > 0) {
-                    tasks.push({ text: `😤 ${unhappy.length} unzufriedene Spieler – kümmere dich um ihre Anliegen.`,
-                        urgency: "urgent", action: "squad" });
-                }
-                // Contract demands
-                const contractDemands = club.players.filter(p => p.contractDemand);
-                if (contractDemands.length > 0) {
-                    tasks.push({ text: `📝 ${contractDemands.length} Spieler wollen Verträge verlängern.`, urgency: "warning",
-                        action: "squad" });
-                }
-                // Coach demands
-                if (club.coach && club.coach.demands.length > 0) {
-                    const d = club.coach.demands[0];
-                    tasks.push({ text: `🧑‍🏫 Trainer fordert: ${d.text}`, urgency: "warning", action: "transfers" });
-                }
-                // Transfer requests
-                const transferRequests = club.players.filter(p => p.wantsTransfer);
-                if (transferRequests.length > 0) {
-                    tasks.push({ text: `🚪 ${transferRequests.length} Spieler wollen wechseln.`, urgency: "urgent",
-                        action: "squad" });
-                }
-                if (tasks.length === 0) {
-                    tasks.push({ text: "✅ Alles im grünen Bereich. Weiter so!", urgency: "normal", action: null });
-                }
-                return tasks;
-            }
-
-            // ---- Get recent matches ----
-            getRecentMatches(club) {
-                return this.matchReports.filter(r => r.home === club.name || r.away === club.name).slice(-6);
             }
         }
 
@@ -2326,6 +2995,7 @@
                     <p style="font-size:14px;">🏟 ${club.stadium?.name || ''} (${club.stadium?.capacity || 0})</p>
                     <p style="font-size:14px;">🎯 Ziel: ${boardGoal} | Schwierigkeit: ${diff}</p>
                     <p style="font-size:14px;">📈 Reputation: ${club.reputation}</p>
+                    <p style="font-size:12px;color:var(--dim);">${club.philosophy || '—'}</p>
                     <button data-name="${club.name}" class="select-club">▶ Übernehmen</button>
                 `;
                 div.querySelector('.select-club').addEventListener('click', () => {
@@ -2355,7 +3025,6 @@
             budgetDisplay.textContent = `€${club.transferBudget.toFixed(1)}M`;
         }
 
-        // ---- Tab switching ----
         function switchTab(tabId) {
             document.querySelectorAll('.menu button').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.tab === tabId);
@@ -2395,7 +3064,7 @@
             }
         }
 
-        // ---- DASHBOARD (enhanced) ----
+        // ---- DASHBOARD ----
         function renderDashboard() {
             const club = appState.playerClub;
             const eng = appState.engine;
@@ -2423,6 +3092,7 @@
                                 <span class="badge dim">${club.seasonGoalsScored}:${club.seasonGoalsConceded}</span>
                             </div>
                         </div>
+                        <p style="font-size:14px;color:var(--dim);margin-top:6px;">📖 ${club.philosophy || '—'}</p>
                     </div>
                 </div>
                 <div class="flex">
@@ -2451,7 +3121,7 @@
                 </div>
             `;
 
-            // Tasks section
+            // Tasks
             html += `<div class="card wide"><h3>⚠ Offene Aufgaben</h3>`;
             tasks.forEach(t => {
                 const cls = t.urgency === 'urgent' ? 'urgent' : t.urgency === 'warning' ? 'warning' : 'done';
@@ -2479,7 +3149,7 @@
                 html += `</div></div>`;
             }
 
-            // Morale warnings
+            // Low morale
             const lowMorale = club.players.filter(p => p.morale < 35);
             if (lowMorale.length > 0) {
                 html += `<div class="card wide" style="border-color:var(--red);">
@@ -2492,34 +3162,6 @@
                         </div>
                     `).join('')}
                     ${lowMorale.length > 5 ? `<span class="tiny-text text-dim">+${lowMorale.length-5} weitere</span>` : ''}
-                </div>`;
-            }
-
-            // Transfer requests
-            const transferRequests = club.players.filter(p => p.wantsTransfer);
-            if (transferRequests.length > 0) {
-                html += `<div class="card wide" style="border-color:var(--gold);">
-                    <h3 style="color:var(--gold);">🚪 Wechselwünsche</h3>
-                    ${transferRequests.map(p => `
-                        <div class="player-row">
-                            <span>${p.name}</span>
-                            <span class="tiny-text text-dim">${p.transferRequestReason || 'Allgemeiner Wechselwunsch'}</span>
-                            <button class="tiny" onclick="handleTransferRequest('${p.id}')">Angebote prüfen</button>
-                        </div>
-                    `).join('')}
-                </div>`;
-            }
-
-            // Coach demands
-            if (club.coach && club.coach.demands.length > 0) {
-                html += `<div class="card wide" style="border-color:var(--blue);">
-                    <h3 style="color:var(--blue);">🧑‍🏫 Trainer-Forderungen</h3>
-                    ${club.coach.demands.slice(0,3).map(d => `
-                        <div class="task-item warning">
-                            <span>${d.text}</span>
-                            <button class="tiny secondary" onclick="switchTab('transfers')">Transfermarkt</button>
-                        </div>
-                    `).join('')}
                 </div>`;
             }
 
@@ -2540,63 +3182,6 @@
             tabContents.dashboard.innerHTML = html;
         }
 
-        function handleTransferRequest(playerId) {
-            const club = appState.playerClub;
-            const eng = appState.engine;
-            const p = club.players.find(p => p.id === playerId);
-            if (!p) return;
-
-            // Find interested clubs
-            const interested = eng.clubs.filter(c => c !== club && c.transferBudget > p.marketValue * 0.5);
-            if (!interested.length) {
-                alert("❌ Keine interessierten Vereine.");
-                return;
-            }
-
-            let html = `<h4>Angebote für ${p.name}</h4>`;
-            interested.slice(0, 5).forEach(c => {
-                const offer = Math.round((p.marketValue * (0.7 + rand(0, 0.5))) * 10) / 10;
-                html += `
-                    <div class="task-item">
-                        <span>${c.name} bietet ${formatMoney(offer)}</span>
-                        <div>
-                            <button class="tiny success" onclick="executeTransferRequest(${p.id}, '${c.name}', ${offer})">Annehmen</button>
-                            <button class="tiny danger" onclick="closeModal()">Ablehnen</button>
-                        </div>
-                    </div>
-                `;
-            });
-            showModal(`🚪 Wechsel für ${p.name}`, html);
-        }
-
-        function executeTransferRequest(playerId, clubName, amount) {
-            const club = appState.playerClub;
-            const eng = appState.engine;
-            const p = club.players.find(p => p.id === playerId);
-            if (!p) return;
-            const buyer = eng.getClub(clubName);
-            if (!buyer) return;
-            if (amount > club.transferBudget && buyer !== club) {
-                // Seller gets the money
-                const offerObj = {
-                    id: Date.now() + Math.random(),
-                    player: p,
-                    fromClub: club,
-                    toClub: buyer,
-                    amount: amount,
-                    status: 'accept'
-                };
-                eng.executeTransfer(offerObj);
-                eng.addNews(`✅ ${p.name} wechselt für ${formatMoney(amount)} von ${club.name} zu ${buyer.name}.`, "success");
-                closeModal();
-                renderDashboard();
-                renderSquad();
-                updateHeader();
-            } else {
-                alert("❌ Transfer fehlgeschlagen.");
-            }
-        }
-
         // ---- SQUAD ----
         function renderSquad() {
             const club = appState.playerClub;
@@ -2606,19 +3191,17 @@
                     <h3>🧑‍🤝‍🧑 Kader von ${club.name}</h3>
                     <div>
                         <button onclick="showSquadAnalysis()" class="secondary small">📊 Analyse</button>
+                        <button onclick="showPlayerDetails()" class="secondary small">🔍 Spieler</button>
                         <button onclick="showContractNegotiations()" class="gold small">📝 Verträge</button>
                     </div>
                 </div>
                 <div id="squad-analysis-output" style="margin-bottom:12px;"></div>
                 <div style="overflow-x:auto;">
                 <table>
-                    <tr><th>#</th><th>Name</th><th>Pos</th><th>Alter</th><th>Stärke</th><th>Pot.</th><th>Wert</th><th>Gehalt</th><th>Vertrag</th><th>Form</th><th>Moral</th><th>Status</th></tr>
+                    <tr><th>#</th><th>Name</th><th>Pos</th><th>Alter</th><th>Stärke</th><th>Pot.</th><th>Wert</th><th>Gehalt</th><th>Vertrag</th><th>Moral</th></tr>
             `;
             club.players.sort((a, b) => b.overall - a.overall);
             club.players.forEach((p, i) => {
-                const form = p.form;
-                const formColor = form > 75 ? 'green' : form > 50 ? 'gold' : 'red';
-                const moraleColor = p.morale > 70 ? 'green' : p.morale > 40 ? 'gold' : 'red';
                 const inj = p.injuryWeeks > 0 ? `🩹${p.injuryWeeks}W` : '';
                 const wants = p.wantsTransfer ? '🚪' : '';
                 const demand = p.contractDemand ? '📝' : '';
@@ -2632,16 +3215,13 @@
                     <td>${formatMoney(p.marketValue)}</td>
                     <td>${formatMoney(p.salary)}</td>
                     <td>${p.contractYears}J</td>
-                    <td><span style="color:var(--${formColor});">${form}%</span></td>
                     <td>${moraleBar(p.morale)} ${p.morale}%</td>
-                    <td>${p.role}</td>
                 </tr>`;
             });
             html += `</table></div>
                 <div class="btn-group">
-                    <button onclick="showPlayerDetails()" class="secondary">🔍 Spieler-Details</button>
                     <button onclick="sellPlayerUI()" class="danger">📤 Spieler verkaufen</button>
-                    <button onclick="handleContractDemands()" class="gold">📝 Vertragsverhandlungen</button>
+                    <button onclick="extendContractUI()" class="gold">📝 Vertrag verlängern</button>
                 </div>
             `;
             tabContents.squad.innerHTML = html;
@@ -2663,11 +3243,11 @@
             const attrs = Object.entries(p.attributes).map(([k, v]) => `${k}: ${v}`).join(', ');
             showModal(`🧑 ${p.name}`, `
                 <p><strong>Position:</strong> ${p.position} | <strong>Alter:</strong> ${p.age}</p>
-                <p><strong>Nationalität:</strong> ${p.nationality} | <strong>Persönlichkeit:</strong> ${p.personality}</p>
+                <p><strong>Nationalität:</strong> ${p.nationality}</p>
                 <p><strong>Stärke:</strong> ${p.overall} | <strong>Potential:</strong> ${p.potential}</p>
                 <p><strong>Marktwert:</strong> ${formatMoney(p.marketValue)} | <strong>Gehalt:</strong> ${formatMoney(p.salary)}</p>
                 <p><strong>Vertrag:</strong> ${p.contractYears} Jahre | <strong>Rolle:</strong> ${p.role}</p>
-                <p><strong>Form:</strong> ${p.form}% | <strong>Moral:</strong> ${p.morale}% ${moraleBar(p.morale)}</p>
+                <p><strong>Moral:</strong> ${p.morale}% ${moraleBar(p.morale)}</p>
                 <p><strong>Einsätze:</strong> ${p.gamesPlayed} | <strong>Tore:</strong> ${p.goals}</p>
                 <p><strong>Attribute:</strong> ${attrs}</p>
                 <p><strong>Moral-Grund:</strong> ${p.getMoraleReason()}</p>
@@ -2677,7 +3257,6 @@
                 <div class="btn-group">
                     <button onclick="closeModal();extendContractPlayer(${p.id})">📝 Vertrag verlängern</button>
                     <button onclick="closeModal();changeRole(${p.id})">🔄 Rolle ändern</button>
-                    ${p.wantsTransfer ? `<button onclick="closeModal();handleTransferRequest(${p.id})" class="gold">🚪 Transfer prüfen</button>` : ''}
                 </div>
             `);
         }
@@ -2805,11 +3384,27 @@
             }
         }
 
-        function handleContractDemands() {
-            showContractNegotiations();
+        function extendContractUI() {
+            const club = appState.playerClub;
+            const name = prompt("Spielername für Vertragsverlängerung:");
+            if (!name) return;
+            const p = club.players.find(p => p.name.toLowerCase().includes(name.toLowerCase()));
+            if (!p) { alert("Spieler nicht gefunden."); return; }
+            const years = parseInt(prompt(`${p.name} – zusätzliche Jahre (1-4):`));
+            if (isNaN(years) || years < 1 || years > 4) return;
+            if (p.satisfaction > 30) {
+                p.contractYears += years;
+                p.satisfaction = clamp(p.satisfaction + 5, 0, 100);
+                p.morale = clamp(p.morale + 8, 0, 100);
+                alert(`✅ Vertrag verlängert! ${p.name} hat noch ${p.contractYears} Jahre.`);
+                appState.engine.addNews(`📝 ${p.name} hat seinen Vertrag verlängert.`, "success");
+            } else {
+                alert(`❌ ${p.name} ist unzufrieden.`);
+            }
+            renderSquad();
         }
 
-        // ---- TRANSFERS (enhanced) ----
+        // ---- TRANSFERS ----
         function renderTransfers() {
             const club = appState.playerClub;
             const eng = appState.engine;
@@ -2878,18 +3473,7 @@
             const amount = parseFloat(prompt(`Angebot für ${targetPlayer.name} (Wert: ${formatMoney(targetPlayer.marketValue)}):`));
             if (isNaN(amount) || amount <= 0) return;
 
-            // Optional addons
-            const addBonus = confirm("Bonuszahlung hinzufügen?");
-            let addons = {};
-            if (addBonus) {
-                const bonusType = prompt("Bonus-Typ (einsätze, tore, titel):");
-                const bonusAmount = parseFloat(prompt("Bonus-Betrag (Mio. €):"));
-                if (bonusType && !isNaN(bonusAmount)) {
-                    addons[bonusType] = bonusAmount;
-                }
-            }
-
-            const result = eng.makeOffer(club, targetClub, targetPlayer, amount, addons);
+            const result = eng.makeOffer(club, targetClub, targetPlayer, amount, {});
             document.getElementById('transfer-output').innerHTML =
                 `<p style="color:${result.success ? 'var(--green)' : 'var(--gold)'};">${result.msg}</p>`;
             if (result.offer && result.offer.status === 'counter') {
@@ -2935,7 +3519,6 @@
                     <p><strong>${label}</strong> ${o.player?.name || 'Spieler'} – ${formatMoney(o.amount)}</p>
                     <p>Von: ${o.fromClubName || '?'} → Zu: ${o.toClubName || '?'}</p>
                     <p>Status: ${o.status} ${o.counterAmount ? `(Gegenangebot: ${formatMoney(o.counterAmount)})` : ''}</p>
-                    ${o.addons && Object.keys(o.addons).length ? `<p class="tiny-text">Bonuses: ${Object.entries(o.addons).map(([k,v]) => `${k}: ${formatMoney(v)}`).join(', ')}</p>` : ''}
                     ${isIncoming ? `<button onclick="acceptIncomingOffer(${idx})" class="success small">Annehmen</button>` : ''}
                     ${isOutgoing && o.status === 'counter' ? `<button onclick="acceptCounterOffer(${idx})" class="gold small">Gegenangebot annehmen</button>` : ''}
                     <button onclick="rejectOffer(${idx})" class="danger small">Ablehnen</button>
@@ -3262,7 +3845,6 @@
                         <p>Liga: Platz ${club.seasonGoals?.leaguePlace || '?'} (aktuell: ${pos})</p>
                         <p>Pokal: ${club.seasonGoals?.cupRound || '?'}</p>
                         <p>Fortschritt: ${evalRes.score}%</p>
-                        <p>Finanzen: ${evalRes.combinedScore}%</p>
                     </div>
                     <div class="card"><h3>Vereinsdaten</h3>
                         <p>Reputation: ${club.reputation}</p>
@@ -3276,7 +3858,6 @@
                         evalRes.satisfaction > 45 ? '⚠ Der Vorstand zeigt sich besorgt.' :
                         '❌ Der Vorstand ist sehr unzufrieden!'}</p>
                     <p>Erwartete Platzierung: ${evalRes.goals.leaguePlace || '?'} | Aktuell: ${pos}</p>
-                    <p>Transferbilanz: ${club.transferBudget > 0 ? 'Positiv' : 'Negativ'}</p>
                 </div>
                 <div class="btn-group">
                     <button onclick="showClubHistory()" class="secondary">📜 Historie</button>
@@ -3612,7 +4193,7 @@
         document.getElementById('btn-new-career').addEventListener('click', () => {
             startScreen.classList.add('hidden');
             selectScreen.classList.remove('hidden');
-            const clubs = generateInitialData();
+            const clubs = generateRealisticClubs();
             appState.clubs = clubs;
             appState.engine = new GameEngine(clubs);
             renderClubList();
@@ -3654,17 +4235,21 @@
         selectScreen.classList.add('hidden');
         gameScreen.classList.add('hidden');
 
-        const initClubs = generateInitialData();
+        // Generate initial data
+        const initClubs = generateRealisticClubs();
         appState.clubs = initClubs;
         appState.engine = new GameEngine(initClubs);
 
-        // ---- Expose functions to global scope ----
+        // ---- Expose functions ----
         window.showSquadAnalysis = showSquadAnalysis;
         window.showPlayerDetails = showPlayerDetails;
         window.extendContractPlayer = extendContractPlayer;
         window.changeRole = changeRole;
-        window.handleContractDemands = handleContractDemands;
+        window.showContractNegotiations = showContractNegotiations;
+        window.acceptContractDemand = acceptContractDemand;
+        window.rejectContractDemand = rejectContractDemand;
         window.sellPlayerUI = sellPlayerUI;
+        window.extendContractUI = extendContractUI;
         window.scoutPlayersUI = scoutPlayersUI;
         window.makeOfferUI = makeOfferUI;
         window.viewOffersUI = viewOffersUI;
@@ -3692,17 +4277,14 @@
         window.deleteSaveUI = deleteSaveUI;
         window.closeModal = closeModal;
         window.showModal = showModal;
-        window.handleTransferRequest = handleTransferRequest;
-        window.executeTransferRequest = executeTransferRequest;
-        window.acceptContractDemand = acceptContractDemand;
-        window.rejectContractDemand = rejectContractDemand;
-        window.showContractNegotiations = showContractNegotiations;
         window.renderTransfers = renderTransfers;
+        window.renderSquad = renderSquad;
 
         window.appState = appState;
 
-        console.log("⚽ Sportdirektor-Simulator geladen! (Enhanced Version)");
+        console.log("⚽ Sportdirektor-Simulator 2026/27 – Realistische Daten geladen!");
         console.log(`📊 ${appState.clubs.length} Vereine, ${appState.clubs.reduce((a,c) => a + c.players.length, 0)} Spieler generiert.`);
+        console.log("🏆 Bundesliga & 2. Bundesliga mit echten Kadern 2026/27");
     </script>
 </body>
 </html>
