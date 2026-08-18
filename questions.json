@@ -1,0 +1,62 @@
+[
+  {
+    "id": "q1",
+    "question": "Wie viele deutsche Meisterschaften hat der FC Bayern gewonnen?",
+    "answer": 33,
+    "unit": "Meisterschaften",
+    "category": "Fußball",
+    "difficulty": "easy",
+    "hints": [
+      { "text": "Die Zahl ist kleiner als 40.", "type": "upper" },
+      { "text": "Die Zahl ist größer als 30.", "type": "lower" }
+    ]
+  },
+  {
+    "id": "q2",
+    "question": "Wie viele Bundesländer hat Deutschland?",
+    "answer": 16,
+    "unit": "Bundesländer",
+    "category": "Deutschland",
+    "difficulty": "easy",
+    "hints": [
+      { "text": "Die Zahl ist kleiner als 20.", "type": "upper" },
+      { "text": "Die Zahl ist größer als 10.", "type": "lower" }
+    ]
+  },
+  {
+    "id": "q3",
+    "question": "Wie viele Planeten hat unser Sonnensystem (inklusive Pluto)?",
+    "answer": 9,
+    "unit": "Planeten",
+    "category": "Wissenschaft",
+    "difficulty": "medium",
+    "hints": [
+      { "text": "Die Zahl ist kleiner als 12.", "type": "upper" },
+      { "text": "Die Zahl ist größer als 7.", "type": "lower" }
+    ]
+  },
+  {
+    "id": "q4",
+    "question": "Wie viele Tore schoss Gerd Müller in der Bundesliga?",
+    "answer": 365,
+    "unit": "Tore",
+    "category": "Fußball",
+    "difficulty": "hard",
+    "hints": [
+      { "text": "Die Zahl ist kleiner als 400.", "type": "upper" },
+      { "text": "Die Zahl ist größer als 300.", "type": "lower" }
+    ]
+  },
+  {
+    "id": "q5",
+    "question": "Wie viele Einwohner hat Berlin (in Millionen)?",
+    "answer": 3.7,
+    "unit": "Millionen",
+    "category": "Geografie",
+    "difficulty": "medium",
+    "hints": [
+      { "text": "Die Zahl ist kleiner als 4.0.", "type": "upper" },
+      { "text": "Die Zahl ist größer als 3.0.", "type": "lower" }
+    ]
+  }
+]

@@ -1,8 +1,9 @@
-// ─── server.js ───────────────────────────────────────────────
+// ─── server.js ──────────────────────────────────────────────────────────────
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -10,24 +11,61 @@ const io = new Server(server, {
   cors: { origin: '*' },
 });
 
-// ─── Statische Dateien aus dem public-Ordner ──────────────
+// ─── Statische Dateien & Fallback ──────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
-
-// ─── Fallback für alle anderen Anfragen ─────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ─── In-Memory-Store ─────────────────────────────────────────
+// ─── Fragen aus JSON laden ─────────────────────────────────────────────────
+let allQuestions = [];
+try {
+  const data = fs.readFileSync(path.join(__dirname, 'questions.json'), 'utf8');
+  allQuestions = JSON.parse(data);
+  console.log(`📚 ${allQuestions.length} Fragen geladen.`);
+} catch (err) {
+  console.warn('⚠️  Keine questions.json gefunden – verwende Standard-Fragen.');
+  // Fallback-Fragen (damit das Spiel immer läuft)
+  allQuestions = [
+    {
+      id: 'fallback1',
+      question: 'Wie viele Beine hat ein Hund?',
+      answer: 4,
+      unit: 'Beine',
+      category: 'Alltag',
+      difficulty: 'easy',
+      hints: [
+        { text: 'Die Zahl ist kleiner als 10.', type: 'upper' },
+        { text: 'Die Zahl ist größer als 2.', type: 'lower' },
+      ],
+    },
+    {
+      id: 'fallback2',
+      question: 'Wie viele Stunden hat ein Tag?',
+      answer: 24,
+      unit: 'Stunden',
+      category: 'Alltag',
+      difficulty: 'easy',
+      hints: [
+        { text: 'Die Zahl ist kleiner als 30.', type: 'upper' },
+        { text: 'Die Zahl ist größer als 20.', type: 'lower' },
+      ],
+    },
+  ];
+}
+
+// ─── Kategorien extrahieren ─────────────────────────────────────────────────
+const categories = [...new Set(allQuestions.map(q => q.category))];
+console.log('📂 Kategorien:', categories.join(', '));
+
+// ─── In-Memory-Store ────────────────────────────────────────────────────────
 const rooms = new Map();
 
-// ─── Hilfsfunktionen ─────────────────────────────────────────
+// ─── Hilfsfunktionen ────────────────────────────────────────────────────────
 function generateRoomId() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let id = '';
-  for (let i = 0; i < 5; i++) {
-    id += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
+  for (let i = 0; i < 5; i++) id += chars.charAt(Math.floor(Math.random() * chars.length));
   return id;
 }
 
@@ -39,6 +77,10 @@ function getActivePlayers(room) {
   return room.players.filter(p => p.status !== 'FOLD' && p.status !== 'OUT');
 }
 
+function getAlivePlayers(room) {
+  return room.players.filter(p => p.status !== 'OUT');
+}
+
 function rotateDealer(room) {
   room.dealerIndex = (room.dealerIndex + 1) % room.players.length;
 }
@@ -46,62 +88,29 @@ function rotateDealer(room) {
 function getBlindPositions(room) {
   const dealer = room.dealerIndex;
   const players = room.players;
-  const active = players.filter(p => p.status !== 'OUT');
-  if (active.length < 2) return { sb: -1, bb: -1 };
+  const alive = players.filter(p => p.status !== 'OUT');
+  if (alive.length < 2) return { sb: -1, bb: -1 };
   const sbIdx = (dealer + 1) % players.length;
   const bbIdx = (dealer + 2) % players.length;
   return { sb: sbIdx, bb: bbIdx };
 }
 
-// ─── Fragen-Datenbank (MVP) ──────────────────────────────────
-const questions = [
-  {
-    id: 'q1',
-    question: 'Wie viele deutsche Meisterschaften hat der FC Bayern gewonnen?',
-    answer: 33,
-    unit: 'Meisterschaften',
-    category: 'Fußball',
-    difficulty: 'easy',
-    hints: [
-      { text: 'Die Zahl ist kleiner als 40.', type: 'upper' },
-      { text: 'Die Zahl ist größer als 30.', type: 'lower' },
-    ],
-  },
-  {
-    id: 'q2',
-    question: 'Wie viele Bundesländer hat Deutschland?',
-    answer: 16,
-    unit: 'Bundesländer',
-    category: 'Deutschland',
-    difficulty: 'easy',
-    hints: [
-      { text: 'Die Zahl ist kleiner als 20.', type: 'upper' },
-      { text: 'Die Zahl ist größer als 10.', type: 'lower' },
-    ],
-  },
-  {
-    id: 'q3',
-    question: 'Wie viele Planeten hat unser Sonnensystem (inklusive Pluto)?',
-    answer: 9,
-    unit: 'Planeten',
-    category: 'Wissenschaft',
-    difficulty: 'medium',
-    hints: [
-      { text: 'Die Zahl ist kleiner als 12.', type: 'upper' },
-      { text: 'Die Zahl ist größer als 7.', type: 'lower' },
-    ],
-  },
-];
-
-let questionIndex = 0;
-
-function getNextQuestion() {
-  const q = questions[questionIndex % questions.length];
-  questionIndex++;
-  return { ...q };
+function resetPlayerState(room) {
+  room.players.forEach(p => {
+    if (p.status !== 'OUT') {
+      p.status = 'WAITING';
+      p.bet = 0;
+      p.isDealer = false;
+      p.isSmallBlind = false;
+      p.isBigBlind = false;
+      p.guess = undefined;
+      p.distance = undefined;
+      p.isWinner = false;
+    }
+  });
 }
 
-// ─── Spielphasen ──────────────────────────────────────────────
+// ─── Spielphasen ──────────────────────────────────────────────────────────────
 const PHASES = {
   LOBBY: 'LOBBY',
   QUESTION: 'QUESTION',
@@ -124,7 +133,7 @@ const BETTING_PHASES = [
   PHASES.FINAL_BETTING,
 ];
 
-// ─── Raum erstellen ───────────────────────────────────────────
+// ─── Raum erstellen (mit Einstellungen) ────────────────────────────────────
 function createRoom(hostId, hostName, settings = {}) {
   const roomId = generateRoomId();
   const room = {
@@ -136,13 +145,19 @@ function createRoom(hostId, hostName, settings = {}) {
     currentBet: 0,
     currentPlayerId: null,
     dealerIndex: 0,
+    // Einstellungen
+    startCapital: settings.startCapital || 1000,
     smallBlind: settings.smallBlind || 10,
     bigBlind: settings.bigBlind || 20,
+    maxRounds: settings.maxRounds || 0,           // 0 = unbegrenzt
+    blindIncreaseInterval: settings.blindIncreaseInterval || 5, // alle X Runden
+    category: settings.category || 'Alle',
+    timeLimit: settings.timeLimit || 20,
+
     question: null,
     hintsRevealed: 0,
     correctAnswer: null,
     showGuesses: false,
-    timeLimit: settings.timeLimit || 20,
     timeRemaining: 20,
     roundOver: false,
     winnerIds: [],
@@ -155,11 +170,14 @@ function createRoom(hostId, hostName, settings = {}) {
     bettingOrder: [],
     bettingIndex: 0,
     allGuessed: false,
+    roundEnded: false,
+    // Zähler für Blind-Erhöhungen
+    roundsSinceBlindIncrease: 0,
   };
   const player = {
     id: hostId,
     name: hostName,
-    chips: settings.startCapital || 1000,
+    chips: room.startCapital,
     status: 'WAITING',
     bet: 0,
     isDealer: false,
@@ -175,7 +193,7 @@ function createRoom(hostId, hostName, settings = {}) {
   return room;
 }
 
-// ─── Broadcast ────────────────────────────────────────────────
+// ─── Broadcast ──────────────────────────────────────────────────────────────
 function broadcastRoom(room) {
   const state = {
     roomId: room.roomId,
@@ -204,31 +222,40 @@ function broadcastRoom(room) {
     hostId: room.hostId,
     maxPlayers: room.maxPlayers,
     started: room.started,
+    maxRounds: room.maxRounds,
+    startCapital: room.startCapital,
+    category: room.category,
   };
   io.to(room.roomId).emit('game:state', state);
 }
 
-// ─── Spiellogik (vereinfacht) ────────────────────────────────
+// ─── Fragen nach Kategorie filtern ──────────────────────────────────────────
+function getQuestionsForCategory(category) {
+  if (category === 'Alle') return allQuestions;
+  return allQuestions.filter(q => q.category === category);
+}
+
+// ─── SPIELLOGIK ──────────────────────────────────────────────────────────────
+
 function startGame(room) {
   if (room.phase !== PHASES.LOBBY || room.players.length < 2) return;
   room.started = true;
   room.roundNumber = 1;
+  room.roundsSinceBlindIncrease = 0;
   startNextRound(room);
 }
 
 function startNextRound(room) {
-  room.players.forEach(p => {
-    if (p.status !== 'OUT') {
-      p.status = 'WAITING';
-      p.bet = 0;
-      p.isDealer = false;
-      p.isSmallBlind = false;
-      p.isBigBlind = false;
-      p.guess = undefined;
-      p.distance = undefined;
-      p.isWinner = false;
-    }
-  });
+  // Prüfe, ob maximale Rundenzahl erreicht ist
+  if (room.maxRounds > 0 && room.roundNumber > room.maxRounds) {
+    // Spiel beenden – alle Spieler in Lobby versetzen
+    room.phase = PHASES.LOBBY;
+    room.started = false;
+    broadcastRoom(room);
+    return;
+  }
+
+  resetPlayerState(room);
   room.pot = 0;
   room.currentBet = 0;
   room.currentPlayerId = null;
@@ -241,12 +268,32 @@ function startNextRound(room) {
   room.allGuessed = false;
   room.bettingOrder = [];
   room.bettingIndex = 0;
-  room.roundOver = false;
+  room.roundEnded = false;
+
+  // Blind-Erhöhung prüfen
+  room.roundsSinceBlindIncrease++;
+  if (room.roundsSinceBlindIncrease >= room.blindIncreaseInterval) {
+    room.smallBlind = Math.floor(room.smallBlind * 2);
+    room.bigBlind = Math.floor(room.bigBlind * 2);
+    room.roundsSinceBlindIncrease = 0;
+    console.log(`📈 Blinds erhöht auf SB=${room.smallBlind}, BB=${room.bigBlind}`);
+  }
 
   rotateDealer(room);
-  const q = getNextQuestion();
-  room.question = q;
-  room.correctAnswer = q.answer;
+
+  // Frage aus der gewählten Kategorie holen
+  const pool = getQuestionsForCategory(room.category);
+  if (pool.length === 0) {
+    // Fallback: Alle Fragen
+    const fallback = allQuestions;
+    const q = fallback[room.roundNumber % fallback.length];
+    room.question = q;
+    room.correctAnswer = q.answer;
+  } else {
+    const q = pool[room.roundNumber % pool.length];
+    room.question = q;
+    room.correctAnswer = q.answer;
+  }
 
   const { sb, bb } = getBlindPositions(room);
   if (sb >= 0) {
@@ -326,17 +373,19 @@ function submitGuess(room, playerId, value) {
 }
 
 function startBettingRound(room, phase) {
+  if (room.roundEnded) return;
   if (!BETTING_PHASES.includes(phase)) return;
   room.phase = phase;
   room.currentBet = (phase === PHASES.FINAL_BETTING) ? 0 : room.currentBet;
   const active = getActivePlayers(room);
-  if (active.length < 2) { endRoundEarly(room); return; }
-  const order = [];
-  const startIdx = (room.dealerIndex + 1) % room.players.length;
-  for (let i = 0; i < room.players.length; i++) {
-    const idx = (startIdx + i) % room.players.length;
-    const p = room.players[idx];
-    if (p.status !== 'FOLD' && p.status !== 'OUT') order.push(p.id);
+  if (active.length < 2) {
+    endRoundEarly(room);
+    return;
+  }
+  const order = buildBettingOrder(room);
+  if (order.length < 2) {
+    endRoundEarly(room);
+    return;
   }
   room.bettingOrder = order;
   room.bettingIndex = 0;
@@ -345,7 +394,19 @@ function startBettingRound(room, phase) {
   broadcastRoom(room);
 }
 
+function buildBettingOrder(room) {
+  const order = [];
+  const startIdx = (room.dealerIndex + 1) % room.players.length;
+  for (let i = 0; i < room.players.length; i++) {
+    const idx = (startIdx + i) % room.players.length;
+    const p = room.players[idx];
+    if (p.status !== 'FOLD' && p.status !== 'OUT') order.push(p.id);
+  }
+  return order;
+}
+
 function startBettingTimer(room) {
+  if (room.roundEnded) return;
   let remaining = room.timeLimit;
   room.timeRemaining = remaining;
   broadcastRoom(room);
@@ -369,17 +430,24 @@ function startBettingTimer(room) {
 }
 
 function handleAction(room, playerId, action, amount) {
+  if (room.roundEnded) return false;
   const player = getPlayerById(room, playerId);
-  if (!player || player.status === 'FOLD' || player.status === 'OUT') return false;
+  if (!player) return false;
+  if (player.status === 'FOLD' || player.status === 'OUT') return false;
   if (room.currentPlayerId !== playerId) return false;
+
   if (room.timerInterval) {
     clearInterval(room.timerInterval);
     room.timerInterval = null;
   }
+
   let valid = false;
   switch (action) {
     case 'CHECK':
-      if (room.currentBet === player.bet) { player.status = 'CHECK'; valid = true; }
+      if (room.currentBet === player.bet) {
+        player.status = 'CHECK';
+        valid = true;
+      }
       break;
     case 'CALL': {
       const call = room.currentBet - player.bet;
@@ -403,18 +471,14 @@ function handleAction(room, playerId, action, amount) {
         room.currentBet = amount;
         player.status = 'RAISE';
         valid = true;
-        // Nach Raise: alle anderen müssen reagieren
-        const active = getActivePlayers(room).filter(p => p.id !== playerId);
-        const order = [];
-        const startIdx = (room.dealerIndex + 1) % room.players.length;
-        for (let i = 0; i < room.players.length; i++) {
-          const idx = (startIdx + i) % room.players.length;
-          const p = room.players[idx];
-          if (p.status !== 'FOLD' && p.status !== 'OUT' && p.id !== playerId) order.push(p.id);
+        const order = buildBettingOrder(room).filter(id => id !== playerId);
+        if (order.length === 0) {
+          finishBettingRound(room);
+          broadcastRoom(room);
+          return true;
         }
         room.bettingOrder = order;
         room.bettingIndex = 0;
-        if (order.length === 0) { finishBettingRound(room); return true; }
         room.currentPlayerId = order[0];
         startBettingTimer(room);
         broadcastRoom(room);
@@ -435,17 +499,14 @@ function handleAction(room, playerId, action, amount) {
         player.status = 'ALL_IN';
         if (player.bet > room.currentBet) room.currentBet = player.bet;
         valid = true;
-        const active = getActivePlayers(room).filter(p => p.id !== playerId);
-        const order = [];
-        const startIdx = (room.dealerIndex + 1) % room.players.length;
-        for (let i = 0; i < room.players.length; i++) {
-          const idx = (startIdx + i) % room.players.length;
-          const p = room.players[idx];
-          if (p.status !== 'FOLD' && p.status !== 'OUT' && p.id !== playerId) order.push(p.id);
+        const order = buildBettingOrder(room).filter(id => id !== playerId);
+        if (order.length === 0) {
+          finishBettingRound(room);
+          broadcastRoom(room);
+          return true;
         }
         room.bettingOrder = order;
         room.bettingIndex = 0;
-        if (order.length === 0) { finishBettingRound(room); return true; }
         room.currentPlayerId = order[0];
         startBettingTimer(room);
         broadcastRoom(room);
@@ -453,8 +514,10 @@ function handleAction(room, playerId, action, amount) {
       }
       break;
     }
-    default: return false;
+    default:
+      return false;
   }
+
   if (valid) {
     broadcastRoom(room);
     advanceBetting(room);
@@ -464,6 +527,7 @@ function handleAction(room, playerId, action, amount) {
 }
 
 function advanceBetting(room) {
+  if (room.roundEnded) return;
   let idx = room.bettingIndex + 1;
   while (idx < room.bettingOrder.length) {
     const pid = room.bettingOrder[idx];
@@ -481,62 +545,97 @@ function advanceBetting(room) {
 }
 
 function finishBettingRound(room) {
+  if (room.roundEnded) return;
   if (room.timerInterval) {
     clearInterval(room.timerInterval);
     room.timerInterval = null;
   }
+
   const phase = room.phase;
+  const active = getActivePlayers(room);
+  if (active.length < 2) {
+    endRoundEarly(room);
+    return;
+  }
+
+  const allSameBet = active.every(p => p.bet === room.currentBet);
+  if (!allSameBet) {
+    const order = buildBettingOrder(room);
+    if (order.length > 1) {
+      room.bettingOrder = order;
+      room.bettingIndex = 0;
+      room.currentPlayerId = order[0];
+      startBettingTimer(room);
+      broadcastRoom(room);
+      return;
+    }
+  }
+
   if (phase === PHASES.BETTING_1) {
     room.phase = PHASES.HINT_1;
     room.hintsRevealed = 1;
     broadcastRoom(room);
     setTimeout(() => {
-      if (room.phase === PHASES.HINT_1) startBettingRound(room, PHASES.BETTING_2);
+      if (room.phase === PHASES.HINT_1 && !room.roundEnded) {
+        startBettingRound(room, PHASES.BETTING_2);
+      }
     }, 3000);
   } else if (phase === PHASES.BETTING_2) {
     room.phase = PHASES.HINT_2;
     room.hintsRevealed = 2;
     broadcastRoom(room);
     setTimeout(() => {
-      if (room.phase === PHASES.HINT_2) startBettingRound(room, PHASES.BETTING_3);
+      if (room.phase === PHASES.HINT_2 && !room.roundEnded) {
+        startBettingRound(room, PHASES.BETTING_3);
+      }
     }, 3000);
   } else if (phase === PHASES.BETTING_3) {
     room.phase = PHASES.REVEAL;
     broadcastRoom(room);
     setTimeout(() => {
-      if (room.phase === PHASES.REVEAL) startBettingRound(room, PHASES.FINAL_BETTING);
+      if (room.phase === PHASES.REVEAL && !room.roundEnded) {
+        startBettingRound(room, PHASES.FINAL_BETTING);
+      }
     }, 3000);
   } else if (phase === PHASES.FINAL_BETTING) {
     room.phase = PHASES.SHOWDOWN;
     room.showGuesses = true;
-    const answer = room.correctAnswer;
-    room.players.forEach(p => {
-      if (p.guess !== undefined && p.status !== 'FOLD' && p.status !== 'OUT') {
-        p.distance = Math.abs(p.guess - answer);
-      }
-    });
-    const active = getActivePlayers(room).filter(p => p.guess !== undefined);
-    if (active.length === 0) {
-      room.winnerIds = [];
-      room.winningAmount = 0;
-    } else {
-      let minDist = Infinity;
-      active.forEach(p => { if (p.distance < minDist) minDist = p.distance; });
-      const winners = active.filter(p => p.distance === minDist);
-      room.winnerIds = winners.map(p => p.id);
-      const share = Math.floor(room.pot / winners.length);
-      winners.forEach(p => {
-        p.chips += share;
-        p.isWinner = true;
-      });
-      room.winningAmount = share;
-    }
-    room.phase = PHASES.RESULT;
-    broadcastRoom(room);
+    showDown(room);
   }
 }
 
+function showDown(room) {
+  const answer = room.correctAnswer;
+  room.players.forEach(p => {
+    if (p.guess !== undefined && p.status !== 'FOLD' && p.status !== 'OUT') {
+      p.distance = Math.abs(p.guess - answer);
+    }
+  });
+
+  const active = getActivePlayers(room).filter(p => p.guess !== undefined);
+  if (active.length === 0) {
+    room.winnerIds = [];
+    room.winningAmount = 0;
+  } else {
+    let minDist = Infinity;
+    active.forEach(p => { if (p.distance < minDist) minDist = p.distance; });
+    const winners = active.filter(p => p.distance === minDist);
+    room.winnerIds = winners.map(p => p.id);
+    const share = Math.floor(room.pot / winners.length);
+    winners.forEach(p => {
+      p.chips += share;
+      p.isWinner = true;
+    });
+    room.winningAmount = share;
+  }
+
+  room.phase = PHASES.RESULT;
+  room.roundEnded = true;
+  broadcastRoom(room);
+}
+
 function endRoundEarly(room) {
+  if (room.roundEnded) return;
   const active = getActivePlayers(room);
   if (active.length === 1) {
     const winner = active[0];
@@ -545,16 +644,24 @@ function endRoundEarly(room) {
     room.winnerIds = [winner.id];
     room.winningAmount = room.pot;
     room.phase = PHASES.RESULT;
+    room.roundEnded = true;
     broadcastRoom(room);
   } else {
-    startNextRound(room);
+    room.roundEnded = true;
+    setTimeout(() => {
+      startNextRound(room);
+    }, 2000);
   }
 }
 
-// ─── Socket.IO Events ─────────────────────────────────────────
+// ─── Socket.IO Events ────────────────────────────────────────────────────────
+
 io.on('connection', (socket) => {
   console.log(`🔌 Client connected: ${socket.id}`);
   socket.emit('player:id', socket.id);
+
+  // Sende Kategorien an den Client
+  socket.emit('categories', categories);
 
   socket.on('room:create', (data) => {
     const { name, settings } = data;
@@ -587,7 +694,7 @@ io.on('connection', (socket) => {
     const player = {
       id: socket.id,
       name: name.trim(),
-      chips: 1000,
+      chips: room.startCapital,
       status: 'WAITING',
       bet: 0,
       isDealer: false,
@@ -639,13 +746,7 @@ io.on('connection', (socket) => {
   socket.on('game:next', () => {
     const room = rooms.get(socket.data.roomId);
     if (!room || room.phase !== PHASES.RESULT) return;
-    const active = room.players.filter(p => p.status !== 'OUT');
-    if (active.length < 2) {
-      room.phase = PHASES.LOBBY;
-      room.started = false;
-      broadcastRoom(room);
-      return;
-    }
+    room.roundNumber++;
     startNextRound(room);
   });
 
@@ -675,7 +776,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// ─── Server starten ────────────────────────────────────────────
+// ─── Server starten ──────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Server läuft auf http://localhost:${PORT}`);
