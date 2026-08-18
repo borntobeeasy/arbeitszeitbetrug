@@ -1,4 +1,4 @@
-// ─── server.js ─── KOMPLETT ─────────────────────────────────────────────
+// ─── server.js ─── KOMPLETT (mit Fix für finale Setzrunde) ──────────
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -366,11 +366,24 @@ function submitGuess(room, playerId, value) {
   return true;
 }
 
+// ─── BETTING ROUND START (mit Reset für finale Runde) ──────────────────
 function startBettingRound(room, phase) {
   if (room.roundEnded) return;
   if (!BETTING_PHASES.includes(phase)) return;
   room.phase = phase;
-  room.currentBet = (phase === PHASES.FINAL_BETTING) ? 0 : room.currentBet;
+
+  // 🆕 Finale Setzrunde: Bets der Spieler zurücksetzen
+  if (phase === PHASES.FINAL_BETTING) {
+    room.players.forEach(p => {
+      if (p.status !== 'FOLD' && p.status !== 'OUT') {
+        p.bet = 0; // Neuer Einsatz für diese Runde
+      }
+    });
+    room.currentBet = 0;
+  } else {
+    room.currentBet = room.currentBet; // bleibt, wie er ist
+  }
+
   const active = getActivePlayers(room);
   if (active.length < 2) { endRoundEarly(room); return; }
   const order = buildBettingOrder(room);

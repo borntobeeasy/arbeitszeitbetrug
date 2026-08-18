@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>💰 Das Duell um die Geld</title>
     <style>
-        /* ─── CSS (identisch zur vorherigen Version) ──────────────────── */
+        /* ─── CSS (unverändert) ─── */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0b0e14; color: #e8edf5; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         #root { width: 100%; max-width: 1300px; padding: 16px; margin: 0 auto; }
@@ -109,6 +109,8 @@
         .badge-bb { background: #b13e3e; color: #fff; }
         .badge-fold { background: #3a2a2a; color: #f87171; }
         .badge-allin { background: #b13e3e; color: #fff; animation: pulse 1s infinite; }
+        .raise-quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
+        .raise-quick-grid .btn { font-size: 0.8rem; padding: 4px 8px; min-width: 0; }
     </style>
 </head>
 <body>
@@ -375,10 +377,7 @@
             );
         }
 
-        // ─── Weitere Komponenten (GuessingPhase, BettingPhase, etc.) ────
-        // Diese sind identisch zur vorherigen Version – aus Platzgründen hier kurzgefasst.
-        // Du kannst sie aus der vorherigen Antwort kopieren. Ich baue sie hier ein:
-
+        // ─── GuessingPhase ──────────────────────────────────────────────────
         function GuessingPhase({ game, player, onSubmit }) {
             const [guess, setGuess] = useState('');
             const hasGuessed = player?.status === 'GUESSED';
@@ -416,24 +415,53 @@
             );
         }
 
+        // ─── BettingPhase (mit schnellen Raise-Buttons) ─────────────────
         function BettingPhase({ game, player, isMyTurn, onAct, phaseLabel }) {
             const [raiseAmount, setRaiseAmount] = useState('');
             const [showRaiseInput, setShowRaiseInput] = useState(false);
             const hasFolded = player?.status === 'FOLD' || player?.status === 'OUT';
             const isAllIn = player?.status === 'ALL_IN';
             if (!player) return null;
-            const minRaise = Math.max(game.currentBet + game.bigBlind, game.currentBet + 10);
-            const maxRaise = player.chips + player.bet;
-            const canCheck = game.currentBet === player.bet;
-            const canCall = game.currentBet > player.bet;
-            const callAmount = Math.min(game.currentBet - player.bet, player.chips);
+
+            // Aktueller Einsatz (currentBet) und was der Spieler bereits in dieser Runde gesetzt hat (player.bet)
+            const currentBet = game.currentBet;
+            const playerBet = player.bet;
+
+            // Min-Raise: currentBet + BB (oder currentBet + 10)
+            const minRaise = Math.max(currentBet + game.bigBlind, currentBet + 10);
+            const maxRaise = player.chips + playerBet;
+
+            const canCheck = currentBet === playerBet;
+            const canCall = currentBet > playerBet;
+            const callAmount = Math.min(currentBet - playerBet, player.chips);
             const canRaise = player.chips > 0 && !isAllIn && !hasFolded;
             const canAllIn = player.chips > 0 && !isAllIn && !hasFolded;
-            const handleRaise = () => { const val = Number(raiseAmount); if (!isNaN(val) && val >= minRaise && val <= maxRaise) { onAct('RAISE', val); setRaiseAmount(''); setShowRaiseInput(false); } };
+
+            // Raise-Vorschläge (BB, 2xBB, 3xBB) – aber mindestens minRaise
+            const raisePresets = [
+                { label: 'BB', value: Math.max(currentBet + game.bigBlind, minRaise) },
+                { label: '2x BB', value: Math.max(currentBet + game.bigBlind * 2, minRaise) },
+                { label: '3x BB', value: Math.max(currentBet + game.bigBlind * 3, minRaise) },
+            ].map(p => ({ ...p, value: Math.min(p.value, maxRaise) }));
+
+            const handleRaise = (amount) => {
+                if (!isNaN(amount) && amount >= minRaise && amount <= maxRaise) {
+                    onAct('RAISE', amount);
+                    setRaiseAmount('');
+                    setShowRaiseInput(false);
+                }
+            };
+
+            const handlePreset = (val) => {
+                if (val >= minRaise && val <= maxRaise) {
+                    handleRaise(val);
+                }
+            };
+
             return React.createElement('div', { className: 'flex flex-col items-center gap-4 animate-fade w-full max-w-lg' },
                 React.createElement('div', { className: 'flex items-center gap-4 w-full justify-between bg-dark p-3 rounded border' },
                     React.createElement('div', null, React.createElement('span', { className: 'text-sm text-muted' }, 'Phase:'), React.createElement('span', { className: 'font-semibold ml-2' }, phaseLabel)),
-                    React.createElement('div', null, React.createElement('span', { className: 'text-sm text-muted' }, 'Einsatz:'), React.createElement('span', { className: 'font-semibold ml-2 text-gold' }, game.currentBet, ' 🪙')),
+                    React.createElement('div', null, React.createElement('span', { className: 'text-sm text-muted' }, 'Einsatz:'), React.createElement('span', { className: 'font-semibold ml-2 text-gold' }, currentBet, ' 🪙')),
                     React.createElement('div', null, React.createElement('span', { className: 'text-sm text-muted' }, 'Pot:'), React.createElement('span', { className: 'font-semibold ml-2 text-gold' }, game.pot, ' 🪙'))
                 ),
                 hasFolded ? React.createElement('div', { className: 'bg-red/20 border border-red rounded p-3 text-center w-full' }, React.createElement('span', { className: 'text-red font-semibold' }, '✕ Gefolded'))
@@ -447,10 +475,32 @@
                             canAllIn && React.createElement('button', { className: 'btn btn-danger', onClick: () => onAct('ALL_IN') }, 'All-In'),
                             !hasFolded && !isAllIn && React.createElement('button', { className: 'btn btn-danger', onClick: () => onAct('FOLD') }, 'Fold')
                         ),
-                        showRaiseInput && React.createElement('div', { className: 'flex items-center gap-2 mt-3 w-full' },
-                            React.createElement('input', { type: 'number', className: 'input flex-1', value: raiseAmount, onChange: e => setRaiseAmount(e.target.value), placeholder: `Min ${minRaise}`, autoFocus: true, onKeyDown: e => { if (e.key === 'Enter') handleRaise(); if (e.key === 'Escape') setShowRaiseInput(false); } }),
-                            React.createElement('button', { className: 'btn btn-success', onClick: handleRaise }, '✓'),
-                            React.createElement('button', { className: 'btn btn-outline', onClick: () => setShowRaiseInput(false) }, '✕')
+                        // ─── Schnelle Raise-Buttons ──────────────────────────
+                        showRaiseInput && canRaise && React.createElement('div', { className: 'mt-2 w-full' },
+                            React.createElement('div', { className: 'raise-quick-grid' },
+                                raisePresets.map((preset, idx) => {
+                                    const disabled = preset.value < minRaise || preset.value > maxRaise;
+                                    return React.createElement('button', {
+                                        key: idx,
+                                        className: `btn btn-sm ${disabled ? 'btn-outline' : 'btn-success'}`,
+                                        onClick: () => handlePreset(preset.value),
+                                        disabled: disabled,
+                                    }, preset.label, ' (', preset.value, ')');
+                                })
+                            ),
+                            React.createElement('div', { className: 'flex items-center gap-2 mt-2' },
+                                React.createElement('input', {
+                                    type: 'number',
+                                    className: 'input flex-1',
+                                    value: raiseAmount,
+                                    onChange: e => setRaiseAmount(e.target.value),
+                                    placeholder: `Min ${minRaise}`,
+                                    autoFocus: true,
+                                    onKeyDown: e => { if (e.key === 'Enter') { const val = Number(raiseAmount); if (!isNaN(val)) handleRaise(val); } if (e.key === 'Escape') setShowRaiseInput(false); },
+                                }),
+                                React.createElement('button', { className: 'btn btn-success', onClick: () => { const val = Number(raiseAmount); if (!isNaN(val)) handleRaise(val); } }, '✓'),
+                                React.createElement('button', { className: 'btn btn-outline', onClick: () => setShowRaiseInput(false) }, '✕')
+                            )
                         )
                     ),
                 game.timeRemaining > 0 && isMyTurn && !hasFolded && !isAllIn &&
@@ -458,6 +508,7 @@
             );
         }
 
+        // ─── Hinweis, Reveal, Showdown, Result (unverändert) ──────────────
         function HintDisplay({ hint, number }) {
             return React.createElement('div', { className: 'hint-box animate-fade w-full max-w-md' },
                 React.createElement('div', { className: 'text-sm text-muted' }, '💡 Hinweis ', number),
@@ -703,7 +754,7 @@
                 )
             )
         );
-        console.log('✅ Das Duell um die Geld – Client geladen.');
+        console.log('✅ Das Duell um die Geld – Client geladen (mit Quick-Raise).');
     </script>
 </body>
 </html>
