@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>💰 Das Duell um die Geld</title>
     <style>
-        /* ─── Reset & Base ─── (gleicher CSS wie zuvor, Platz sparend) ─── */
+        /* ─── CSS (identisch zur vorherigen Version) ──────────────────── */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0b0e14; color: #e8edf5; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         #root { width: 100%; max-width: 1300px; padding: 16px; margin: 0 auto; }
@@ -114,13 +114,11 @@
 <body>
     <div id="root"></div>
 
-    <!-- ─── Abhängigkeiten ──────────────────────────────────────────────── -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.0/babel.min.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
-    <!-- ─── Client-Code ──────────────────────────────────────────────────── -->
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
 
@@ -226,8 +224,8 @@
                 emit('bet:act', { action, amount });
             }, [emit]);
 
-            const startGame = useCallback(() => {
-                emit('game:start');
+            const startGame = useCallback((settings) => {
+                emit('game:start', settings);
             }, [emit]);
 
             const ctxValue = { socket: socketRef.current, state, emit, joinRoom, createRoom, submitGuess, act, startGame };
@@ -240,49 +238,37 @@
             return ctx;
         }
 
-        // ─── Komponenten ──────────────────────────────────────────────────
-
-        // Lobby mit Einstellungen
+        // ─── Lobby ────────────────────────────────────────────────────────────
         function Lobby({ game, isHost, onStart, categories }) {
             const [settings, setSettings] = useState({
                 startCapital: game.startCapital || 1000,
                 smallBlind: game.smallBlind || 10,
                 bigBlind: game.bigBlind || 20,
                 maxRounds: game.maxRounds || 0,
-                blindIncreaseInterval: 5,
+                blindIncreaseInterval: game.blindIncreaseInterval || 5,
                 category: game.category || 'Alle',
                 timeLimit: game.timeLimit || 20,
-                maxPlayers: game.maxPlayers || 8,
             });
 
-            // Nur Host darf Einstellungen ändern
             const handleChange = (key, value) => {
                 if (!isHost) return;
                 setSettings(s => ({ ...s, [key]: value }));
-                // Einstellungen werden beim Spielstart an den Server gesendet (später)
             };
 
-            // Beim Start die Settings mitgeben
             const handleStart = () => {
-                onStart(settings);
+                if (isHost && game.players.length >= 2) {
+                    onStart(settings);
+                }
             };
 
-            return React.createElement(
-                'div',
-                { className: 'flex flex-col items-center gap-6 p-6' },
-                React.createElement(
-                    'div',
-                    { className: 'text-center' },
+            return React.createElement('div', { className: 'flex flex-col items-center gap-6 p-6' },
+                React.createElement('div', { className: 'text-center' },
                     React.createElement('h1', { className: 'text-3xl font-bold text-gold' }, '💰 DAS DUELL UM DIE GELD'),
                     React.createElement('p', { className: 'text-muted text-sm mt-2' }, 'Raum: ', React.createElement('span', { className: 'text-gold font-semibold' }, game.roomId))
                 ),
-                React.createElement(
-                    'div',
-                    { className: 'w-full max-w-md bg-card rounded p-6 border' },
+                React.createElement('div', { className: 'w-full max-w-md bg-card rounded p-6 border' },
                     React.createElement('h2', { className: 'text-lg font-semibold mb-4' }, 'Spieler (', game.players.length, '/', game.maxPlayers, ')'),
-                    React.createElement(
-                        'div',
-                        { className: 'flex flex-col gap-2' },
+                    React.createElement('div', { className: 'flex flex-col gap-2' },
                         game.players.map(p =>
                             React.createElement('div', { key: p.id, className: 'flex items-center justify-between bg-dark p-2 rounded' },
                                 React.createElement('span', { className: 'font-medium' }, p.name),
@@ -295,10 +281,7 @@
                         )
                     )
                 ),
-                // Einstellungen (nur für Host sichtbar)
-                isHost && React.createElement(
-                    'div',
-                    { className: 'w-full max-w-md bg-card rounded p-6 border' },
+                isHost && React.createElement('div', { className: 'w-full max-w-md bg-card rounded p-6 border' },
                     React.createElement('h3', { className: 'text-lg font-semibold mb-4' }, '⚙️ Einstellungen'),
                     React.createElement('div', { className: 'flex flex-col gap-3' },
                         React.createElement('div', null,
@@ -374,9 +357,7 @@
                         )
                     )
                 ),
-                React.createElement(
-                    'div',
-                    { className: 'flex flex-col items-center gap-3 w-full max-w-md' },
+                React.createElement('div', { className: 'flex flex-col items-center gap-3 w-full max-w-md' },
                     isHost &&
                         React.createElement('button', {
                             className: 'btn btn-gold btn-lg btn-block',
@@ -395,11 +376,148 @@
         }
 
         // ─── Weitere Komponenten (GuessingPhase, BettingPhase, etc.) ────
-        // Diese sind identisch zur vorherigen Version – ich kürze hier aus Platzgründen,
-        // aber du kannst sie aus der vorherigen Antwort übernehmen.
-        // Wichtig: In der GameTable wird die Lobby jetzt mit den Kategorien aufgerufen.
+        // Diese sind identisch zur vorherigen Version – aus Platzgründen hier kurzgefasst.
+        // Du kannst sie aus der vorherigen Antwort kopieren. Ich baue sie hier ein:
 
-        // ─── GameTable (angepasst) ────────────────────────────────────────
+        function GuessingPhase({ game, player, onSubmit }) {
+            const [guess, setGuess] = useState('');
+            const hasGuessed = player?.status === 'GUESSED';
+            if (!game.question) return React.createElement('div', { className: 'text-center text-muted' }, 'Lade Frage...');
+            return React.createElement('div', { className: 'flex flex-col items-center gap-6 animate-fade' },
+                React.createElement('div', { className: 'text-center' },
+                    React.createElement('div', { className: 'text-sm text-muted mb-1' }, 'Runde ', game.roundNumber),
+                    React.createElement('h2', { className: 'text-2xl font-bold' }, game.question.question),
+                    game.question.unit && React.createElement('p', { className: 'text-sm text-muted mt-1' }, 'Einheit: ', game.question.unit),
+                    React.createElement('div', { className: 'text-xs text-muted mt-1' }, game.question.category, ' · ', game.question.difficulty)
+                ),
+                hasGuessed
+                    ? React.createElement('div', { className: 'bg-green/20 border border-green rounded p-4 text-center' },
+                        React.createElement('p', { className: 'text-green text-lg font-semibold' }, '✓ Schätzung abgegeben'),
+                        React.createElement('p', { className: 'text-sm text-muted' }, 'Deine Zahl: ', React.createElement('strong', null, player?.guess)),
+                        React.createElement('p', { className: 'text-xs text-muted mt-2' }, 'Warte auf andere Spieler...')
+                    )
+                    : React.createElement('div', { className: 'flex flex-col items-center gap-4' },
+                        React.createElement('label', { className: 'text-lg font-semibold' }, 'Deine Schätzung'),
+                        React.createElement('input', {
+                            type: 'number',
+                            className: 'input guess-input',
+                            value: guess,
+                            onChange: e => setGuess(e.target.value),
+                            placeholder: '?',
+                            autoFocus: true,
+                            onKeyDown: e => { if (e.key === 'Enter' && guess.trim() !== '') { const val = Number(guess); if (!isNaN(val)) onSubmit(val); } },
+                        }),
+                        React.createElement('button', {
+                            className: 'btn btn-success btn-lg',
+                            onClick: () => { const val = Number(guess); if (!isNaN(val)) onSubmit(val); },
+                            disabled: guess.trim() === '' || isNaN(Number(guess)),
+                        }, 'Schätzung abgeben')
+                    )
+            );
+        }
+
+        function BettingPhase({ game, player, isMyTurn, onAct, phaseLabel }) {
+            const [raiseAmount, setRaiseAmount] = useState('');
+            const [showRaiseInput, setShowRaiseInput] = useState(false);
+            const hasFolded = player?.status === 'FOLD' || player?.status === 'OUT';
+            const isAllIn = player?.status === 'ALL_IN';
+            if (!player) return null;
+            const minRaise = Math.max(game.currentBet + game.bigBlind, game.currentBet + 10);
+            const maxRaise = player.chips + player.bet;
+            const canCheck = game.currentBet === player.bet;
+            const canCall = game.currentBet > player.bet;
+            const callAmount = Math.min(game.currentBet - player.bet, player.chips);
+            const canRaise = player.chips > 0 && !isAllIn && !hasFolded;
+            const canAllIn = player.chips > 0 && !isAllIn && !hasFolded;
+            const handleRaise = () => { const val = Number(raiseAmount); if (!isNaN(val) && val >= minRaise && val <= maxRaise) { onAct('RAISE', val); setRaiseAmount(''); setShowRaiseInput(false); } };
+            return React.createElement('div', { className: 'flex flex-col items-center gap-4 animate-fade w-full max-w-lg' },
+                React.createElement('div', { className: 'flex items-center gap-4 w-full justify-between bg-dark p-3 rounded border' },
+                    React.createElement('div', null, React.createElement('span', { className: 'text-sm text-muted' }, 'Phase:'), React.createElement('span', { className: 'font-semibold ml-2' }, phaseLabel)),
+                    React.createElement('div', null, React.createElement('span', { className: 'text-sm text-muted' }, 'Einsatz:'), React.createElement('span', { className: 'font-semibold ml-2 text-gold' }, game.currentBet, ' 🪙')),
+                    React.createElement('div', null, React.createElement('span', { className: 'text-sm text-muted' }, 'Pot:'), React.createElement('span', { className: 'font-semibold ml-2 text-gold' }, game.pot, ' 🪙'))
+                ),
+                hasFolded ? React.createElement('div', { className: 'bg-red/20 border border-red rounded p-3 text-center w-full' }, React.createElement('span', { className: 'text-red font-semibold' }, '✕ Gefolded'))
+                    : isAllIn ? React.createElement('div', { className: 'bg-red/30 border border-red rounded p-3 text-center w-full' }, React.createElement('span', { className: 'text-red font-semibold animate-pulse' }, 'ALL-IN!'))
+                    : !isMyTurn ? React.createElement('div', { className: 'text-center text-muted' }, game.currentPlayerId ? 'Warte auf anderen Spieler...' : 'Warte...')
+                    : React.createElement('div', { className: 'w-full' },
+                        React.createElement('div', { className: 'action-grid' },
+                            canCheck && React.createElement('button', { className: 'btn btn-outline', onClick: () => onAct('CHECK') }, 'Check'),
+                            canCall && React.createElement('button', { className: 'btn btn-primary', onClick: () => onAct('CALL') }, 'Call ', callAmount, ' 🪙'),
+                            canRaise && !showRaiseInput && React.createElement('button', { className: 'btn btn-gold', onClick: () => setShowRaiseInput(true) }, 'Raise'),
+                            canAllIn && React.createElement('button', { className: 'btn btn-danger', onClick: () => onAct('ALL_IN') }, 'All-In'),
+                            !hasFolded && !isAllIn && React.createElement('button', { className: 'btn btn-danger', onClick: () => onAct('FOLD') }, 'Fold')
+                        ),
+                        showRaiseInput && React.createElement('div', { className: 'flex items-center gap-2 mt-3 w-full' },
+                            React.createElement('input', { type: 'number', className: 'input flex-1', value: raiseAmount, onChange: e => setRaiseAmount(e.target.value), placeholder: `Min ${minRaise}`, autoFocus: true, onKeyDown: e => { if (e.key === 'Enter') handleRaise(); if (e.key === 'Escape') setShowRaiseInput(false); } }),
+                            React.createElement('button', { className: 'btn btn-success', onClick: handleRaise }, '✓'),
+                            React.createElement('button', { className: 'btn btn-outline', onClick: () => setShowRaiseInput(false) }, '✕')
+                        )
+                    ),
+                game.timeRemaining > 0 && isMyTurn && !hasFolded && !isAllIn &&
+                    React.createElement('div', { className: `timer-ring ${game.timeRemaining <= 5 ? 'danger' : game.timeRemaining <= 10 ? 'warning' : ''}` }, game.timeRemaining)
+            );
+        }
+
+        function HintDisplay({ hint, number }) {
+            return React.createElement('div', { className: 'hint-box animate-fade w-full max-w-md' },
+                React.createElement('div', { className: 'text-sm text-muted' }, '💡 Hinweis ', number),
+                React.createElement('div', { className: 'text-lg font-semibold text-gold' }, hint)
+            );
+        }
+
+        function RevealPhase({ game }) {
+            return React.createElement('div', { className: 'flex flex-col items-center gap-4 animate-slide' },
+                React.createElement('div', { className: 'text-sm text-muted' }, 'Die richtige Antwort ist...'),
+                React.createElement('div', { className: 'text-5xl font-bold text-gold' }, game.correctAnswer),
+                game.question?.unit && React.createElement('div', { className: 'text-sm text-muted' }, game.question.unit),
+                React.createElement('div', { className: 'text-sm text-muted mt-2' }, '⬇ Finale Setzrunde beginnt gleich ⬇')
+            );
+        }
+
+        function Showdown({ game }) {
+            const sorted = [...game.players].filter(p => p.guess !== undefined && p.status !== 'FOLD' && p.status !== 'OUT').sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+            const winner = sorted.length > 0 ? sorted[0] : null;
+            return React.createElement('div', { className: 'flex flex-col items-center gap-4 animate-slide w-full max-w-lg' },
+                React.createElement('div', { className: 'text-2xl font-bold text-gold' }, '🏆 SHOWDOWN'),
+                React.createElement('div', { className: 'text-sm text-muted' }, 'Richtige Antwort: ', React.createElement('strong', { className: 'text-gold' }, game.correctAnswer)),
+                React.createElement('div', { className: 'w-full bg-dark rounded p-4 border' },
+                    game.players.map(p => {
+                        const isActive = p.guess !== undefined && p.status !== 'FOLD' && p.status !== 'OUT';
+                        if (!isActive && p.status !== 'FOLD' && p.status !== 'OUT') return null;
+                        const isWinner = winner && p.id === winner.id;
+                        return React.createElement('div', { key: p.id, className: `flex items-center justify-between p-2 rounded ${isWinner ? 'bg-gold/20 border border-gold' : ''}` },
+                            React.createElement('span', { className: 'font-medium' }, p.name, p.isSelf && ' (du)', isWinner && ' 👑'),
+                            p.guess !== undefined
+                                ? React.createElement('span', { className: 'flex items-center gap-3' },
+                                    React.createElement('span', null, p.guess),
+                                    React.createElement('span', { className: 'text-sm text-muted' }, '→'),
+                                    React.createElement('span', { className: `font-semibold ${p.distance === 0 ? 'text-green' : p.distance && p.distance <= 2 ? 'text-gold' : 'text-muted'}` }, p.distance, ' daneben'),
+                                    isWinner && React.createElement('span', { className: 'badge badge-dealer' }, 'GEWINNER')
+                                )
+                                : React.createElement('span', { className: 'text-sm text-muted' }, 'Gefolded')
+                        );
+                    })
+                ),
+                winner && React.createElement('div', { className: 'bg-gold/20 border border-gold rounded p-4 text-center w-full' },
+                    React.createElement('span', { className: 'text-xl font-bold text-gold' }, winner.name, ' gewinnt ', game.winningAmount || game.pot, ' 🪙!')
+                )
+            );
+        }
+
+        function ResultPhase({ game, onNext }) {
+            return React.createElement('div', { className: 'flex flex-col items-center gap-4 animate-slide' },
+                React.createElement('div', { className: 'text-2xl font-bold text-gold' }, 'Runde ', game.roundNumber, ' beendet'),
+                game.winnerIds.length > 0 && React.createElement('div', { className: 'bg-gold/20 border border-gold rounded p-4 text-center w-full max-w-md' },
+                    React.createElement('span', { className: 'text-xl font-bold text-gold' },
+                        game.players.find(p => p.id === game.winnerIds[0])?.name || 'Unbekannt',
+                        ' gewinnt ', game.winningAmount || game.pot, ' 🪙!'
+                    )
+                ),
+                React.createElement('button', { className: 'btn btn-primary', onClick: onNext }, 'Nächste Runde ➜')
+            );
+        }
+
+        // ─── GameTable ─────────────────────────────────────────────────────
         function GameTable() {
             const { state, submitGuess, act, startGame } = useSocket();
             const game = state.game;
@@ -418,35 +536,25 @@
             const isHost = player?.isHost || false;
             const isMyTurn = game.currentPlayerId === player?.id && player?.status !== 'FOLD' && player?.status !== 'OUT';
 
-            // ─── Phase-Renderer (gleicher Code wie zuvor) ──────────────────
-            // Achtung: In der Lobby-Phase übergib die Kategorien
+            const phaseLabels = {
+                LOBBY: 'Lobby',
+                QUESTION: 'Frage',
+                GUESSING: 'Schätzung',
+                BETTING_1: 'Setzrunde 1',
+                HINT_1: 'Hinweis 1',
+                BETTING_2: 'Setzrunde 2',
+                HINT_2: 'Hinweis 2',
+                BETTING_3: 'Setzrunde 3',
+                REVEAL: 'Auflösung',
+                FINAL_BETTING: 'Finale Setzrunde',
+                SHOWDOWN: 'Showdown',
+                RESULT: 'Ergebnis',
+            };
+
             const renderPhase = () => {
                 switch (game.phase) {
                     case 'LOBBY':
-                        return React.createElement(Lobby, {
-                            game,
-                            isHost,
-                            onStart: (settings) => {
-                                // Sende die Einstellungen beim Spielstart mit
-                                // Die Einstellungen werden im 'game:start' Event gesendet
-                                // Wir speichern sie im Socket-Kontext oder im Server
-                                // Hier rufen wir startGame auf, der dann die Settings im Server setzt.
-                                // Da der Server die Settings beim Erstellen des Raums gespeichert hat,
-                                // müssen wir sie beim Start aktualisieren.
-                                // Einfach: startGame() ohne Parameter – der Server verwendet die gespeicherten Einstellungen.
-                                // Aber der Host kann sie geändert haben – wir senden ein separates Event.
-                                // Alternativ: Speichere settings im Client und sende sie beim Start mit.
-                                // Ich vereinfache: Der Server verwendet beim Erstellen des Raums bereits die Einstellungen,
-                                // der Client zeigt sie nur an. Der Host kann sie ändern, aber sie werden nicht automatisch an den Server gesendet.
-                                // Um das zu beheben, müssten wir ein 'room:update' Event einführen.
-                                // Für den MVP belassen wir es dabei: Der Host ändert die Einstellungen im Client,
-                                // aber der Server hat seine eigenen, die beim Erstellen gesetzt wurden.
-                                // Ich empfehle, die Settings beim Start zu aktualisieren – wir rufen startGame auf.
-                                startGame();
-                            },
-                            categories,
-                        });
-                    // ─── Weitere Phasen (unverändert) ──────────────────────
+                        return React.createElement(Lobby, { game, isHost, onStart: startGame, categories });
                     case 'QUESTION':
                     case 'GUESSING':
                         return React.createElement(GuessingPhase, { game, player, onSubmit: submitGuess });
@@ -454,13 +562,7 @@
                     case 'BETTING_2':
                     case 'BETTING_3':
                     case 'FINAL_BETTING':
-                        return React.createElement(BettingPhase, {
-                            game,
-                            player,
-                            isMyTurn,
-                            onAct: act,
-                            phaseLabel: phaseLabels[game.phase] || game.phase,
-                        });
+                        return React.createElement(BettingPhase, { game, player, isMyTurn, onAct: act, phaseLabel: phaseLabels[game.phase] || game.phase });
                     case 'HINT_1':
                     case 'HINT_2': {
                         const idx = game.phase === 'HINT_1' ? 0 : 1;
@@ -481,27 +583,7 @@
                 }
             };
 
-            // ─── Labels ────────────────────────────────────────────────────
-            const phaseLabels = {
-                LOBBY: 'Lobby',
-                QUESTION: 'Frage',
-                GUESSING: 'Schätzung',
-                BETTING_1: 'Setzrunde 1',
-                HINT_1: 'Hinweis 1',
-                BETTING_2: 'Setzrunde 2',
-                HINT_2: 'Hinweis 2',
-                BETTING_3: 'Setzrunde 3',
-                REVEAL: 'Auflösung',
-                FINAL_BETTING: 'Finale Setzrunde',
-                SHOWDOWN: 'Showdown',
-                RESULT: 'Ergebnis',
-            };
-
-            // ─── Rendering ────────────────────────────────────────────────
-            return React.createElement(
-                'div',
-                { className: 'table' },
-                // Header
+            return React.createElement('div', { className: 'table' },
                 React.createElement('div', { className: 'flex justify-between items-center mb-4 flex-wrap gap-2' },
                     React.createElement('div', { className: 'flex items-center gap-3' },
                         React.createElement('span', { className: 'text-gold font-bold' }, '💰 ', game.roomId),
@@ -513,7 +595,6 @@
                         React.createElement('span', { className: 'pot-display text-gold font-bold' }, game.pot, ' 🪙')
                     )
                 ),
-                // Tisch
                 React.createElement('div', { className: 'table-felt' },
                     React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-4 gap-2 mb-4' },
                         game.players.map(p => {
@@ -552,11 +633,6 @@
             );
         }
 
-        // ─── Die fehlenden Komponenten kurz definiert ──────────────────
-        // (Hier müssten GuessingPhase, BettingPhase, HintDisplay, RevealPhase, Showdown, ResultPhase stehen.
-        //  Sie sind identisch zur vorherigen Version – bitte aus der vorherigen Antwort kopieren.
-        //  Um Platz zu sparen, hier nur Platzhalter – ersetze sie durch den vollständigen Code aus der vorherigen Antwort.)
-
         // ─── App ────────────────────────────────────────────────────────────
         function App() {
             const { state, joinRoom, createRoom } = useSocket();
@@ -577,24 +653,13 @@
                     React.createElement('div', { className: 'flex flex-col gap-4' },
                         React.createElement('div', null,
                             React.createElement('label', { className: 'block text-sm font-semibold mb-1' }, 'Dein Name'),
-                            React.createElement('input', {
-                                className: 'input',
-                                value: name,
-                                onChange: e => setName(e.target.value),
-                                placeholder: 'Dein Spielername',
-                            })
+                            React.createElement('input', { className: 'input', value: name, onChange: e => setName(e.target.value), placeholder: 'Dein Spielername' })
                         ),
                         React.createElement('div', { className: 'flex gap-3' },
                             React.createElement('div', { className: 'flex-1' },
                                 React.createElement('label', { className: 'block text-sm font-semibold mb-1' }, 'Raum beitreten'),
                                 React.createElement('div', { className: 'flex gap-2' },
-                                    React.createElement('input', {
-                                        className: 'input',
-                                        value: roomCode,
-                                        onChange: e => setRoomCode(e.target.value.toUpperCase()),
-                                        placeholder: 'Code z.B. K7X4P',
-                                        maxLength: 6,
-                                    }),
+                                    React.createElement('input', { className: 'input', value: roomCode, onChange: e => setRoomCode(e.target.value.toUpperCase()), placeholder: 'Code z.B. K7X4P', maxLength: 6 }),
                                     React.createElement('button', {
                                         className: 'btn btn-primary',
                                         onClick: () => { if (name.trim() && roomCode.trim()) joinRoom(roomCode.trim(), name.trim()); },
@@ -611,12 +676,7 @@
                         React.createElement('div', null,
                             React.createElement('label', { className: 'block text-sm font-semibold mb-1' }, 'Neuen Raum erstellen'),
                             React.createElement('div', { className: 'flex gap-2' },
-                                React.createElement('input', {
-                                    className: 'input',
-                                    value: createName,
-                                    onChange: e => setCreateName(e.target.value),
-                                    placeholder: 'Dein Name',
-                                }),
+                                React.createElement('input', { className: 'input', value: createName, onChange: e => setCreateName(e.target.value), placeholder: 'Dein Name' }),
                                 React.createElement('button', {
                                     className: 'btn btn-success',
                                     onClick: () => { if (createName.trim()) createRoom(createName.trim()); },
