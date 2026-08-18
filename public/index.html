@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>💰 Das Duell um die Geld</title>
     <style>
-        /* ─── CSS (unverändert) ─── */
+        /* ─── CSS ──────────────────────────────────────────────────────── */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0b0e14; color: #e8edf5; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         #root { width: 100%; max-width: 1300px; padding: 16px; margin: 0 auto; }
@@ -230,7 +230,22 @@
                 emit('game:start', settings);
             }, [emit]);
 
-            const ctxValue = { socket: socketRef.current, state, emit, joinRoom, createRoom, submitGuess, act, startGame };
+            // 🆕 Neue Funktion für "Nächste Runde"
+            const nextRound = useCallback(() => {
+                emit('game:next');
+            }, [emit]);
+
+            const ctxValue = {
+                socket: socketRef.current,
+                state,
+                emit,
+                joinRoom,
+                createRoom,
+                submitGuess,
+                act,
+                startGame,
+                nextRound,
+            };
             return React.createElement(SocketContext.Provider, { value: ctxValue }, children);
         }
 
@@ -415,7 +430,7 @@
             );
         }
 
-        // ─── BettingPhase (mit schnellen Raise-Buttons) ─────────────────
+        // ─── BettingPhase ──────────────────────────────────────────────────
         function BettingPhase({ game, player, isMyTurn, onAct, phaseLabel }) {
             const [raiseAmount, setRaiseAmount] = useState('');
             const [showRaiseInput, setShowRaiseInput] = useState(false);
@@ -423,21 +438,16 @@
             const isAllIn = player?.status === 'ALL_IN';
             if (!player) return null;
 
-            // Aktueller Einsatz (currentBet) und was der Spieler bereits in dieser Runde gesetzt hat (player.bet)
             const currentBet = game.currentBet;
             const playerBet = player.bet;
-
-            // Min-Raise: currentBet + BB (oder currentBet + 10)
             const minRaise = Math.max(currentBet + game.bigBlind, currentBet + 10);
             const maxRaise = player.chips + playerBet;
-
             const canCheck = currentBet === playerBet;
             const canCall = currentBet > playerBet;
             const callAmount = Math.min(currentBet - playerBet, player.chips);
             const canRaise = player.chips > 0 && !isAllIn && !hasFolded;
             const canAllIn = player.chips > 0 && !isAllIn && !hasFolded;
 
-            // Raise-Vorschläge (BB, 2xBB, 3xBB) – aber mindestens minRaise
             const raisePresets = [
                 { label: 'BB', value: Math.max(currentBet + game.bigBlind, minRaise) },
                 { label: '2x BB', value: Math.max(currentBet + game.bigBlind * 2, minRaise) },
@@ -475,7 +485,6 @@
                             canAllIn && React.createElement('button', { className: 'btn btn-danger', onClick: () => onAct('ALL_IN') }, 'All-In'),
                             !hasFolded && !isAllIn && React.createElement('button', { className: 'btn btn-danger', onClick: () => onAct('FOLD') }, 'Fold')
                         ),
-                        // ─── Schnelle Raise-Buttons ──────────────────────────
                         showRaiseInput && canRaise && React.createElement('div', { className: 'mt-2 w-full' },
                             React.createElement('div', { className: 'raise-quick-grid' },
                                 raisePresets.map((preset, idx) => {
@@ -508,7 +517,7 @@
             );
         }
 
-        // ─── Hinweis, Reveal, Showdown, Result (unverändert) ──────────────
+        // ─── Hint, Reveal, Showdown ──────────────────────────────────────────
         function HintDisplay({ hint, number }) {
             return React.createElement('div', { className: 'hint-box animate-fade w-full max-w-md' },
                 React.createElement('div', { className: 'text-sm text-muted' }, '💡 Hinweis ', number),
@@ -555,6 +564,7 @@
             );
         }
 
+        // ─── ResultPhase (jetzt mit nextRound) ────────────────────────────
         function ResultPhase({ game, onNext }) {
             return React.createElement('div', { className: 'flex flex-col items-center gap-4 animate-slide' },
                 React.createElement('div', { className: 'text-2xl font-bold text-gold' }, 'Runde ', game.roundNumber, ' beendet'),
@@ -570,7 +580,7 @@
 
         // ─── GameTable ─────────────────────────────────────────────────────
         function GameTable() {
-            const { state, submitGuess, act, startGame } = useSocket();
+            const { state, submitGuess, act, startGame, nextRound } = useSocket();
             const game = state.game;
             const player = game?.players.find(p => p.isSelf);
             const categories = state.categories || [];
@@ -628,7 +638,7 @@
                     case 'SHOWDOWN':
                         return React.createElement(Showdown, { game });
                     case 'RESULT':
-                        return React.createElement(ResultPhase, { game, onNext: () => act('NEXT_ROUND') });
+                        return React.createElement(ResultPhase, { game, onNext: nextRound });
                     default:
                         return React.createElement('div', { className: 'text-muted' }, 'Unbekannte Phase: ', game.phase);
                 }
@@ -754,7 +764,7 @@
                 )
             )
         );
-        console.log('✅ Das Duell um die Geld – Client geladen (mit Quick-Raise).');
+        console.log('✅ Das Duell um die Geld – Client geladen (mit nextRound).');
     </script>
 </body>
 </html>
