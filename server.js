@@ -1,4 +1,4 @@
-// ─── server.js ──────────────────────────────────────────────────────────────
+// ─── server.js ─── KOMPLETT ─────────────────────────────────────────────
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -11,20 +11,19 @@ const io = new Server(server, {
   cors: { origin: '*' },
 });
 
-// ─── Statische Dateien & Fallback ──────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ─── Fragen aus JSON laden ─────────────────────────────────────────────────
+// ─── Fragen ────────────────────────────────────────────────────────────────
 let allQuestions = [];
 try {
   const data = fs.readFileSync(path.join(__dirname, 'questions.json'), 'utf8');
   allQuestions = JSON.parse(data);
   console.log(`📚 ${allQuestions.length} Fragen geladen.`);
 } catch (err) {
-  console.warn('⚠️  Keine questions.json gefunden – verwende Standard-Fragen.');
+  console.warn('⚠️  Keine questions.json – verwende Standard-Fragen.');
   allQuestions = [
     {
       id: 'fallback1',
@@ -53,14 +52,12 @@ try {
   ];
 }
 
-// ─── Kategorien extrahieren ─────────────────────────────────────────────────
 const categories = [...new Set(allQuestions.map(q => q.category))];
 console.log('📂 Kategorien:', categories.join(', '));
 
-// ─── In-Memory-Store ────────────────────────────────────────────────────────
+// ─── In-Memory-Store ──────────────────────────────────────────────────────
 const rooms = new Map();
 
-// ─── Hilfsfunktionen ────────────────────────────────────────────────────────
 function generateRoomId() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let id = '';
@@ -109,7 +106,6 @@ function resetPlayerState(room) {
   });
 }
 
-// ─── Spielphasen ──────────────────────────────────────────────────────────────
 const PHASES = {
   LOBBY: 'LOBBY',
   QUESTION: 'QUESTION',
@@ -132,7 +128,7 @@ const BETTING_PHASES = [
   PHASES.FINAL_BETTING,
 ];
 
-// ─── Raum erstellen ──────────────────────────────────────────────────────────
+// ─── Raum erstellen ──────────────────────────────────────────────────────
 function createRoom(hostId, hostName, settings = {}) {
   const roomId = generateRoomId();
   const room = {
@@ -144,7 +140,6 @@ function createRoom(hostId, hostName, settings = {}) {
     currentBet: 0,
     currentPlayerId: null,
     dealerIndex: 0,
-    // Standard-Einstellungen (werden beim Start überschrieben)
     startCapital: settings.startCapital || 1000,
     smallBlind: settings.smallBlind || 10,
     bigBlind: settings.bigBlind || 20,
@@ -153,7 +148,6 @@ function createRoom(hostId, hostName, settings = {}) {
     category: settings.category || 'Alle',
     timeLimit: settings.timeLimit || 20,
     maxPlayers: settings.maxPlayers || 8,
-
     question: null,
     hintsRevealed: 0,
     correctAnswer: null,
@@ -191,7 +185,6 @@ function createRoom(hostId, hostName, settings = {}) {
   return room;
 }
 
-// ─── Broadcast ──────────────────────────────────────────────────────────────
 function broadcastRoom(room) {
   const state = {
     roomId: room.roomId,
@@ -227,18 +220,16 @@ function broadcastRoom(room) {
   io.to(room.roomId).emit('game:state', state);
 }
 
-// ─── Fragen nach Kategorie filtern ──────────────────────────────────────────
 function getQuestionsForCategory(category) {
   if (category === 'Alle') return allQuestions;
   return allQuestions.filter(q => q.category === category);
 }
 
-// ─── SPIELLOGIK ──────────────────────────────────────────────────────────────
+// ─── SPIELLOGIK ────────────────────────────────────────────────────────────
 
 function startGame(room, settings) {
   if (room.phase !== PHASES.LOBBY || room.players.length < 2) return;
-  
-  // ─── Einstellungen vom Client übernehmen ─────────────────────────────
+
   if (settings) {
     room.startCapital = settings.startCapital || room.startCapital;
     room.smallBlind = settings.smallBlind || room.smallBlind;
@@ -248,15 +239,12 @@ function startGame(room, settings) {
     room.category = settings.category || room.category;
     room.timeLimit = settings.timeLimit || room.timeLimit;
     room.maxPlayers = settings.maxPlayers || room.maxPlayers;
-    
-    // Spieler-Chips aktualisieren (falls Startkapital geändert)
+
     room.players.forEach(p => {
-      if (p.chips !== room.startCapital) {
-        p.chips = room.startCapital;
-      }
+      if (p.chips !== room.startCapital) p.chips = room.startCapital;
     });
   }
-  
+
   room.started = true;
   room.roundNumber = 1;
   room.roundsSinceBlindIncrease = 0;
@@ -264,7 +252,6 @@ function startGame(room, settings) {
 }
 
 function startNextRound(room) {
-  // Prüfe, ob maximale Rundenzahl erreicht ist
   if (room.maxRounds > 0 && room.roundNumber > room.maxRounds) {
     room.phase = PHASES.LOBBY;
     room.started = false;
@@ -287,7 +274,6 @@ function startNextRound(room) {
   room.bettingIndex = 0;
   room.roundEnded = false;
 
-  // Blind-Erhöhung prüfen
   room.roundsSinceBlindIncrease++;
   if (room.roundsSinceBlindIncrease >= room.blindIncreaseInterval) {
     room.smallBlind = Math.floor(room.smallBlind * 2);
@@ -298,18 +284,10 @@ function startNextRound(room) {
 
   rotateDealer(room);
 
-  // Frage aus der gewählten Kategorie holen
   const pool = getQuestionsForCategory(room.category);
-  if (pool.length === 0) {
-    const fallback = allQuestions;
-    const q = fallback[room.roundNumber % fallback.length];
-    room.question = q;
-    room.correctAnswer = q.answer;
-  } else {
-    const q = pool[room.roundNumber % pool.length];
-    room.question = q;
-    room.correctAnswer = q.answer;
-  }
+  const q = pool.length > 0 ? pool[room.roundNumber % pool.length] : allQuestions[room.roundNumber % allQuestions.length];
+  room.question = q;
+  room.correctAnswer = q.answer;
 
   const { sb, bb } = getBlindPositions(room);
   if (sb >= 0) {
@@ -341,14 +319,330 @@ function startNextRound(room) {
   }, 3000);
 }
 
-// ─── (Rest der Spiellogik bleibt unverändert – siehe vorherige Version) ──
-// ─── Die Funktionen startGuessingTimer, submitGuess, startBettingRound, ──
-// ─── handleAction, advanceBetting, finishBettingRound, showDown, ──────
-// ─── endRoundEarly sind identisch zur vorherigen Version. ────────────
-// ─── Ich kürze hier aus Platzgründen, aber du kannst sie aus der ──────
-// ─── vorherigen Antwort kopieren. ─────────────────────────────────────
+function startGuessingTimer(room) {
+  let remaining = room.timeLimit;
+  room.timeRemaining = remaining;
+  broadcastRoom(room);
+  if (room.timerInterval) clearInterval(room.timerInterval);
+  room.timerInterval = setInterval(() => {
+    remaining--;
+    room.timeRemaining = remaining;
+    broadcastRoom(room);
+    if (remaining <= 0) {
+      clearInterval(room.timerInterval);
+      room.timerInterval = null;
+      const active = getActivePlayers(room);
+      active.forEach(p => {
+        if (!room.guesses[p.id]) p.status = 'FOLD';
+      });
+      if (getActivePlayers(room).length < 2) {
+        endRoundEarly(room);
+        return;
+      }
+      room.allGuessed = true;
+      startBettingRound(room, PHASES.BETTING_1);
+    }
+  }, 1000);
+}
 
-// ─── Socket.IO Events ────────────────────────────────────────────────────────
+function submitGuess(room, playerId, value) {
+  if (room.phase !== PHASES.GUESSING) return false;
+  if (room.guesses[playerId]) return false;
+  const player = getPlayerById(room, playerId);
+  if (!player) return false;
+  room.guesses[playerId] = value;
+  player.guess = value;
+  player.status = 'GUESSED';
+  const active = getActivePlayers(room);
+  if (active.every(p => room.guesses[p.id])) {
+    room.allGuessed = true;
+    if (room.timerInterval) {
+      clearInterval(room.timerInterval);
+      room.timerInterval = null;
+    }
+    startBettingRound(room, PHASES.BETTING_1);
+  }
+  broadcastRoom(room);
+  return true;
+}
+
+function startBettingRound(room, phase) {
+  if (room.roundEnded) return;
+  if (!BETTING_PHASES.includes(phase)) return;
+  room.phase = phase;
+  room.currentBet = (phase === PHASES.FINAL_BETTING) ? 0 : room.currentBet;
+  const active = getActivePlayers(room);
+  if (active.length < 2) { endRoundEarly(room); return; }
+  const order = buildBettingOrder(room);
+  if (order.length < 2) { endRoundEarly(room); return; }
+  room.bettingOrder = order;
+  room.bettingIndex = 0;
+  room.currentPlayerId = order[0] || null;
+  startBettingTimer(room);
+  broadcastRoom(room);
+}
+
+function buildBettingOrder(room) {
+  const order = [];
+  const startIdx = (room.dealerIndex + 1) % room.players.length;
+  for (let i = 0; i < room.players.length; i++) {
+    const idx = (startIdx + i) % room.players.length;
+    const p = room.players[idx];
+    if (p.status !== 'FOLD' && p.status !== 'OUT') order.push(p.id);
+  }
+  return order;
+}
+
+function startBettingTimer(room) {
+  if (room.roundEnded) return;
+  let remaining = room.timeLimit;
+  room.timeRemaining = remaining;
+  broadcastRoom(room);
+  if (room.timerInterval) clearInterval(room.timerInterval);
+  room.timerInterval = setInterval(() => {
+    remaining--;
+    room.timeRemaining = remaining;
+    broadcastRoom(room);
+    if (remaining <= 0) {
+      clearInterval(room.timerInterval);
+      room.timerInterval = null;
+      const p = room.currentPlayerId ? getPlayerById(room, room.currentPlayerId) : null;
+      if (p && p.status !== 'FOLD' && p.status !== 'OUT') {
+        if (room.currentBet === p.bet) handleAction(room, p.id, 'CHECK');
+        else handleAction(room, p.id, 'FOLD');
+      } else {
+        advanceBetting(room);
+      }
+    }
+  }, 1000);
+}
+
+function handleAction(room, playerId, action, amount) {
+  if (room.roundEnded) return false;
+  const player = getPlayerById(room, playerId);
+  if (!player) return false;
+  if (player.status === 'FOLD' || player.status === 'OUT') return false;
+  if (room.currentPlayerId !== playerId) return false;
+
+  if (room.timerInterval) {
+    clearInterval(room.timerInterval);
+    room.timerInterval = null;
+  }
+
+  let valid = false;
+  switch (action) {
+    case 'CHECK':
+      if (room.currentBet === player.bet) {
+        player.status = 'CHECK';
+        valid = true;
+      }
+      break;
+    case 'CALL': {
+      const call = room.currentBet - player.bet;
+      if (call > 0 && call <= player.chips) {
+        player.chips -= call;
+        player.bet += call;
+        room.pot += call;
+        player.status = 'CALL';
+        valid = true;
+      }
+      break;
+    }
+    case 'RAISE': {
+      const minRaise = Math.max(room.currentBet + room.bigBlind, room.currentBet + 10);
+      const maxRaise = player.chips + player.bet;
+      if (amount >= minRaise && amount <= maxRaise) {
+        const diff = amount - player.bet;
+        player.chips -= diff;
+        player.bet = amount;
+        room.pot += diff;
+        room.currentBet = amount;
+        player.status = 'RAISE';
+        valid = true;
+        const order = buildBettingOrder(room).filter(id => id !== playerId);
+        if (order.length === 0) {
+          finishBettingRound(room);
+          broadcastRoom(room);
+          return true;
+        }
+        room.bettingOrder = order;
+        room.bettingIndex = 0;
+        room.currentPlayerId = order[0];
+        startBettingTimer(room);
+        broadcastRoom(room);
+        return true;
+      }
+      break;
+    }
+    case 'FOLD':
+      player.status = 'FOLD';
+      valid = true;
+      break;
+    case 'ALL_IN': {
+      if (player.chips > 0) {
+        const all = player.chips;
+        player.bet += all;
+        room.pot += all;
+        player.chips = 0;
+        player.status = 'ALL_IN';
+        if (player.bet > room.currentBet) room.currentBet = player.bet;
+        valid = true;
+        const order = buildBettingOrder(room).filter(id => id !== playerId);
+        if (order.length === 0) {
+          finishBettingRound(room);
+          broadcastRoom(room);
+          return true;
+        }
+        room.bettingOrder = order;
+        room.bettingIndex = 0;
+        room.currentPlayerId = order[0];
+        startBettingTimer(room);
+        broadcastRoom(room);
+        return true;
+      }
+      break;
+    }
+    default:
+      return false;
+  }
+
+  if (valid) {
+    broadcastRoom(room);
+    advanceBetting(room);
+    return true;
+  }
+  return false;
+}
+
+function advanceBetting(room) {
+  if (room.roundEnded) return;
+  let idx = room.bettingIndex + 1;
+  while (idx < room.bettingOrder.length) {
+    const pid = room.bettingOrder[idx];
+    const p = getPlayerById(room, pid);
+    if (p && p.status !== 'FOLD' && p.status !== 'OUT') {
+      room.bettingIndex = idx;
+      room.currentPlayerId = pid;
+      startBettingTimer(room);
+      broadcastRoom(room);
+      return;
+    }
+    idx++;
+  }
+  finishBettingRound(room);
+}
+
+function finishBettingRound(room) {
+  if (room.roundEnded) return;
+  if (room.timerInterval) {
+    clearInterval(room.timerInterval);
+    room.timerInterval = null;
+  }
+
+  const phase = room.phase;
+  const active = getActivePlayers(room);
+  if (active.length < 2) {
+    endRoundEarly(room);
+    return;
+  }
+
+  const allSameBet = active.every(p => p.bet === room.currentBet);
+  if (!allSameBet) {
+    const order = buildBettingOrder(room);
+    if (order.length > 1) {
+      room.bettingOrder = order;
+      room.bettingIndex = 0;
+      room.currentPlayerId = order[0];
+      startBettingTimer(room);
+      broadcastRoom(room);
+      return;
+    }
+  }
+
+  if (phase === PHASES.BETTING_1) {
+    room.phase = PHASES.HINT_1;
+    room.hintsRevealed = 1;
+    broadcastRoom(room);
+    setTimeout(() => {
+      if (room.phase === PHASES.HINT_1 && !room.roundEnded) {
+        startBettingRound(room, PHASES.BETTING_2);
+      }
+    }, 3000);
+  } else if (phase === PHASES.BETTING_2) {
+    room.phase = PHASES.HINT_2;
+    room.hintsRevealed = 2;
+    broadcastRoom(room);
+    setTimeout(() => {
+      if (room.phase === PHASES.HINT_2 && !room.roundEnded) {
+        startBettingRound(room, PHASES.BETTING_3);
+      }
+    }, 3000);
+  } else if (phase === PHASES.BETTING_3) {
+    room.phase = PHASES.REVEAL;
+    broadcastRoom(room);
+    setTimeout(() => {
+      if (room.phase === PHASES.REVEAL && !room.roundEnded) {
+        startBettingRound(room, PHASES.FINAL_BETTING);
+      }
+    }, 3000);
+  } else if (phase === PHASES.FINAL_BETTING) {
+    room.phase = PHASES.SHOWDOWN;
+    room.showGuesses = true;
+    showDown(room);
+  }
+}
+
+function showDown(room) {
+  const answer = room.correctAnswer;
+  room.players.forEach(p => {
+    if (p.guess !== undefined && p.status !== 'FOLD' && p.status !== 'OUT') {
+      p.distance = Math.abs(p.guess - answer);
+    }
+  });
+
+  const active = getActivePlayers(room).filter(p => p.guess !== undefined);
+  if (active.length === 0) {
+    room.winnerIds = [];
+    room.winningAmount = 0;
+  } else {
+    let minDist = Infinity;
+    active.forEach(p => { if (p.distance < minDist) minDist = p.distance; });
+    const winners = active.filter(p => p.distance === minDist);
+    room.winnerIds = winners.map(p => p.id);
+    const share = Math.floor(room.pot / winners.length);
+    winners.forEach(p => {
+      p.chips += share;
+      p.isWinner = true;
+    });
+    room.winningAmount = share;
+  }
+
+  room.phase = PHASES.RESULT;
+  room.roundEnded = true;
+  broadcastRoom(room);
+}
+
+function endRoundEarly(room) {
+  if (room.roundEnded) return;
+  const active = getActivePlayers(room);
+  if (active.length === 1) {
+    const winner = active[0];
+    winner.chips += room.pot;
+    winner.isWinner = true;
+    room.winnerIds = [winner.id];
+    room.winningAmount = room.pot;
+    room.phase = PHASES.RESULT;
+    room.roundEnded = true;
+    broadcastRoom(room);
+  } else {
+    room.roundEnded = true;
+    setTimeout(() => {
+      startNextRound(room);
+    }, 2000);
+  }
+}
+
+// ─── Socket.IO ──────────────────────────────────────────────────────────────
 
 io.on('connection', (socket) => {
   console.log(`🔌 Client connected: ${socket.id}`);
@@ -405,7 +699,6 @@ io.on('connection', (socket) => {
     console.log(`👤 ${name} ist ${roomId} beigetreten`);
   });
 
-  // ─── SPIEL STARTEN MIT EINSTELLUNGEN ───────────────────────────────────
   socket.on('game:start', (data) => {
     const room = rooms.get(socket.data.roomId);
     if (!room) return;
@@ -414,9 +707,7 @@ io.on('connection', (socket) => {
       return;
     }
     if (room.started) return;
-    // Einstellungen aus dem Client übernehmen
-    const settings = data || {};
-    startGame(room, settings);
+    startGame(room, data);
   });
 
   socket.on('guess:submit', (data) => {
@@ -474,7 +765,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// ─── Server starten ──────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Server läuft auf http://localhost:${PORT}`);
