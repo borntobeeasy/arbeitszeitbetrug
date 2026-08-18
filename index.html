@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Sportdirektor-Simulator // Bundesliga &amp; 2. Bundesliga 2026/27</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ================================================================
+           RETRO ARCADE / TELETEXT THEME
+           Palette: DFL-Rot #e3000f · Bundesliga-Gold #ffd200 · Terminal-Grün #39ff14
+           Tiefschwarz-Blau #05070f / #0c1024 · Panel #10142a
+           Pixel-Font "Press Start 2P" fuer Ueberschriften/UI, "VT323" fuer Zahlen/Ticker
+        =================================================================== */
+        :root{
+            --bg:#05070f;
+            --panel:#0c1024;
+            --panel-2:#10142a;
+            --line:#2a2f52;
+            --red:#e3000f;
+            --gold:#ffd200;
+            --blue:#1e5fff;
+            --green:#39ff14;
+            --text:#e8ecff;
+            --dim:#8890c0;
+            --pixel: 'Press Start 2P', monospace;
+            --mono: 'VT323', 'JetBrains Mono', monospace;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scrollbar-color: var(--red) var(--bg); }
+        body {
+            font-family: var(--mono);
+            font-size: 20px;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            line-height: 1.35;
+            background-image:
+                radial-gradient(ellipse at top, rgba(30,95,255,0.12), transparent 60%),
+                radial-gradient(ellipse at bottom, rgba(227,0,15,0.10), transparent 60%);
+        }
+        /* CRT scanline + flicker overlay */
+        body::before{
+            content:"";
+            position: fixed; inset:0; pointer-events:none; z-index: 999;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(255,255,255,0.035) 0px,
+                rgba(255,255,255,0.035) 1px,
+                transparent 2px,
+                transparent 3px
+            );
+            mix-blend-mode: overlay;
+        }
+        body::after{
+            content:"";
+            position: fixed; inset:0; pointer-events:none; z-index: 998;
+            box-shadow: inset 0 0 160px rgba(0,0,0,0.75);
+            animation: flicker 6s infinite;
+        }
+        @keyframes flicker{
+            0%,97%,100% { opacity: 1; }
+            98% { opacity: 0.94; }
+            99% { opacity: 0.98; }
+        }
+        h1, h2, h3 {
+            font-family: var(--pixel);
+            color: var(--gold);
+            text-shadow: 2px 2px 0 var(--red), 4px 4px 0 rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+            line-height: 1.6;
+        }
+        h1 { font-size: 22px; padding: 14px 0; text-align:center; }
+        h2 { font-size: 15px; margin-bottom: 10px; }
+        h3 { font-size: 12px; margin-bottom: 10px; color: var(--blue); text-shadow: 2px 2px 0 rgba(0,0,0,0.6); }
+        h4 { font-family: var(--pixel); font-size: 10px; color: var(--green); margin: 10px 0; }
+        p { font-size: 20px; }
+
+        button {
+            font-family: var(--pixel);
+            font-size: 10px;
+            background: var(--red);
+            border: none;
+            outline: 3px solid #7a0009;
+            outline-offset: -3px;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 0;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            box-shadow: 4px 4px 0 #000;
+            transition: transform 0.08s ease, box-shadow 0.08s ease;
+            text-transform: uppercase;
+        }
+        button:hover { background: #ff2436; }
+        button:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0 0 0 #000;
+        }
+        button:focus-visible { outline: 3px dashed var(--gold); outline-offset: 2px; }
+
+        input, select {
+            font-family: var(--mono);
+            font-size: 20px;
+            padding: 6px 12px;
+            border-radius: 0;
+            border: 2px solid var(--line);
+            margin: 4px 0;
+            background: #060814;
+            color: var(--green);
+        }
+        input:focus, select:focus { outline: 2px solid var(--gold); border-color: var(--gold); }
+
+        .container {
+            background: var(--panel);
+            padding: 20px;
+            border: 2px solid var(--line);
+            border-image: linear-gradient(135deg, var(--red), var(--gold), var(--blue)) 1;
+            margin-top: 14px;
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.5);
+        }
+        .flex { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; }
+        .card {
+            background: var(--panel-2);
+            padding: 15px;
+            border: 2px solid var(--line);
+            flex: 1 1 200px;
+            position: relative;
+        }
+        .card h3, .card h4 { margin-top: 0; }
+
+        .menu { display: flex; gap: 8px; flex-wrap: wrap; margin: 15px 0; }
+        .menu button { background: var(--panel-2); outline-color: var(--line); color: var(--dim); }
+        .menu button.active { background: var(--red); color: #fff; outline-color: #7a0009; }
+
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 22px; }
+        th, td { padding: 6px 12px; text-align: left; border-bottom: 1px solid var(--line); }
+        th {
+            background: var(--panel-2);
+            color: var(--gold);
+            font-family: var(--pixel);
+            font-size: 9px;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--red);
+        }
+        tr.row-champions td:first-child { box-shadow: inset 4px 0 0 var(--blue); }
+        tr.row-europa td:first-child { box-shadow: inset 4px 0 0 var(--green); }
+        tr.row-playoff td:first-child { box-shadow: inset 4px 0 0 var(--gold); }
+        tr.row-relegation td:first-child { box-shadow: inset 4px 0 0 var(--red); }
+        tr.row-own { background: rgba(255,210,0,0.10); }
+        tr.row-own td:first-child { font-weight: bold; }
+
+        .highlight { color: var(--gold); font-weight: bold; }
+        .ticker {
+            background: #010102;
+            border: 2px solid var(--line);
+            padding: 15px;
+            max-height: 320px;
+            overflow-y: auto;
+            font-size: 22px;
+            color: var(--green);
+        }
+        .ticker p { margin: 4px 0; }
+        .ticker hr { border: none; border-top: 1px dashed var(--line); margin: 8px 0; }
+        .hidden { display: none; }
+        .status {
+            font-family: var(--pixel);
+            font-size: 11px;
+            padding: 8px 12px;
+            background: var(--panel-2);
+            border: 2px solid var(--red);
+            color: var(--gold);
+        }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+        .btn-group button { background: var(--blue); outline-color: #0b2a80; }
+        .btn-group button.danger { background: var(--red); outline-color: #7a0009; }
+        .btn-group button.success { background: #158a3d; outline-color: #0a4a20; }
+
+        pre { font-family: var(--mono); font-size: 20px; color: var(--green); white-space: pre-wrap; }
+
+        /* ---------- Badges / club crests ---------- */
+        .crest {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 42px; height: 42px;
+            font-family: var(--pixel); font-size: 11px;
+            background: var(--panel-2);
+            border: 2px solid var(--gold);
+            box-shadow: 3px 3px 0 #000;
+            color: var(--gold);
+            flex-shrink: 0;
+        }
+        .crest.league-2 { border-color: var(--blue); color: var(--blue); }
+        .club-card { display: flex; flex-direction: column; gap: 8px; }
+        .club-card .club-head { display: flex; align-items: center; gap: 10px; }
+        .club-card .club-head h3 { margin: 0; font-size: 11px; }
+        .league-tag {
+            display: inline-block; font-family: var(--pixel); font-size: 8px;
+            padding: 3px 6px; margin-bottom: 6px;
+            background: var(--red); color: #fff;
+        }
+        .league-tag.tag-2 { background: var(--blue); }
+
+        /* ---------- Title / select screen ---------- */
+        .arcade-title { text-align: center; margin-bottom: 4px; }
+        .blink { animation: blink 1s steps(1) infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .subtitle {
+            text-align: center; font-family: var(--pixel); font-size: 9px;
+            color: var(--dim); margin-bottom: 18px; letter-spacing: 1px;
+        }
+        .league-tabs { display:flex; gap: 8px; margin: 10px 0 16px; }
+        .league-tabs button { background: var(--panel-2); color: var(--dim); outline-color: var(--line); }
+        .league-tabs button.active { background: var(--gold); color: #000; outline-color: #a08600; }
+
+        ::selection { background: var(--gold); color: #000; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--red); border: 2px solid var(--bg); }
+
+        @media (max-width: 600px) {
+            body { font-size: 18px; padding: 12px; }
+            h1 { font-size: 15px; }
+            h2 { font-size: 12px; }
+            button { font-size: 9px; padding: 8px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<h1 class="arcade-title">⚽ SPORTDIREKTOR SIMULATOR</h1>
+<p class="subtitle">1. BUNDESLIGA <span class="blink">▮</span> 2. BUNDESLIGA — SAISON 2026/27</p>
+<div id="app">
+    <!-- Selection Screen -->
+    <div id="select-screen" class="container">
+        <h2>&gt; Waehle deinen Verein_</h2>
+        <div id="league-tabs" class="league-tabs">
+            <button data-league="Bundesliga" class="active">1. Bundesliga</button>
+            <button data-league="2. Bundesliga">2. Bundesliga</button>
+        </div>
+        <div id="club-list" class="flex"></div>
+        <button id="load-game-btn">📂 Spielstand laden</button>
+        <p style="margin-top:14px; color:var(--dim); font-size:16px;">Alle Daten werden lokal im Browser (localStorage) gespeichert.</p>
+    </div>
+
+    <!-- Main Game UI -->
+    <div id="game-screen" class="hidden">
+        <div class="flex" style="justify-content:space-between; align-items:center;">
+            <h2 id="club-name-header"></h2>
+            <span id="matchday-display" class="status">Spieltag 0</span>
+        </div>
+        <!-- Menu Tabs -->
+        <div class="menu">
+            <button data-tab="dashboard" class="active">Dashboard</button>
+            <button data-tab="squad">Kader</button>
+            <button data-tab="transfers">Transfers</button>
+            <button data-tab="coach">Trainer</button>
+            <button data-tab="matchday">Spieltag</button>
+            <button data-tab="save">Speichern</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="tab-dashboard" class="container tab-content"></div>
+        <div id="tab-squad" class="container tab-content hidden"></div>
+        <div id="tab-transfers" class="container tab-content hidden"></div>
+        <div id="tab-coach" class="container tab-content hidden"></div>
+        <div id="tab-matchday" class="container tab-content hidden"></div>
+        <div id="tab-save" class="container tab-content hidden"></div>
+    </div>
+</div>
+
+<script>
+// ================================================================
+//  DATA MODELS (JavaScript classes)
+// ================================================================
+
+class Player {
+    constructor(id, name, age, position, attributes, marketValue, salary, contractYears, potential) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.position = position;
+        this.attributes = attributes;       // object {geschwindigkeit, passspiel, schuss, defensive, kopfball}
+        this.marketValue = marketValue;     // Mio €
+        this.salary = salary;               // Mio €/year
+        this.contractYears = contractYears;
+        this.potential = potential;
+        this.satisfaction = 70;
+        this.gamesPlayed = 0;
+        this.goals = 0;
+        this.assists = 0;
+        this.injuryWeeks = 0;
+        this.formPenalty = 0;
+    }
+
+    get overall() {
+        const vals = Object.values(this.attributes);
+        return Math.round(vals.reduce((a,b) => a+b, 0) / vals.length);
+    }
+
+    toJSON() {
+        return { ...this, attributes: {...this.attributes} };
+    }
+
+    static fromJSON(data) {
+        const p = new Player(data.id, data.name, data.age, data.position, data.attributes,
+                            data.marketValue, data.salary, data.contractYears, data.potential);
+        p.satisfaction = data.satisfaction;
+        p.gamesPlayed = data.gamesPlayed;
+        p.goals = data.goals;
+        p.assists = data.assists;
+        p.injuryWeeks = data.injuryWeeks;
+        p.formPenalty = data.formPenalty;
+        return p;
+    }
+}
+
+class Coach {
+    constructor(id, name, age, reputation, philosophy, preferredFormation, strengths, weaknesses, contractYears) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.reputation = reputation;
+        this.philosophy = philosophy;
+        this.preferredFormation = preferredFormation;
+        this.strengths = strengths;         // object
+        this.weaknesses = weaknesses;
+        this.contractYears = contractYears;
+    }
+
+    toJSON() {
+        return { ...this, strengths: {...this.strengths}, weaknesses: {...this.weaknesses} };
+    }
+
+    static fromJSON(data) {
+        return new Coach(data.id, data.name, data.age, data.reputation,
+                         data.philosophy, data.preferredFormation,
+                         data.strengths, data.weaknesses, data.contractYears);
+    }
+}
+
+class Club {
+    constructor(name, league, financialReserves, transferBudget, salaryBudget, seasonGoals, youthAcademyLevel = 1) {
+        this.name = name;
+        this.league = league;               // "Bundesliga" or "2. Bundesliga"
+        this.financialReserves = financialReserves;
+        this.transferBudget = transferBudget;
+        this.salaryBudget = salaryBudget;
+        this.seasonGoals = seasonGoals;     // { leaguePlace: 8, cupRound: "quarter_final" }
+        this.youthAcademyLevel = youthAcademyLevel;
+        this.fanTrust = 50;
+        this.players = [];
+        this.coach = null;
+    }
+
+    averageOverall() {
+        if (!this.players.length) return 0;
+        const sum = this.players.reduce((acc, p) => acc + p.overall, 0);
+        return sum / this.players.length;
+    }
+
+    toJSON() {
+        return {
+            name: this.name,
+            league: this.league,
+            financialReserves: this.financialReserves,
+            transferBudget: this.transferBudget,
+            salaryBudget: this.salaryBudget,
+            seasonGoals: { ...this.seasonGoals },
+            youthAcademyLevel: this.youthAcademyLevel,
+            fanTrust: this.fanTrust,
+            players: this.players.map(p => p.toJSON()),
+            coach: this.coach ? this.coach.toJSON() : null
+        };
+    }
+
+    static fromJSON(data) {
+        const club = new Club(data.name, data.league || "Bundesliga", data.financialReserves, data.transferBudget,
+                              data.salaryBudget, data.seasonGoals, data.youthAcademyLevel);
+        club.fanTrust = data.fanTrust;
+        club.players = data.players.map(p => Player.fromJSON(p));
+        club.coach = data.coach ? Coach.fromJSON(data.coach) : null;
+        return club;
+    }
+}
+
+// ================================================================
+//  DATA GENERATOR
+// ================================================================
+
+// Saison 2026/27 - real recherchierte Teilnehmerfelder (Stand August 2026)
+const BUNDESLIGA_CLUBS = [
+    { name: "FC Bayern München",       crest: "FCB" },
+    { name: "Borussia Dortmund",       crest: "BVB" },
+    { name: "RB Leipzig",              crest: "RBL" },
+    { name: "Bayer 04 Leverkusen",     crest: "B04" },
+    { name: "Eintracht Frankfurt",     crest: "SGE" },
+    { name: "VfB Stuttgart",           crest: "VfB" },
+    { name: "SC Freiburg",             crest: "SCF" },
+    { name: "1. FC Union Berlin",      crest: "FCU" },
+    { name: "TSG Hoffenheim",          crest: "TSG" },
+    { name: "Borussia Mönchengladbach",crest: "BMG" },
+    { name: "1. FC Köln",              crest: "KOE" },
+    { name: "Werder Bremen",           crest: "SVW" },
+    { name: "FC Augsburg",             crest: "FCA" },
+    { name: "1. FSV Mainz 05",         crest: "M05" },
+    { name: "Hamburger SV",            crest: "HSV" },
+    { name: "FC Schalke 04",           crest: "S04" },
+    { name: "SV Elversberg",           crest: "SVE" },
+    { name: "SC Paderborn 07",         crest: "SCP" }
+];
+
+const ZWEITLIGA_CLUBS = [
+    { name: "Hertha BSC",              crest: "BSC" },
+    { name: "Hannover 96",             crest: "H96" },
+    { name: "1. FC Kaiserslautern",    crest: "FCK" },
+    { name: "1. FC Nürnberg",          crest: "FCN" },
+    { name: "VfL Bochum",              crest: "VfL" },
+    { name: "Arminia Bielefeld",       crest: "DSC" },
+    { name: "Karlsruher SC",           crest: "KSC" },
+    { name: "Eintracht Braunschweig",  crest: "EBS" },
+    { name: "Holstein Kiel",           crest: "KSV" },
+    { name: "1. FC Magdeburg",         crest: "FCM" },
+    { name: "SG Dynamo Dresden",       crest: "SGD" },
+    { name: "SpVgg Greuther Fürth",    crest: "SGF" },
+    { name: "SV Darmstadt 98",         crest: "SVD" },
+    { name: "VfL Osnabrück",           crest: "VfLO" },
+    { name: "Energie Cottbus",         crest: "FCE" },
+    { name: "VfL Wolfsburg",           crest: "WOB" },
+    { name: "1. FC Heidenheim",        crest: "FCH" },
+    { name: "FC St. Pauli",            crest: "STP" }
+];
+
+const CLUB_CREST = {};
+BUNDESLIGA_CLUBS.forEach(c => CLUB_CREST[c.name] = c.crest);
+ZWEITLIGA_CLUBS.forEach(c => CLUB_CREST[c.name] = c.crest);
+
+const POSITIONS = ["IV", "AV", "ZM", "FL", "ST"];
+const ATTRIBUTES = ["geschwindigkeit", "passspiel", "schuss", "defensive", "kopfball"];
+
+const POSITION_WEIGHTS = {
+    IV: { defensive: 0.6, kopfball: 0.2, passspiel: 0.1, geschwindigkeit: 0.05, schuss: 0.05 },
+    AV: { geschwindigkeit: 0.3, defensive: 0.3, passspiel: 0.2, schuss: 0.1, kopfball: 0.1 },
+    ZM: { passspiel: 0.3, schuss: 0.2, geschwindigkeit: 0.15, defensive: 0.25, kopfball: 0.1 },
+    FL: { geschwindigkeit: 0.3, schuss: 0.25, passspiel: 0.2, defensive: 0.1, kopfball: 0.15 },
+    ST: { schuss: 0.35, kopfball: 0.25, geschwindigkeit: 0.2, passspiel: 0.1, defensive: 0.1 }
+};
+
+function randomName() {
+    const first = ["Max","Lukas","Julian","Marco","Mats","Thomas","Manuel","Joshua","Serge","Leon",
+                   "Kai","Timo","Niclas","Florian","Robin","Bernd","Kevin","Matthias","Christian","Jan"];
+    const last = ["Müller","Schmidt","Schneider","Fischer","Weber","Meyer","Wagner","Becker","Schulz","Hoffmann",
+                  "Koch","Richter","Klein","Wolf","Schröder","Neumann","Zimmermann","Braun","Krüger","Frank"];
+    return first[Math.floor(Math.random() * first.length)] + " " + last[Math.floor(Math.random() * last.length)];
+}
+
+function generatePlayer(id, age = null) {
+    if (age === null) age = 18 + Math.floor(Math.random() * 18);
+    const position = POSITIONS[Math.floor(Math.random() * POSITIONS.length)];
+    const attrs = {};
+    ATTRIBUTES.forEach(attr => {
+        let base = 50 + Math.floor(Math.random() * 41); // 50-90
+        const weights = POSITION_WEIGHTS[position];
+        if (weights && weights[attr]) {
+            base += Math.floor(weights[attr] * 20);
+        }
+        attrs[attr] = Math.min(99, base);
+    });
+    const overall = Math.round(Object.values(attrs).reduce((a,b) => a+b, 0) / ATTRIBUTES.length);
+    const marketValue = Math.round((0.5 + (overall / 100) * 10 + (Math.random() - 0.5) * 2) * 10) / 10;
+    const salary = Math.round((0.2 + (overall / 100) * 5 + (Math.random() - 0.5) * 0.6) * 10) / 10;
+    const contract = 1 + Math.floor(Math.random() * 4);
+    const potential = Math.min(99, overall + 5 + Math.floor(Math.random() * 21));
+    return new Player(id, randomName(), age, position, attrs, marketValue, salary, contract, potential);
+}
+
+function generateCoach(id) {
+    const philosophies = ["ball possession", "counter", "pressing", "direct", "tiki-taka"];
+    const formations = ["4-3-3", "4-2-3-1", "3-4-3", "4-4-2", "3-5-2"];
+    const allSkills = ["offensive_development", "youth_promotion", "motivation", "defensive_organisation", "media_competence"];
+    const strengths = {};
+    const weaknesses = {};
+    allSkills.forEach(skill => {
+        strengths[skill] = 60 + Math.floor(Math.random() * 36);
+        weaknesses[skill] = 40 + Math.floor(Math.random() * 36);
+    });
+    return new Coach(id, randomName(), 35 + Math.floor(Math.random() * 30),
+                    40 + Math.floor(Math.random() * 51),
+                    philosophies[Math.floor(Math.random() * philosophies.length)],
+                    formations[Math.floor(Math.random() * formations.length)],
+                    strengths, weaknesses,
+                    1 + Math.floor(Math.random() * 3));
+}
+
+function buildLeagueClubs(clubDefs, league, startId, financeScale) {
+    const clubs = [];
+    let playerId = startId;
+    clubDefs.forEach((def, idx) => {
+        const factor = 1.0 - (idx / 25.0);
+        const financial = Math.round((financeScale.reserveBase + factor * financeScale.reserveSpan) * 10) / 10;
+        const transfer = Math.round((financeScale.transferBase + factor * financeScale.transferSpan) * 10) / 10;
+        const salary = Math.round((financeScale.salaryBase + factor * financeScale.salarySpan) * 10) / 10;
+        const goals = {
+            leaguePlace: 1 + Math.floor(Math.random() * 18),
+            cupRound: ["round1","round2","quarter","semi","final"][Math.floor(Math.random() * 5)]
+        };
+        const club = new Club(def.name, league, financial, transfer, salary, goals, 1 + Math.floor(Math.random() * 6));
+        const numPlayers = 25 + Math.floor(Math.random() * 6);
+        for (let i = 0; i < numPlayers; i++) {
+            let age = 18 + Math.floor(Math.random() * 18);
+            if (i < 5) age = 17 + Math.floor(Math.random() * 5);   // talents
+            else if (i > 20) age = 30 + Math.floor(Math.random() * 6);
+            const p = generatePlayer(playerId++, age);
+            p.marketValue = Math.round(p.marketValue * (0.8 + 0.4 * factor) * financeScale.valueMultiplier * 10) / 10;
+            club.players.push(p);
+        }
+        clubs.push(club);
+    });
+    return clubs;
+}
+
+function generateInitialData() {
+    // 1. Bundesliga: groessere Budgets (Werte in Mio. Euro)
+    const bundesligaClubs = buildLeagueClubs(BUNDESLIGA_CLUBS, "Bundesliga", 0, {
+        reserveBase: 50, reserveSpan: 150,
+        transferBase: 10, transferSpan: 100,
+        salaryBase: 5, salarySpan: 60,
+        valueMultiplier: 1.0
+    });
+    // 2. Bundesliga: kleinere, aber realistische Budgets
+    const zweitligaClubs = buildLeagueClubs(ZWEITLIGA_CLUBS, "2. Bundesliga", 5000, {
+        reserveBase: 8, reserveSpan: 22,
+        transferBase: 1.5, transferSpan: 10,
+        salaryBase: 1, salarySpan: 6,
+        valueMultiplier: 0.3
+    });
+    const clubs = [...bundesligaClubs, ...zweitligaClubs];
+    // Generate coaches and assign randomly
+    const coaches = [];
+    for (let i = 0; i < 20; i++) coaches.push(generateCoach(i));
+    clubs.forEach(club => {
+        club.coach = coaches[Math.floor(Math.random() * coaches.length)];
+    });
+    return clubs;
+}
+
+// ================================================================
+//  GAME ENGINE
+// ================================================================
+
+class GameEngine {
+    constructor(clubs) {
+        this.clubs = clubs;
+        this.currentMatchday = 0;
+        this.leagueTable = {};
+        this.clubs.forEach(c => this.leagueTable[c.name] = 0);
+        this.transferOffers = [];   // array of offer objects
+    }
+
+    // Sorted [name, points] table filtered to one league ("Bundesliga" / "2. Bundesliga")
+    tableForLeague(leagueName) {
+        const namesInLeague = new Set(this.clubs.filter(c => c.league === leagueName).map(c => c.name));
+        return Object.entries(this.leagueTable)
+            .filter(([name]) => namesInLeague.has(name))
+            .sort((a, b) => b[1] - a[1]);
+    }
+
+    clubLeague(clubName) {
+        const c = this.clubs.find(c => c.name === clubName);
+        return c ? c.league : "Bundesliga";
+    }
+
+    // ----- Squad Analysis -----
+    analyzeSquad(club) {
+        const counts = {}, avg = {};
+        club.players.forEach(p => {
+            counts[p.position] = (counts[p.position] || 0) + 1;
+            if (!avg[p.position]) avg[p.position] = [];
+            avg[p.position].push(p.overall);
+        });
+        for (let pos in avg) {
+            avg[pos] = avg[pos].reduce((a,b) => a+b, 0) / avg[pos].length;
+        }
+        return { counts, avgOverall: avg };
+    }
+
+    squadDepthReport(club) {
+        const analysis = this.analyzeSquad(club);
+        let report = `Squad analysis for ${club.name}:\nPosition | Count | Avg Overall\n`;
+        for (let pos in analysis.counts) {
+            report += `${pos.padEnd(8)} | ${analysis.counts[pos].toString().padEnd(5)} | ${analysis.avgOverall[pos].toFixed(1)}\n`;
+        }
+        const weak = [];
+        for (let pos in analysis.counts) {
+            if (analysis.counts[pos] < 2) weak.push(pos);
+            else if (analysis.avgOverall[pos] < 70) weak.push(pos);
+        }
+        report += weak.length ? `Weak positions: ${weak.join(', ')}` : "Squad looks balanced.";
+        return report;
+    }
+
+    // ----- Transfers -----
+    scoutPlayers(club, position, budget) {
+        const candidates = [];
+        this.clubs.forEach(other => {
+            if (other === club) return;
+            other.players.forEach(p => {
+                if (p.position === position && p.marketValue <= budget) {
+                    candidates.push(p);
+                }
+            });
+        });
+        candidates.sort((a,b) => b.overall - a.overall);
+        return candidates.slice(0, 10);
+    }
+
+    makeOffer(fromClub, toClub, player, amount) {
+        if (amount > fromClub.transferBudget) return "Insufficient transfer budget.";
+        const ratio = amount / player.marketValue;
+        let decision;
+        if (ratio >= 1.3) decision = "accept";
+        else if (ratio < 0.8) decision = "reject";
+        else decision = "counter";
+
+        const offer = { player, fromClub, toClub, amount, status: decision, counterAmount: null };
+        if (decision === "accept") {
+            this.executeTransfer(offer);
+            return `Transfer accepted! ${player.name} moves to ${fromClub.name} for ${amount} Mio.`;
+        } else if (decision === "reject") {
+            return `Offer rejected by ${toClub.name}.`;
+        } else {
+            const counter = Math.round((amount * 1.2 + 0.5) * 10) / 10;
+            offer.counterAmount = counter;
+            this.transferOffers.push(offer);
+            return `${toClub.name} counter-offers with ${counter} Mio.`;
+        }
+    }
+
+    executeTransfer(offer) {
+        const { player, fromClub, toClub, amount } = offer;
+        // Remove from seller
+        const idx = fromClub.players.indexOf(player);
+        if (idx !== -1) fromClub.players.splice(idx, 1);
+        // Add to buyer
+        toClub.players.push(player);
+        // Adjust budgets
+        toClub.transferBudget -= amount;
+        toClub.financialReserves -= amount;
+        fromClub.transferBudget += amount;
+        fromClub.financialReserves += amount;
+        // Remove from offers
+        const oIdx = this.transferOffers.indexOf(offer);
+        if (oIdx !== -1) this.transferOffers.splice(oIdx, 1);
+    }
+
+    negotiateSalary(player, offeredSalary) {
+        if (offeredSalary >= player.salary * 0.8 && player.satisfaction > 40) {
+            player.salary = offeredSalary;
+            player.satisfaction = Math.min(100, player.satisfaction + 10);
+            return true;
+        } else {
+            player.satisfaction = Math.max(0, player.satisfaction - 5);
+            return false;
+        }
+    }
+
+    // ----- Coach -----
+    evaluateCoach(club) {
+        if (!club.coach) return "No coach assigned.";
+        const c = club.coach;
+        const perf = club.fanTrust;
+        const score = (perf * 0.5 + c.reputation * 0.5);
+        let rating = score > 75 ? "Excellent" : score > 50 ? "Good" : "Needs improvement";
+        return `Coach ${c.name} (Rep: ${c.reputation}): ${rating}. Philosophy: ${c.philosophy}. Preferred formation: ${c.preferredFormation}.`;
+    }
+
+    coachCompatibility(coach, club) {
+        const avg = club.averageOverall();
+        return Math.round((coach.reputation + avg) / 2);
+    }
+
+    hireCoach(club, coach) {
+        if (club.coach) return `${club.name} already has a coach. Fire first.`;
+        club.coach = coach;
+        return `${coach.name} hired as new coach of ${club.name}.`;
+    }
+
+    fireCoach(club) {
+        if (!club.coach) return "No coach to fire.";
+        const fired = club.coach;
+        club.coach = null;
+        return `${fired.name} has been fired.`;
+    }
+
+    // ----- Match Simulation -----
+    simulateMatch(homeClub, awayClub) {
+        let homeStrength = homeClub.averageOverall();
+        let awayStrength = awayClub.averageOverall();
+        if (homeClub.coach) homeStrength += homeClub.coach.reputation * 0.05;
+        if (awayClub.coach) awayStrength += awayClub.coach.reputation * 0.05;
+        homeStrength *= (1 + (Math.random() - 0.5) * 0.4);
+        awayStrength *= (1 + (Math.random() - 0.5) * 0.4);
+
+        const diff = homeStrength - awayStrength;
+        const homeXg = Math.max(0, (homeStrength / 100) * 2.0 + diff * 0.01);
+        const awayXg = Math.max(0, (awayStrength / 100) * 2.0 - diff * 0.01);
+        // Poisson
+        let homeGoals = this.poissonRandom(homeXg);
+        let awayGoals = this.poissonRandom(awayXg);
+        homeGoals = Math.min(7, Math.max(0, homeGoals));
+        awayGoals = Math.min(7, Math.max(0, awayGoals));
+
+        const events = [];
+        for (let i = 0; i < homeGoals; i++) events.push(`${homeClub.name} scores! (Goal ${i+1})`);
+        for (let i = 0; i < awayGoals; i++) events.push(`${awayClub.name} scores! (Goal ${i+1})`);
+        if (Math.random() < 0.3) {
+            const player = homeClub.players[Math.floor(Math.random() * homeClub.players.length)];
+            events.push(`Yellow card for ${player.name} (${homeClub.name})`);
+        }
+        if (Math.random() < 0.2) {
+            const player = awayClub.players[Math.floor(Math.random() * awayClub.players.length)];
+            events.push(`Injury! ${player.name} (${awayClub.name}) substituted.`);
+        }
+
+        // Update league table (done outside)
+        return {
+            home: homeClub.name,
+            away: awayClub.name,
+            homeGoals,
+            awayGoals,
+            xG_home: Math.round(homeXg * 100) / 100,
+            xG_away: Math.round(awayXg * 100) / 100,
+            events
+        };
+    }
+
+    poissonRandom(lambda) {
+        // simple approximation: use Math.random
+        if (lambda < 30) {
+            let L = Math.exp(-lambda);
+            let k = 0;
+            let p = 1;
+            do {
+                k++;
+                p *= Math.random();
+            } while (p > L);
+            return k - 1;
+        }
+        // fallback: normal approx
+        return Math.round(lambda + Math.sqrt(lambda) * (Math.random() - 0.5) * 2);
+    }
+
+    simulateMatchday(fixtures) {
+        const results = [];
+        fixtures.forEach(([home, away]) => {
+            if (!away) {
+                results.push({ home: home.name, away: "BYE", homeGoals: null, awayGoals: null, events: [] });
+                return;
+            }
+            const result = this.simulateMatch(home, away);
+            results.push(result);
+            // Update table
+            if (result.homeGoals > result.awayGoals) {
+                this.leagueTable[home.name] += 3;
+            } else if (result.homeGoals < result.awayGoals) {
+                this.leagueTable[away.name] += 3;
+            } else {
+                this.leagueTable[home.name] += 1;
+                this.leagueTable[away.name] += 1;
+            }
+        });
+        this.currentMatchday++;
+        return results;
+    }
+}
+
+// ================================================================
+//  APPLICATION STATE & UI
+// ================================================================
+
+let appState = {
+    clubs: [],
+    engine: null,
+    playerClub: null,
+    currentTab: 'dashboard'
+};
+
+// ----- DOM refs -----
+const selectScreen = document.getElementById('select-screen');
+const gameScreen = document.getElementById('game-screen');
+const clubList = document.getElementById('club-list');
+const loadGameBtn = document.getElementById('load-game-btn');
+const clubNameHeader = document.getElementById('club-name-header');
+const matchdayDisplay = document.getElementById('matchday-display');
+
+const tabContents = {
+    dashboard: document.getElementById('tab-dashboard'),
+    squad: document.getElementById('tab-squad'),
+    transfers: document.getElementById('tab-transfers'),
+    coach: document.getElementById('tab-coach'),
+    matchday: document.getElementById('tab-matchday'),
+    save: document.getElementById('tab-save')
+};
+
+// ----- Helpers -----
+let selectedLeagueTab = "Bundesliga";
+
+function renderClubList() {
+    clubList.innerHTML = '';
+    appState.clubs
+        .filter(club => club.league === selectedLeagueTab)
+        .forEach((club) => {
+            const idx = appState.clubs.indexOf(club);
+            const crest = CLUB_CREST[club.name] || club.name.slice(0,3).toUpperCase();
+            const crestClass = club.league === "2. Bundesliga" ? "crest league-2" : "crest";
+            const div = document.createElement('div');
+            div.className = 'card club-card';
+            div.innerHTML = `
+                <div class="club-head">
+                    <div class="${crestClass}">${crest}</div>
+                    <h3>${club.name}</h3>
+                </div>
+                <p>Budget: ${club.transferBudget.toFixed(1)} Mio. €</p>
+                <p>Kader: ${club.players.length} Spieler</p>
+                <button data-idx="${idx}">▶ Uebernehmen</button>`;
+            div.querySelector('button').addEventListener('click', () => {
+                appState.playerClub = club;
+                startGame();
+            });
+            clubList.appendChild(div);
+        });
+}
+
+document.querySelectorAll('#league-tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        selectedLeagueTab = btn.dataset.league;
+        document.querySelectorAll('#league-tabs button').forEach(b => b.classList.toggle('active', b === btn));
+        renderClubList();
+    });
+});
+
+function startGame() {
+    selectScreen.classList.add('hidden');
+    gameScreen.classList.remove('hidden');
+    clubNameHeader.textContent = appState.playerClub.name;
+    updateMatchdayDisplay();
+    switchTab('dashboard');
+}
+
+function updateMatchdayDisplay() {
+    matchdayDisplay.textContent = `Spieltag ${appState.engine.currentMatchday}`;
+}
+
+function switchTab(tabId) {
+    // Update menu buttons
+    document.querySelectorAll('.menu button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
+    });
+    // Hide all tabs, show selected
+    Object.keys(tabContents).forEach(key => {
+        tabContents[key].classList.toggle('hidden', key !== tabId);
+    });
+    appState.currentTab = tabId;
+    // Render content
+    switch (tabId) {
+        case 'dashboard': renderDashboard(); break;
+        case 'squad': renderSquad(); break;
+        case 'transfers': renderTransfers(); break;
+        case 'coach': renderCoach(); break;
+        case 'matchday': renderMatchday(); break;
+        case 'save': renderSave(); break;
+    }
+}
+
+// ================================================================
+//  TAB RENDERERS
+// ================================================================
+
+function renderDashboard() {
+    const club = appState.playerClub;
+    const engine = appState.engine;
+    const crest = CLUB_CREST[club.name] || club.name.slice(0,3).toUpperCase();
+    const leagueTagClass = club.league === "2. Bundesliga" ? "league-tag tag-2" : "league-tag";
+    let html = `
+        <span class="${leagueTagClass}">${club.league}</span>
+        <div class="flex">
+            <div class="card"><h3>📊 Finanzen</h3>
+                <p>Ruecklagen: ${club.financialReserves.toFixed(1)} Mio. €</p>
+                <p>Transferbudget: ${club.transferBudget.toFixed(1)} Mio.</p>
+                <p>Gehaltsbudget: ${club.salaryBudget.toFixed(1)} Mio.</p>
+            </div>
+            <div class="card"><h3>👥 Kader</h3>
+                <p>Spieler: ${club.players.length}</p>
+                <p>Ø Staerke: ${club.averageOverall().toFixed(1)}</p>
+                <p>Fan-Vertrauen: ${club.fanTrust}%</p>
+            </div>
+            <div class="card"><h3>🧑‍🏫 Trainer</h3>
+                <p>${club.coach ? club.coach.name : 'Keiner'}</p>
+                <p>Reputation: ${club.coach ? club.coach.reputation : '-'}</p>
+            </div>
+        </div>
+    `;
+    html += renderLeagueTableHTML(engine, club.league, club.name, true);
+    tabContents.dashboard.innerHTML = html;
+}
+
+function renderSquad() {
+    const club = appState.playerClub;
+    const engine = appState.engine;
+    let html = `<h3>Squad of ${club.name}</h3>
+                <button onclick="showSquadAnalysis()">📊 Squad Analysis</button>
+                <div id="squad-analysis-output"></div>
+                <table>
+                    <tr><th>ID</th><th>Name</th><th>Pos</th><th>Age</th><th>Overall</th><th>Value</th><th>Salary</th><th>Contract</th></tr>`;
+    club.players.forEach(p => {
+        html += `<tr>
+            <td>${p.id}</td>
+            <td>${p.name}</td>
+            <td>${p.position}</td>
+            <td>${p.age}</td>
+            <td>${p.overall}</td>
+            <td>${p.marketValue.toFixed(1)}</td>
+            <td>${p.salary.toFixed(1)}</td>
+            <td>${p.contractYears}</td>
+        </tr>`;
+    });
+    html += `</table>
+             <div class="btn-group">
+                <button onclick="extendContract()">Extend Contract</button>
+             </div>`;
+    tabContents.squad.innerHTML = html;
+}
+
+function showSquadAnalysis() {
+    const engine = appState.engine;
+    const club = appState.playerClub;
+    const report = engine.squadDepthReport(club);
+    document.getElementById('squad-analysis-output').innerHTML = `<pre>${report}</pre>`;
+}
+
+function extendContract() {
+    const club = appState.playerClub;
+    const pid = prompt("Enter player ID to extend:");
+    if (!pid) return;
+    const id = parseInt(pid);
+    const player = club.players.find(p => p.id === id);
+    if (!player) { alert("Player not found."); return; }
+    const years = parseInt(prompt("Enter additional years (1-3):"));
+    if (isNaN(years) || years < 1 || years > 3) { alert("Invalid years."); return; }
+    if (player.satisfaction > 50) {
+        player.contractYears += years;
+        player.satisfaction = Math.min(100, player.satisfaction + 5);
+        alert(`Contract extended! ${player.name} now has ${player.contractYears} years left.`);
+    } else {
+        alert(`${player.name} is not satisfied and refuses to extend.`);
+    }
+    renderSquad();
+}
+
+function renderTransfers() {
+    const club = appState.playerClub;
+    const engine = appState.engine;
+    let html = `
+        <h3>Transfer Market</h3>
+        <div class="btn-group">
+            <button onclick="scoutPlayersUI()">🔍 Scout Players</button>
+            <button onclick="makeOfferUI()">💰 Make Offer</button>
+            <button onclick="sellPlayerUI()">📤 Sell Player</button>
+            <button onclick="viewOffersUI()">📋 Pending Offers</button>
+        </div>
+        <div id="transfer-output"></div>
+    `;
+    tabContents.transfers.innerHTML = html;
+}
+
+function scoutPlayersUI() {
+    const club = appState.playerClub;
+    const engine = appState.engine;
+    const pos = prompt("Enter position to scout (IV, AV, ZM, FL, ST):");
+    if (!pos || !POSITIONS.includes(pos)) { alert("Invalid position."); return; }
+    const budget = parseFloat(prompt("Max budget (Mio. €):"));
+    if (isNaN(budget)) return;
+    const candidates = engine.scoutPlayers(club, pos, budget);
+    let out = `<h4>Scouting results for ${pos}</h4><table><tr><th>Name</th><th>Club</th><th>Overall</th><th>Value</th></tr>`;
+    candidates.forEach(p => {
+        let clubName = "Unknown";
+        for (let c of engine.clubs) {
+            if (c !== club && c.players.includes(p)) { clubName = c.name; break; }
+        }
+        out += `<tr><td>${p.name}</td><td>${clubName}</td><td>${p.overall}</td><td>${p.marketValue.toFixed(1)}</td></tr>`;
+    });
+    out += `</table>`;
+    document.getElementById('transfer-output').innerHTML = out;
+}
+
+function makeOfferUI() {
+    const club = appState.playerClub;
+    const engine = appState.engine;
+    const search = prompt("Enter player name or ID to make an offer:");
+    if (!search) return;
+    let targetPlayer = null, targetClub = null;
+    const id = parseInt(search);
+    if (!isNaN(id)) {
+        for (let c of engine.clubs) {
+            if (c === club) continue;
+            const p = c.players.find(p => p.id === id);
+            if (p) { targetPlayer = p; targetClub = c; break; }
+        }
+    } else {
+        const name = search.toLowerCase();
+        for (let c of engine.clubs) {
+            if (c === club) continue;
+            const p = c.players.find(p => p.name.toLowerCase().includes(name));
+            if (p) { targetPlayer = p; targetClub = c; break; }
+        }
+    }
+    if (!targetPlayer) { alert("Player not found in other clubs."); return; }
+    const amount = parseFloat(prompt(`Offer amount for ${targetPlayer.name} (Value: ${targetPlayer.marketValue} Mio.):`));
+    if (isNaN(amount)) return;
+    const result = engine.makeOffer(club, targetClub, targetPlayer, amount);
+    document.getElementById('transfer-output').innerHTML = `<p>${result}</p>`;
+}
+
+function sellPlayerUI() {
+    const club = appState.playerClub;
+    const engine = appState.engine;
+    // List players
+    let list = club.players.map((p, i) => `${i+1}. ${p.name} (${p.position}, Value: ${p.marketValue} Mio.)`).join('\n');
+    const sel = parseInt(prompt(`Select player to sell:\n${list}\nEnter number (0 to cancel):`));
+    if (isNaN(sel) || sel < 1 || sel > club.players.length) return;
+    const player = club.players[sel - 1];
+    const interested = engine.clubs.filter(c => c !== club && c.transferBudget > player.marketValue * 0.5);
+    if (!interested.length) { alert("No clubs interested."); return; }
+    const buyer = interested[Math.floor(Math.random() * interested.length)];
+    const offerAmount = Math.round(player.marketValue * (0.7 + Math.random() * 0.6) * 10) / 10;
+    if (confirm(`${buyer.name} offers ${offerAmount} Mio. for ${player.name}. Accept?`)) {
+        const offer = { player, fromClub: club, toClub: buyer, amount: offerAmount };
+        engine.executeTransfer(offer);
+        alert(`Transfer completed! ${player.name} sold to ${buyer.name}.`);
+    } else {
+        alert("Offer rejected.");
+    }
+    renderTransfers();
+}
+
+function viewOffersUI() {
+    const engine = appState.engine;
+    if (!engine.transferOffers.length) {
+        document.getElementById('transfer-output').innerHTML = "<p>No pending offers.</p>";
+        return;
+    }
+    let out = "<h4>Pending Offers</h4><ul>";
+    engine.transferOffers.forEach(o => {
+        out += `<li>${o.fromClub.name} offers ${o.amount} Mio. for ${o.player.name} (status: ${o.status})`;
+        if (o.counterAmount) out += ` - counter: ${o.counterAmount} Mio.`;
+        out += `</li>`;
+    });
+    out += `</ul>`;
+    document.getElementById('transfer-output').innerHTML = out;
+}
+
+function renderCoach() {
+    const club = appState.playerClub;
+    const engine = appState.engine;
+    let html = `<h3>Coach Management</h3>`;
+    if (club.coach) {
+        const c = club.coach;
+        html += `<div class="card">
+            <h4>${c.name}</h4>
+            <p>Age: ${c.age}, Reputation: ${c.reputation}</p>
+            <p>Philosophy: ${c.philosophy}, Formation: ${c.preferredFormation}</p>
+            <p>Strengths: ${Object.entries(c.strengths).map(([k,v]) => `${k}: ${v}`).join(', ')}</p>
+            <p>Weaknesses: ${Object.entries(c.weaknesses).map(([k,v]) => `${k}: ${v}`).join(', ')}</p>
+            <p>Contract years left: ${c.contractYears}</p>
+        </div>`;
+    } else {
+        html += `<p>No coach assigned.</p>`;
+    }
+    html += `<div class="btn-group">
+        <button onclick="evaluateCoachUI()">Evaluate Coach</button>
+        <button class="danger" onclick="fireCoachUI()">Fire Coach</button>
+        <button onclick="hireCoachUI()">Hire New Coach</button>
+    </div>
+    <div id="coach-output"></div>`;
+    tabContents.coach.innerHTML = html;
+}
+
+function evaluateCoachUI() {
+    const engine = appState.engine;
+    const club = appState.playerClub;
+    document.getElementById('coach-output').innerHTML = `<pre>${engine.evaluateCoach(club)}</pre>`;
+}
+
+function fireCoachUI() {
+    const engine = appState.engine;
+    const club = appState.playerClub;
+    if (!club.coach) { alert("No coach to fire."); return; }
+    if (confirm(`Fire ${club.coach.name}?`)) {
+        alert(engine.fireCoach(club));
+        renderCoach();
+    }
+}
+
+function hireCoachUI() {
+    const engine = appState.engine;
+    const club = appState.playerClub;
+    // Generate 5 random coaches
+    const coaches = [];
+    for (let i = 0; i < 5; i++) coaches.push(generateCoach(100 + i));
+    let list = coaches.map((c, i) => `${i+1}. ${c.name} (Rep: ${c.reputation}, Philosophy: ${c.philosophy})`).join('\n');
+    const sel = parseInt(prompt(`Available coaches:\n${list}\nSelect number (0 to cancel):`));
+    if (isNaN(sel) || sel < 1 || sel > coaches.length) return;
+    const newCoach = coaches[sel-1];
+    if (club.coach) engine.fireCoach(club);
+    alert(engine.hireCoach(club, newCoach));
+    renderCoach();
+}
+
+function renderMatchday() {
+    const engine = appState.engine;
+    let html = `
+        <h3>Spieltag ${engine.currentMatchday + 1}</h3>
+        <button onclick="simulateMatchdayUI()">▶ Naechsten Spieltag simulieren</button>
+        <div id="matchday-results"></div>
+    `;
+    tabContents.matchday.innerHTML = html;
+}
+
+function buildFixturesForLeague(engine, leagueName) {
+    const leagueClubs = engine.clubs.filter(c => c.league === leagueName);
+    const shuffled = [...leagueClubs].sort(() => Math.random() - 0.5);
+    const fixtures = [];
+    for (let i = 0; i < shuffled.length; i += 2) {
+        if (i + 1 < shuffled.length) {
+            fixtures.push([shuffled[i], shuffled[i + 1]]);
+        } else {
+            fixtures.push([shuffled[i], null]);
+        }
+    }
+    return fixtures;
+}
+
+function renderResultsBlock(engine, leagueName, results, playerClubName) {
+    let html = `<h4>&gt; ${leagueName.toUpperCase()}</h4><div class="ticker">`;
+    results.forEach(r => {
+        const isOwn = r.home === playerClubName || r.away === playerClubName;
+        if (!r.away) {
+            html += `<p>${r.home} ist spielfrei.</p>`;
+            return;
+        }
+        html += `<p${isOwn ? ' class="highlight"' : ''}><strong>${r.home} ${r.homeGoals} - ${r.awayGoals} ${r.away}</strong> (xG: ${r.xG_home} - ${r.xG_away})</p>`;
+        r.events.forEach(e => html += `<p>&nbsp;&nbsp;${e}</p>`);
+        html += `<hr>`;
+    });
+    html += `</div>`;
+    html += renderLeagueTableHTML(engine, leagueName, playerClubName, false);
+    return html;
+}
+
+function renderLeagueTableHTML(engine, leagueName, playerClubName, top5Only) {
+    let sorted = engine.tableForLeague(leagueName);
+    if (top5Only) sorted = sorted.slice(0, 5);
+    let html = `<h4>&gt; Tabelle ${leagueName}</h4><table><tr><th>Pl.</th><th>Verein</th><th>Pkt.</th></tr>`;
+    sorted.forEach(([name, pts], i) => {
+        const pos = i + 1;
+        let rowClass = '';
+        if (leagueName === "Bundesliga") {
+            if (pos <= 4) rowClass = 'row-champions';
+            else if (pos === 5) rowClass = 'row-europa';
+            else if (pos === 6) rowClass = 'row-europa';
+            else if (pos === 16) rowClass = 'row-playoff';
+            else if (pos >= 17) rowClass = 'row-relegation';
+        } else {
+            if (pos <= 2) rowClass = 'row-champions';
+            else if (pos === 3) rowClass = 'row-playoff';
+            else if (pos >= 17) rowClass = 'row-relegation';
+        }
+        if (name === playerClubName) rowClass += ' row-own';
+        const crest = CLUB_CREST[name] || name.slice(0,3).toUpperCase();
+        html += `<tr class="${rowClass.trim()}"><td>${pos}</td><td>${crest} · ${name}</td><td>${pts}</td></tr>`;
+    });
+    html += `</table>`;
+    return html;
+}
+
+function simulateMatchdayUI() {
+    const engine = appState.engine;
+    const playerClub = appState.playerClub;
+
+    const bundesligaFixtures = buildFixturesForLeague(engine, "Bundesliga");
+    const zweitligaFixtures = buildFixturesForLeague(engine, "2. Bundesliga");
+
+    const bundesligaResults = engine.simulateMatchday(bundesligaFixtures);
+    engine.currentMatchday--; // Spieltag-Zaehler nur einmal pro Runde erhoehen
+    const zweitligaResults = engine.simulateMatchday(zweitligaFixtures);
+
+    let html = `<h4>Spieltag ${engine.currentMatchday} — Ergebnisse</h4>`;
+    html += renderResultsBlock(engine, "Bundesliga", bundesligaResults, playerClub.name);
+    html += renderResultsBlock(engine, "2. Bundesliga", zweitligaResults, playerClub.name);
+
+    document.getElementById('matchday-results').innerHTML = html;
+    updateMatchdayDisplay();
+}
+
+function renderSave() {
+    let html = `
+        <h3>Save / Load</h3>
+        <div class="btn-group">
+            <button onclick="saveGame()">💾 Save Game</button>
+            <button onclick="loadGame()">📂 Load Saved Game</button>
+        </div>
+        <div id="save-output"></div>
+    `;
+    tabContents.save.innerHTML = html;
+}
+
+// ================================================================
+//  SAVE / LOAD (localStorage)
+// ================================================================
+
+function saveGame() {
+    if (!appState.clubs.length) return;
+    const data = {
+        clubs: appState.clubs.map(c => c.toJSON()),
+        currentMatchday: appState.engine.currentMatchday,
+        leagueTable: appState.engine.leagueTable,
+        transferOffers: appState.engine.transferOffers
+    };
+    localStorage.setItem('footballSimulatorSave', JSON.stringify(data));
+    document.getElementById('save-output').innerHTML = '<p>✅ Game saved successfully!</p>';
+}
+
+function loadGame() {
+    const raw = localStorage.getItem('footballSimulatorSave');
+    if (!raw) {
+        document.getElementById('save-output').innerHTML = '<p>❌ No save found.</p>';
+        return;
+    }
+    try {
+        const data = JSON.parse(raw);
+        const clubs = data.clubs.map(c => Club.fromJSON(c));
+        const engine = new GameEngine(clubs);
+        engine.currentMatchday = data.currentMatchday || 0;
+        engine.leagueTable = data.leagueTable || {};
+        engine.transferOffers = data.transferOffers || [];
+        // Rebuild transferOffers with proper references? For simplicity, we just keep as plain objects.
+        // In a full solution, we'd need to map, but for MVP we'll just store the data.
+        // We'll also need to fix references to player objects.
+        // But since we only use transferOffers for display, we can keep as is.
+        appState.clubs = clubs;
+        appState.engine = engine;
+        // find the player club (by name)
+        const playerClubName = appState.playerClub ? appState.playerClub.name : null;
+        if (playerClubName) {
+            const found = clubs.find(c => c.name === playerClubName);
+            if (found) appState.playerClub = found;
+        }
+        document.getElementById('save-output').innerHTML = '<p>✅ Game loaded successfully!</p>';
+        // Refresh UI
+        if (appState.playerClub) {
+            clubNameHeader.textContent = appState.playerClub.name;
+            updateMatchdayDisplay();
+            switchTab(appState.currentTab || 'dashboard');
+        } else {
+            // go to select screen
+            location.reload(); // simple reset
+        }
+    } catch(e) {
+        document.getElementById('save-output').innerHTML = '<p>❌ Error loading save.</p>';
+        console.error(e);
+    }
+}
+
+// ================================================================
+//  EVENT LISTENERS & INIT
+// ================================================================
+
+document.querySelectorAll('.menu button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        switchTab(btn.dataset.tab);
+    });
+});
+
+loadGameBtn.addEventListener('click', () => {
+    // Try to load, then if successful, go to game
+    const raw = localStorage.getItem('footballSimulatorSave');
+    if (!raw) { alert("No saved game found."); return; }
+    try {
+        const data = JSON.parse(raw);
+        const clubs = data.clubs.map(c => Club.fromJSON(c));
+        const engine = new GameEngine(clubs);
+        engine.currentMatchday = data.currentMatchday || 0;
+        engine.leagueTable = data.leagueTable || {};
+        engine.transferOffers = data.transferOffers || [];
+        appState.clubs = clubs;
+        appState.engine = engine;
+        // Let user choose club again? For simplicity, pick first club with same name? We'll ask.
+        const clubNames = clubs.map(c => c.name).join('\n');
+        const chosen = prompt(`Loaded save. Choose your club by name:\n${clubNames}`);
+        if (chosen) {
+            const club = clubs.find(c => c.name === chosen);
+            if (club) {
+                appState.playerClub = club;
+                startGame();
+                return;
+            }
+        }
+        alert("Club not found, starting new game.");
+        // fallback to new game
+        initNewGame();
+    } catch(e) {
+        alert("Error loading save. Starting new game.");
+        initNewGame();
+    }
+});
+
+function initNewGame() {
+    const clubs = generateInitialData();
+    appState.clubs = clubs;
+    appState.engine = new GameEngine(clubs);
+    // Show selection
+    selectScreen.classList.remove('hidden');
+    gameScreen.classList.add('hidden');
+    renderClubList();
+}
+
+// Start the app
+initNewGame();
+
+// Also allow starting from select screen by clicking club.
+</script>
+</body>
+</html>
