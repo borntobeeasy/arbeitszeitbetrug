@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,72 +14,110 @@
            Tiefschwarz-Blau #05070f / #0c1024 · Panel #10142a
            Pixel-Font "Press Start 2P" fuer Ueberschriften/UI, "VT323" fuer Zahlen/Ticker
         =================================================================== */
-        :root{
-            --bg:#05070f;
-            --panel:#0c1024;
-            --panel-2:#10142a;
-            --line:#2a2f52;
-            --red:#e3000f;
-            --gold:#ffd200;
-            --blue:#1e5fff;
-            --green:#39ff14;
-            --text:#e8ecff;
-            --dim:#8890c0;
+        :root {
+            --bg: #05070f;
+            --panel: #0c1024;
+            --panel-2: #10142a;
+            --line: #2a2f52;
+            --red: #e3000f;
+            --gold: #ffd200;
+            --blue: #1e5fff;
+            --green: #39ff14;
+            --text: #e8ecff;
+            --dim: #8890c0;
             --pixel: 'Press Start 2P', monospace;
             --mono: 'VT323', 'JetBrains Mono', monospace;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scrollbar-color: var(--red) var(--bg); }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html {
+            scrollbar-color: var(--red) var(--bg);
+        }
         body {
             font-family: var(--mono);
             font-size: 20px;
             background: var(--bg);
             color: var(--text);
             padding: 20px;
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
             position: relative;
             line-height: 1.35;
-            background-image:
-                radial-gradient(ellipse at top, rgba(30,95,255,0.12), transparent 60%),
-                radial-gradient(ellipse at bottom, rgba(227,0,15,0.10), transparent 60%);
+            background-image: radial-gradient(ellipse at top, rgba(30, 95, 255, 0.12), transparent 60%),
+                radial-gradient(ellipse at bottom, rgba(227, 0, 15, 0.10), transparent 60%);
         }
         /* CRT scanline + flicker overlay */
-        body::before{
-            content:"";
-            position: fixed; inset:0; pointer-events:none; z-index: 999;
-            background: repeating-linear-gradient(
-                to bottom,
-                rgba(255,255,255,0.035) 0px,
-                rgba(255,255,255,0.035) 1px,
-                transparent 2px,
-                transparent 3px
-            );
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+            background: repeating-linear-gradient(to bottom,
+                    rgba(255, 255, 255, 0.035) 0px,
+                    rgba(255, 255, 255, 0.035) 1px,
+                    transparent 2px,
+                    transparent 3px);
             mix-blend-mode: overlay;
         }
-        body::after{
-            content:"";
-            position: fixed; inset:0; pointer-events:none; z-index: 998;
-            box-shadow: inset 0 0 160px rgba(0,0,0,0.75);
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 998;
+            box-shadow: inset 0 0 160px rgba(0, 0, 0, 0.75);
             animation: flicker 6s infinite;
         }
-        @keyframes flicker{
-            0%,97%,100% { opacity: 1; }
-            98% { opacity: 0.94; }
-            99% { opacity: 0.98; }
+        @keyframes flicker {
+            0%,
+            97%,
+            100% {
+                opacity: 1;
+            }
+            98% {
+                opacity: 0.94;
+            }
+            99% {
+                opacity: 0.98;
+            }
         }
-        h1, h2, h3 {
+        h1,
+        h2,
+        h3 {
             font-family: var(--pixel);
             color: var(--gold);
-            text-shadow: 2px 2px 0 var(--red), 4px 4px 0 rgba(0,0,0,0.5);
+            text-shadow: 2px 2px 0 var(--red), 4px 4px 0 rgba(0, 0, 0, 0.5);
             letter-spacing: 1px;
             line-height: 1.6;
         }
-        h1 { font-size: 22px; padding: 14px 0; text-align:center; }
-        h2 { font-size: 15px; margin-bottom: 10px; }
-        h3 { font-size: 12px; margin-bottom: 10px; color: var(--blue); text-shadow: 2px 2px 0 rgba(0,0,0,0.6); }
-        h4 { font-family: var(--pixel); font-size: 10px; color: var(--green); margin: 10px 0; }
-        p { font-size: 20px; }
+        h1 {
+            font-size: 22px;
+            padding: 14px 0;
+            text-align: center;
+        }
+        h2 {
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+        h3 {
+            font-size: 12px;
+            margin-bottom: 10px;
+            color: var(--blue);
+            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+        }
+        h4 {
+            font-family: var(--pixel);
+            font-size: 10px;
+            color: var(--green);
+            margin: 10px 0;
+        }
+        p {
+            font-size: 20px;
+        }
 
         button {
             font-family: var(--pixel);
@@ -97,14 +135,42 @@
             transition: transform 0.08s ease, box-shadow 0.08s ease;
             text-transform: uppercase;
         }
-        button:hover { background: #ff2436; }
+        button:hover {
+            background: #ff2436;
+        }
         button:active {
             transform: translate(4px, 4px);
             box-shadow: 0 0 0 #000;
         }
-        button:focus-visible { outline: 3px dashed var(--gold); outline-offset: 2px; }
+        button:focus-visible {
+            outline: 3px dashed var(--gold);
+            outline-offset: 2px;
+        }
+        button.secondary {
+            background: var(--blue);
+            outline-color: #0b2a80;
+        }
+        button.success {
+            background: #158a3d;
+            outline-color: #0a4a20;
+        }
+        button.danger {
+            background: var(--red);
+            outline-color: #7a0009;
+        }
+        button.gold {
+            background: var(--gold);
+            color: #000;
+            outline-color: #a08600;
+        }
+        button.small {
+            font-size: 8px;
+            padding: 5px 10px;
+        }
 
-        input, select {
+        input,
+        select,
+        textarea {
             font-family: var(--mono);
             font-size: 20px;
             padding: 6px 12px;
@@ -114,7 +180,12 @@
             background: #060814;
             color: var(--green);
         }
-        input:focus, select:focus { outline: 2px solid var(--gold); border-color: var(--gold); }
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 2px solid var(--gold);
+            border-color: var(--gold);
+        }
 
         .container {
             background: var(--panel);
@@ -122,9 +193,14 @@
             border: 2px solid var(--line);
             border-image: linear-gradient(135deg, var(--red), var(--gold), var(--blue)) 1;
             margin-top: 14px;
-            box-shadow: 6px 6px 0 rgba(0,0,0,0.5);
+            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.5);
         }
-        .flex { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; }
+        .flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: space-between;
+        }
         .card {
             background: var(--panel-2);
             padding: 15px;
@@ -132,14 +208,55 @@
             flex: 1 1 200px;
             position: relative;
         }
-        .card h3, .card h4 { margin-top: 0; }
+        .card h3,
+        .card h4 {
+            margin-top: 0;
+        }
+        .card.wide {
+            flex: 1 1 100%;
+        }
+        .card .value {
+            font-size: 28px;
+            color: var(--gold);
+            font-family: var(--pixel);
+        }
+        .card .label {
+            font-size: 14px;
+            color: var(--dim);
+            font-family: var(--pixel);
+        }
 
-        .menu { display: flex; gap: 8px; flex-wrap: wrap; margin: 15px 0; }
-        .menu button { background: var(--panel-2); outline-color: var(--line); color: var(--dim); }
-        .menu button.active { background: var(--red); color: #fff; outline-color: #7a0009; }
+        .menu {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        .menu button {
+            background: var(--panel-2);
+            outline-color: var(--line);
+            color: var(--dim);
+            font-size: 9px;
+            padding: 8px 12px;
+        }
+        .menu button.active {
+            background: var(--red);
+            color: #fff;
+            outline-color: #7a0009;
+        }
 
-        table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 22px; }
-        th, td { padding: 6px 12px; text-align: left; border-bottom: 1px solid var(--line); }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 20px;
+        }
+        th,
+        td {
+            padding: 5px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+        }
         th {
             background: var(--panel-2);
             color: var(--gold);
@@ -148,26 +265,56 @@
             letter-spacing: 0.5px;
             border-bottom: 2px solid var(--red);
         }
-        tr.row-champions td:first-child { box-shadow: inset 4px 0 0 var(--blue); }
-        tr.row-europa td:first-child { box-shadow: inset 4px 0 0 var(--green); }
-        tr.row-playoff td:first-child { box-shadow: inset 4px 0 0 var(--gold); }
-        tr.row-relegation td:first-child { box-shadow: inset 4px 0 0 var(--red); }
-        tr.row-own { background: rgba(255,210,0,0.10); }
-        tr.row-own td:first-child { font-weight: bold; }
+        tr.row-champions td:first-child {
+            box-shadow: inset 4px 0 0 var(--blue);
+        }
+        tr.row-europa td:first-child {
+            box-shadow: inset 4px 0 0 var(--green);
+        }
+        tr.row-playoff td:first-child {
+            box-shadow: inset 4px 0 0 var(--gold);
+        }
+        tr.row-relegation td:first-child {
+            box-shadow: inset 4px 0 0 var(--red);
+        }
+        tr.row-own {
+            background: rgba(255, 210, 0, 0.12);
+        }
+        tr.row-own td:first-child {
+            font-weight: bold;
+            color: var(--gold);
+        }
+        tr.clickable {
+            cursor: pointer;
+        }
+        tr.clickable:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
 
-        .highlight { color: var(--gold); font-weight: bold; }
+        .highlight {
+            color: var(--gold);
+            font-weight: bold;
+        }
         .ticker {
             background: #010102;
             border: 2px solid var(--line);
             padding: 15px;
-            max-height: 320px;
+            max-height: 400px;
             overflow-y: auto;
-            font-size: 22px;
+            font-size: 20px;
             color: var(--green);
         }
-        .ticker p { margin: 4px 0; }
-        .ticker hr { border: none; border-top: 1px dashed var(--line); margin: 8px 0; }
-        .hidden { display: none; }
+        .ticker p {
+            margin: 4px 0;
+        }
+        .ticker hr {
+            border: none;
+            border-top: 1px dashed var(--line);
+            margin: 8px 0;
+        }
+        .hidden {
+            display: none !important;
+        }
         .status {
             font-family: var(--pixel);
             font-size: 11px;
@@ -176,1162 +323,2782 @@
             border: 2px solid var(--red);
             color: var(--gold);
         }
-        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
-        .btn-group button { background: var(--blue); outline-color: #0b2a80; }
-        .btn-group button.danger { background: var(--red); outline-color: #7a0009; }
-        .btn-group button.success { background: #158a3d; outline-color: #0a4a20; }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .btn-group button {
+            background: var(--blue);
+            outline-color: #0b2a80;
+        }
+        .btn-group button.danger {
+            background: var(--red);
+            outline-color: #7a0009;
+        }
+        .btn-group button.success {
+            background: #158a3d;
+            outline-color: #0a4a20;
+        }
+        .btn-group button.gold {
+            background: var(--gold);
+            color: #000;
+            outline-color: #a08600;
+        }
 
-        pre { font-family: var(--mono); font-size: 20px; color: var(--green); white-space: pre-wrap; }
+        .progress-bar {
+            display: flex;
+            height: 18px;
+            background: #0a0c1a;
+            border: 1px solid var(--line);
+            margin: 4px 0;
+            width: 100%;
+            max-width: 200px;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            background: var(--gold);
+            transition: width 0.3s;
+        }
+        .progress-bar .fill.green {
+            background: var(--green);
+        }
+        .progress-bar .fill.red {
+            background: var(--red);
+        }
+        .progress-bar .fill.blue {
+            background: var(--blue);
+        }
 
-        /* ---------- Badges / club crests ---------- */
         .crest {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 42px; height: 42px;
-            font-family: var(--pixel); font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            font-family: var(--pixel);
+            font-size: 11px;
             background: var(--panel-2);
             border: 2px solid var(--gold);
             box-shadow: 3px 3px 0 #000;
             color: var(--gold);
             flex-shrink: 0;
         }
-        .crest.league-2 { border-color: var(--blue); color: var(--blue); }
-        .club-card { display: flex; flex-direction: column; gap: 8px; }
-        .club-card .club-head { display: flex; align-items: center; gap: 10px; }
-        .club-card .club-head h3 { margin: 0; font-size: 11px; }
+        .crest.league-2 {
+            border-color: var(--blue);
+            color: var(--blue);
+        }
+        .club-card {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .club-card .club-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .club-card .club-head h3 {
+            margin: 0;
+            font-size: 11px;
+        }
         .league-tag {
-            display: inline-block; font-family: var(--pixel); font-size: 8px;
-            padding: 3px 6px; margin-bottom: 6px;
-            background: var(--red); color: #fff;
+            display: inline-block;
+            font-family: var(--pixel);
+            font-size: 8px;
+            padding: 3px 6px;
+            margin-bottom: 6px;
+            background: var(--red);
+            color: #fff;
         }
-        .league-tag.tag-2 { background: var(--blue); }
+        .league-tag.tag-2 {
+            background: var(--blue);
+        }
 
-        /* ---------- Title / select screen ---------- */
-        .arcade-title { text-align: center; margin-bottom: 4px; }
-        .blink { animation: blink 1s steps(1) infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
+        .arcade-title {
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .blink {
+            animation: blink 1s steps(1) infinite;
+        }
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
         .subtitle {
-            text-align: center; font-family: var(--pixel); font-size: 9px;
-            color: var(--dim); margin-bottom: 18px; letter-spacing: 1px;
+            text-align: center;
+            font-family: var(--pixel);
+            font-size: 9px;
+            color: var(--dim);
+            margin-bottom: 18px;
+            letter-spacing: 1px;
         }
-        .league-tabs { display:flex; gap: 8px; margin: 10px 0 16px; }
-        .league-tabs button { background: var(--panel-2); color: var(--dim); outline-color: var(--line); }
-        .league-tabs button.active { background: var(--gold); color: #000; outline-color: #a08600; }
+        .league-tabs {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0 16px;
+        }
+        .league-tabs button {
+            background: var(--panel-2);
+            color: var(--dim);
+            outline-color: var(--line);
+        }
+        .league-tabs button.active {
+            background: var(--gold);
+            color: #000;
+            outline-color: #a08600;
+        }
 
-        ::selection { background: var(--gold); color: #000; }
-        ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--red); border: 2px solid var(--bg); }
+        ::selection {
+            background: var(--gold);
+            color: #000;
+        }
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--red);
+            border: 2px solid var(--bg);
+        }
 
-        @media (max-width: 600px) {
-            body { font-size: 18px; padding: 12px; }
-            h1 { font-size: 15px; }
-            h2 { font-size: 12px; }
-            button { font-size: 9px; padding: 8px 10px; }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-box {
+            background: var(--panel);
+            border: 3px solid var(--gold);
+            padding: 30px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 12px 12px 0 rgba(0, 0, 0, 0.7);
+        }
+        .modal-box h2 {
+            margin-top: 0;
+        }
+        .modal-box .close-btn {
+            float: right;
+            background: var(--red);
+            outline-color: #7a0009;
+            font-size: 14px;
+            padding: 5px 14px;
+        }
+
+        .news-item {
+            padding: 10px;
+            border-left: 4px solid var(--blue);
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .news-item .news-date {
+            color: var(--dim);
+            font-size: 14px;
+            font-family: var(--pixel);
+        }
+        .news-item .news-title {
+            color: var(--gold);
+            font-weight: bold;
+        }
+        .news-item.urgent {
+            border-left-color: var(--red);
+            background: rgba(227, 0, 15, 0.08);
+        }
+        .news-item.success {
+            border-left-color: var(--green);
+            background: rgba(57, 255, 20, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            font-family: var(--pixel);
+            font-size: 8px;
+            padding: 2px 8px;
+            border-radius: 0;
+            margin: 0 4px;
+        }
+        .badge.gold {
+            background: var(--gold);
+            color: #000;
+        }
+        .badge.red {
+            background: var(--red);
+            color: #fff;
+        }
+        .badge.blue {
+            background: var(--blue);
+            color: #fff;
+        }
+        .badge.green {
+            background: var(--green);
+            color: #000;
+        }
+
+        .player-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .player-row .p-info {
+            flex: 1;
+            min-width: 120px;
+        }
+        .player-row .p-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 16px;
+            color: var(--dim);
+        }
+
+        @media (max-width: 700px) {
+            body {
+                font-size: 16px;
+                padding: 10px;
+            }
+            h1 {
+                font-size: 14px;
+            }
+            h2 {
+                font-size: 11px;
+            }
+            button {
+                font-size: 8px;
+                padding: 6px 10px;
+            }
+            .card {
+                flex: 1 1 100%;
+            }
+            .menu button {
+                font-size: 7px;
+                padding: 5px 8px;
+            }
+            table {
+                font-size: 16px;
+            }
+            th,
+            td {
+                padding: 3px 6px;
+            }
         }
     </style>
 </head>
 <body>
 
-<h1 class="arcade-title">⚽ SPORTDIREKTOR SIMULATOR</h1>
-<p class="subtitle">1. BUNDESLIGA <span class="blink">▮</span> 2. BUNDESLIGA — SAISON 2026/27</p>
-<div id="app">
-    <!-- Selection Screen -->
-    <div id="select-screen" class="container">
-        <h2>&gt; Waehle deinen Verein_</h2>
-        <div id="league-tabs" class="league-tabs">
-            <button data-league="Bundesliga" class="active">1. Bundesliga</button>
-            <button data-league="2. Bundesliga">2. Bundesliga</button>
-        </div>
-        <div id="club-list" class="flex"></div>
-        <button id="load-game-btn">📂 Spielstand laden</button>
-        <p style="margin-top:14px; color:var(--dim); font-size:16px;">Alle Daten werden lokal im Browser (localStorage) gespeichert.</p>
-    </div>
+    <h1 class="arcade-title">⚽ SPORTDIREKTOR SIMULATOR</h1>
+    <p class="subtitle">1. BUNDESLIGA <span class="blink">▮</span> 2. BUNDESLIGA — SAISON 2026/27</p>
 
-    <!-- Main Game UI -->
-    <div id="game-screen" class="hidden">
-        <div class="flex" style="justify-content:space-between; align-items:center;">
-            <h2 id="club-name-header"></h2>
-            <span id="matchday-display" class="status">Spieltag 0</span>
-        </div>
-        <!-- Menu Tabs -->
-        <div class="menu">
-            <button data-tab="dashboard" class="active">Dashboard</button>
-            <button data-tab="squad">Kader</button>
-            <button data-tab="transfers">Transfers</button>
-            <button data-tab="coach">Trainer</button>
-            <button data-tab="matchday">Spieltag</button>
-            <button data-tab="save">Speichern</button>
-        </div>
-
-        <!-- Tab Content -->
-        <div id="tab-dashboard" class="container tab-content"></div>
-        <div id="tab-squad" class="container tab-content hidden"></div>
-        <div id="tab-transfers" class="container tab-content hidden"></div>
-        <div id="tab-coach" class="container tab-content hidden"></div>
-        <div id="tab-matchday" class="container tab-content hidden"></div>
-        <div id="tab-save" class="container tab-content hidden"></div>
-    </div>
-</div>
-
-<script>
-// ================================================================
-//  DATA MODELS (JavaScript classes)
-// ================================================================
-
-class Player {
-    constructor(id, name, age, position, attributes, marketValue, salary, contractYears, potential) {
-        this.id = id;
-        this.name = name;
-        this.age = age;
-        this.position = position;
-        this.attributes = attributes;       // object {geschwindigkeit, passspiel, schuss, defensive, kopfball}
-        this.marketValue = marketValue;     // Mio €
-        this.salary = salary;               // Mio €/year
-        this.contractYears = contractYears;
-        this.potential = potential;
-        this.satisfaction = 70;
-        this.gamesPlayed = 0;
-        this.goals = 0;
-        this.assists = 0;
-        this.injuryWeeks = 0;
-        this.formPenalty = 0;
-    }
-
-    get overall() {
-        const vals = Object.values(this.attributes);
-        return Math.round(vals.reduce((a,b) => a+b, 0) / vals.length);
-    }
-
-    toJSON() {
-        return { ...this, attributes: {...this.attributes} };
-    }
-
-    static fromJSON(data) {
-        const p = new Player(data.id, data.name, data.age, data.position, data.attributes,
-                            data.marketValue, data.salary, data.contractYears, data.potential);
-        p.satisfaction = data.satisfaction;
-        p.gamesPlayed = data.gamesPlayed;
-        p.goals = data.goals;
-        p.assists = data.assists;
-        p.injuryWeeks = data.injuryWeeks;
-        p.formPenalty = data.formPenalty;
-        return p;
-    }
-}
-
-class Coach {
-    constructor(id, name, age, reputation, philosophy, preferredFormation, strengths, weaknesses, contractYears) {
-        this.id = id;
-        this.name = name;
-        this.age = age;
-        this.reputation = reputation;
-        this.philosophy = philosophy;
-        this.preferredFormation = preferredFormation;
-        this.strengths = strengths;         // object
-        this.weaknesses = weaknesses;
-        this.contractYears = contractYears;
-    }
-
-    toJSON() {
-        return { ...this, strengths: {...this.strengths}, weaknesses: {...this.weaknesses} };
-    }
-
-    static fromJSON(data) {
-        return new Coach(data.id, data.name, data.age, data.reputation,
-                         data.philosophy, data.preferredFormation,
-                         data.strengths, data.weaknesses, data.contractYears);
-    }
-}
-
-class Club {
-    constructor(name, league, financialReserves, transferBudget, salaryBudget, seasonGoals, youthAcademyLevel = 1) {
-        this.name = name;
-        this.league = league;               // "Bundesliga" or "2. Bundesliga"
-        this.financialReserves = financialReserves;
-        this.transferBudget = transferBudget;
-        this.salaryBudget = salaryBudget;
-        this.seasonGoals = seasonGoals;     // { leaguePlace: 8, cupRound: "quarter_final" }
-        this.youthAcademyLevel = youthAcademyLevel;
-        this.fanTrust = 50;
-        this.players = [];
-        this.coach = null;
-    }
-
-    averageOverall() {
-        if (!this.players.length) return 0;
-        const sum = this.players.reduce((acc, p) => acc + p.overall, 0);
-        return sum / this.players.length;
-    }
-
-    toJSON() {
-        return {
-            name: this.name,
-            league: this.league,
-            financialReserves: this.financialReserves,
-            transferBudget: this.transferBudget,
-            salaryBudget: this.salaryBudget,
-            seasonGoals: { ...this.seasonGoals },
-            youthAcademyLevel: this.youthAcademyLevel,
-            fanTrust: this.fanTrust,
-            players: this.players.map(p => p.toJSON()),
-            coach: this.coach ? this.coach.toJSON() : null
-        };
-    }
-
-    static fromJSON(data) {
-        const club = new Club(data.name, data.league || "Bundesliga", data.financialReserves, data.transferBudget,
-                              data.salaryBudget, data.seasonGoals, data.youthAcademyLevel);
-        club.fanTrust = data.fanTrust;
-        club.players = data.players.map(p => Player.fromJSON(p));
-        club.coach = data.coach ? Coach.fromJSON(data.coach) : null;
-        return club;
-    }
-}
-
-// ================================================================
-//  DATA GENERATOR
-// ================================================================
-
-// Saison 2026/27 - real recherchierte Teilnehmerfelder (Stand August 2026)
-const BUNDESLIGA_CLUBS = [
-    { name: "FC Bayern München",       crest: "FCB" },
-    { name: "Borussia Dortmund",       crest: "BVB" },
-    { name: "RB Leipzig",              crest: "RBL" },
-    { name: "Bayer 04 Leverkusen",     crest: "B04" },
-    { name: "Eintracht Frankfurt",     crest: "SGE" },
-    { name: "VfB Stuttgart",           crest: "VfB" },
-    { name: "SC Freiburg",             crest: "SCF" },
-    { name: "1. FC Union Berlin",      crest: "FCU" },
-    { name: "TSG Hoffenheim",          crest: "TSG" },
-    { name: "Borussia Mönchengladbach",crest: "BMG" },
-    { name: "1. FC Köln",              crest: "KOE" },
-    { name: "Werder Bremen",           crest: "SVW" },
-    { name: "FC Augsburg",             crest: "FCA" },
-    { name: "1. FSV Mainz 05",         crest: "M05" },
-    { name: "Hamburger SV",            crest: "HSV" },
-    { name: "FC Schalke 04",           crest: "S04" },
-    { name: "SV Elversberg",           crest: "SVE" },
-    { name: "SC Paderborn 07",         crest: "SCP" }
-];
-
-const ZWEITLIGA_CLUBS = [
-    { name: "Hertha BSC",              crest: "BSC" },
-    { name: "Hannover 96",             crest: "H96" },
-    { name: "1. FC Kaiserslautern",    crest: "FCK" },
-    { name: "1. FC Nürnberg",          crest: "FCN" },
-    { name: "VfL Bochum",              crest: "VfL" },
-    { name: "Arminia Bielefeld",       crest: "DSC" },
-    { name: "Karlsruher SC",           crest: "KSC" },
-    { name: "Eintracht Braunschweig",  crest: "EBS" },
-    { name: "Holstein Kiel",           crest: "KSV" },
-    { name: "1. FC Magdeburg",         crest: "FCM" },
-    { name: "SG Dynamo Dresden",       crest: "SGD" },
-    { name: "SpVgg Greuther Fürth",    crest: "SGF" },
-    { name: "SV Darmstadt 98",         crest: "SVD" },
-    { name: "VfL Osnabrück",           crest: "VfLO" },
-    { name: "Energie Cottbus",         crest: "FCE" },
-    { name: "VfL Wolfsburg",           crest: "WOB" },
-    { name: "1. FC Heidenheim",        crest: "FCH" },
-    { name: "FC St. Pauli",            crest: "STP" }
-];
-
-const CLUB_CREST = {};
-BUNDESLIGA_CLUBS.forEach(c => CLUB_CREST[c.name] = c.crest);
-ZWEITLIGA_CLUBS.forEach(c => CLUB_CREST[c.name] = c.crest);
-
-const POSITIONS = ["IV", "AV", "ZM", "FL", "ST"];
-const ATTRIBUTES = ["geschwindigkeit", "passspiel", "schuss", "defensive", "kopfball"];
-
-const POSITION_WEIGHTS = {
-    IV: { defensive: 0.6, kopfball: 0.2, passspiel: 0.1, geschwindigkeit: 0.05, schuss: 0.05 },
-    AV: { geschwindigkeit: 0.3, defensive: 0.3, passspiel: 0.2, schuss: 0.1, kopfball: 0.1 },
-    ZM: { passspiel: 0.3, schuss: 0.2, geschwindigkeit: 0.15, defensive: 0.25, kopfball: 0.1 },
-    FL: { geschwindigkeit: 0.3, schuss: 0.25, passspiel: 0.2, defensive: 0.1, kopfball: 0.15 },
-    ST: { schuss: 0.35, kopfball: 0.25, geschwindigkeit: 0.2, passspiel: 0.1, defensive: 0.1 }
-};
-
-function randomName() {
-    const first = ["Max","Lukas","Julian","Marco","Mats","Thomas","Manuel","Joshua","Serge","Leon",
-                   "Kai","Timo","Niclas","Florian","Robin","Bernd","Kevin","Matthias","Christian","Jan"];
-    const last = ["Müller","Schmidt","Schneider","Fischer","Weber","Meyer","Wagner","Becker","Schulz","Hoffmann",
-                  "Koch","Richter","Klein","Wolf","Schröder","Neumann","Zimmermann","Braun","Krüger","Frank"];
-    return first[Math.floor(Math.random() * first.length)] + " " + last[Math.floor(Math.random() * last.length)];
-}
-
-function generatePlayer(id, age = null) {
-    if (age === null) age = 18 + Math.floor(Math.random() * 18);
-    const position = POSITIONS[Math.floor(Math.random() * POSITIONS.length)];
-    const attrs = {};
-    ATTRIBUTES.forEach(attr => {
-        let base = 50 + Math.floor(Math.random() * 41); // 50-90
-        const weights = POSITION_WEIGHTS[position];
-        if (weights && weights[attr]) {
-            base += Math.floor(weights[attr] * 20);
-        }
-        attrs[attr] = Math.min(99, base);
-    });
-    const overall = Math.round(Object.values(attrs).reduce((a,b) => a+b, 0) / ATTRIBUTES.length);
-    const marketValue = Math.round((0.5 + (overall / 100) * 10 + (Math.random() - 0.5) * 2) * 10) / 10;
-    const salary = Math.round((0.2 + (overall / 100) * 5 + (Math.random() - 0.5) * 0.6) * 10) / 10;
-    const contract = 1 + Math.floor(Math.random() * 4);
-    const potential = Math.min(99, overall + 5 + Math.floor(Math.random() * 21));
-    return new Player(id, randomName(), age, position, attrs, marketValue, salary, contract, potential);
-}
-
-function generateCoach(id) {
-    const philosophies = ["ball possession", "counter", "pressing", "direct", "tiki-taka"];
-    const formations = ["4-3-3", "4-2-3-1", "3-4-3", "4-4-2", "3-5-2"];
-    const allSkills = ["offensive_development", "youth_promotion", "motivation", "defensive_organisation", "media_competence"];
-    const strengths = {};
-    const weaknesses = {};
-    allSkills.forEach(skill => {
-        strengths[skill] = 60 + Math.floor(Math.random() * 36);
-        weaknesses[skill] = 40 + Math.floor(Math.random() * 36);
-    });
-    return new Coach(id, randomName(), 35 + Math.floor(Math.random() * 30),
-                    40 + Math.floor(Math.random() * 51),
-                    philosophies[Math.floor(Math.random() * philosophies.length)],
-                    formations[Math.floor(Math.random() * formations.length)],
-                    strengths, weaknesses,
-                    1 + Math.floor(Math.random() * 3));
-}
-
-function buildLeagueClubs(clubDefs, league, startId, financeScale) {
-    const clubs = [];
-    let playerId = startId;
-    clubDefs.forEach((def, idx) => {
-        const factor = 1.0 - (idx / 25.0);
-        const financial = Math.round((financeScale.reserveBase + factor * financeScale.reserveSpan) * 10) / 10;
-        const transfer = Math.round((financeScale.transferBase + factor * financeScale.transferSpan) * 10) / 10;
-        const salary = Math.round((financeScale.salaryBase + factor * financeScale.salarySpan) * 10) / 10;
-        const goals = {
-            leaguePlace: 1 + Math.floor(Math.random() * 18),
-            cupRound: ["round1","round2","quarter","semi","final"][Math.floor(Math.random() * 5)]
-        };
-        const club = new Club(def.name, league, financial, transfer, salary, goals, 1 + Math.floor(Math.random() * 6));
-        const numPlayers = 25 + Math.floor(Math.random() * 6);
-        for (let i = 0; i < numPlayers; i++) {
-            let age = 18 + Math.floor(Math.random() * 18);
-            if (i < 5) age = 17 + Math.floor(Math.random() * 5);   // talents
-            else if (i > 20) age = 30 + Math.floor(Math.random() * 6);
-            const p = generatePlayer(playerId++, age);
-            p.marketValue = Math.round(p.marketValue * (0.8 + 0.4 * factor) * financeScale.valueMultiplier * 10) / 10;
-            club.players.push(p);
-        }
-        clubs.push(club);
-    });
-    return clubs;
-}
-
-function generateInitialData() {
-    // 1. Bundesliga: groessere Budgets (Werte in Mio. Euro)
-    const bundesligaClubs = buildLeagueClubs(BUNDESLIGA_CLUBS, "Bundesliga", 0, {
-        reserveBase: 50, reserveSpan: 150,
-        transferBase: 10, transferSpan: 100,
-        salaryBase: 5, salarySpan: 60,
-        valueMultiplier: 1.0
-    });
-    // 2. Bundesliga: kleinere, aber realistische Budgets
-    const zweitligaClubs = buildLeagueClubs(ZWEITLIGA_CLUBS, "2. Bundesliga", 5000, {
-        reserveBase: 8, reserveSpan: 22,
-        transferBase: 1.5, transferSpan: 10,
-        salaryBase: 1, salarySpan: 6,
-        valueMultiplier: 0.3
-    });
-    const clubs = [...bundesligaClubs, ...zweitligaClubs];
-    // Generate coaches and assign randomly
-    const coaches = [];
-    for (let i = 0; i < 20; i++) coaches.push(generateCoach(i));
-    clubs.forEach(club => {
-        club.coach = coaches[Math.floor(Math.random() * coaches.length)];
-    });
-    return clubs;
-}
-
-// ================================================================
-//  GAME ENGINE
-// ================================================================
-
-class GameEngine {
-    constructor(clubs) {
-        this.clubs = clubs;
-        this.currentMatchday = 0;
-        this.leagueTable = {};
-        this.clubs.forEach(c => this.leagueTable[c.name] = 0);
-        this.transferOffers = [];   // array of offer objects
-    }
-
-    // Sorted [name, points] table filtered to one league ("Bundesliga" / "2. Bundesliga")
-    tableForLeague(leagueName) {
-        const namesInLeague = new Set(this.clubs.filter(c => c.league === leagueName).map(c => c.name));
-        return Object.entries(this.leagueTable)
-            .filter(([name]) => namesInLeague.has(name))
-            .sort((a, b) => b[1] - a[1]);
-    }
-
-    clubLeague(clubName) {
-        const c = this.clubs.find(c => c.name === clubName);
-        return c ? c.league : "Bundesliga";
-    }
-
-    // ----- Squad Analysis -----
-    analyzeSquad(club) {
-        const counts = {}, avg = {};
-        club.players.forEach(p => {
-            counts[p.position] = (counts[p.position] || 0) + 1;
-            if (!avg[p.position]) avg[p.position] = [];
-            avg[p.position].push(p.overall);
-        });
-        for (let pos in avg) {
-            avg[pos] = avg[pos].reduce((a,b) => a+b, 0) / avg[pos].length;
-        }
-        return { counts, avgOverall: avg };
-    }
-
-    squadDepthReport(club) {
-        const analysis = this.analyzeSquad(club);
-        let report = `Squad analysis for ${club.name}:\nPosition | Count | Avg Overall\n`;
-        for (let pos in analysis.counts) {
-            report += `${pos.padEnd(8)} | ${analysis.counts[pos].toString().padEnd(5)} | ${analysis.avgOverall[pos].toFixed(1)}\n`;
-        }
-        const weak = [];
-        for (let pos in analysis.counts) {
-            if (analysis.counts[pos] < 2) weak.push(pos);
-            else if (analysis.avgOverall[pos] < 70) weak.push(pos);
-        }
-        report += weak.length ? `Weak positions: ${weak.join(', ')}` : "Squad looks balanced.";
-        return report;
-    }
-
-    // ----- Transfers -----
-    scoutPlayers(club, position, budget) {
-        const candidates = [];
-        this.clubs.forEach(other => {
-            if (other === club) return;
-            other.players.forEach(p => {
-                if (p.position === position && p.marketValue <= budget) {
-                    candidates.push(p);
-                }
-            });
-        });
-        candidates.sort((a,b) => b.overall - a.overall);
-        return candidates.slice(0, 10);
-    }
-
-    makeOffer(fromClub, toClub, player, amount) {
-        if (amount > fromClub.transferBudget) return "Insufficient transfer budget.";
-        const ratio = amount / player.marketValue;
-        let decision;
-        if (ratio >= 1.3) decision = "accept";
-        else if (ratio < 0.8) decision = "reject";
-        else decision = "counter";
-
-        const offer = { player, fromClub, toClub, amount, status: decision, counterAmount: null };
-        if (decision === "accept") {
-            this.executeTransfer(offer);
-            return `Transfer accepted! ${player.name} moves to ${fromClub.name} for ${amount} Mio.`;
-        } else if (decision === "reject") {
-            return `Offer rejected by ${toClub.name}.`;
-        } else {
-            const counter = Math.round((amount * 1.2 + 0.5) * 10) / 10;
-            offer.counterAmount = counter;
-            this.transferOffers.push(offer);
-            return `${toClub.name} counter-offers with ${counter} Mio.`;
-        }
-    }
-
-    executeTransfer(offer) {
-        const { player, fromClub, toClub, amount } = offer;
-        // Remove from seller
-        const idx = fromClub.players.indexOf(player);
-        if (idx !== -1) fromClub.players.splice(idx, 1);
-        // Add to buyer
-        toClub.players.push(player);
-        // Adjust budgets
-        toClub.transferBudget -= amount;
-        toClub.financialReserves -= amount;
-        fromClub.transferBudget += amount;
-        fromClub.financialReserves += amount;
-        // Remove from offers
-        const oIdx = this.transferOffers.indexOf(offer);
-        if (oIdx !== -1) this.transferOffers.splice(oIdx, 1);
-    }
-
-    negotiateSalary(player, offeredSalary) {
-        if (offeredSalary >= player.salary * 0.8 && player.satisfaction > 40) {
-            player.salary = offeredSalary;
-            player.satisfaction = Math.min(100, player.satisfaction + 10);
-            return true;
-        } else {
-            player.satisfaction = Math.max(0, player.satisfaction - 5);
-            return false;
-        }
-    }
-
-    // ----- Coach -----
-    evaluateCoach(club) {
-        if (!club.coach) return "No coach assigned.";
-        const c = club.coach;
-        const perf = club.fanTrust;
-        const score = (perf * 0.5 + c.reputation * 0.5);
-        let rating = score > 75 ? "Excellent" : score > 50 ? "Good" : "Needs improvement";
-        return `Coach ${c.name} (Rep: ${c.reputation}): ${rating}. Philosophy: ${c.philosophy}. Preferred formation: ${c.preferredFormation}.`;
-    }
-
-    coachCompatibility(coach, club) {
-        const avg = club.averageOverall();
-        return Math.round((coach.reputation + avg) / 2);
-    }
-
-    hireCoach(club, coach) {
-        if (club.coach) return `${club.name} already has a coach. Fire first.`;
-        club.coach = coach;
-        return `${coach.name} hired as new coach of ${club.name}.`;
-    }
-
-    fireCoach(club) {
-        if (!club.coach) return "No coach to fire.";
-        const fired = club.coach;
-        club.coach = null;
-        return `${fired.name} has been fired.`;
-    }
-
-    // ----- Match Simulation -----
-    simulateMatch(homeClub, awayClub) {
-        let homeStrength = homeClub.averageOverall();
-        let awayStrength = awayClub.averageOverall();
-        if (homeClub.coach) homeStrength += homeClub.coach.reputation * 0.05;
-        if (awayClub.coach) awayStrength += awayClub.coach.reputation * 0.05;
-        homeStrength *= (1 + (Math.random() - 0.5) * 0.4);
-        awayStrength *= (1 + (Math.random() - 0.5) * 0.4);
-
-        const diff = homeStrength - awayStrength;
-        const homeXg = Math.max(0, (homeStrength / 100) * 2.0 + diff * 0.01);
-        const awayXg = Math.max(0, (awayStrength / 100) * 2.0 - diff * 0.01);
-        // Poisson
-        let homeGoals = this.poissonRandom(homeXg);
-        let awayGoals = this.poissonRandom(awayXg);
-        homeGoals = Math.min(7, Math.max(0, homeGoals));
-        awayGoals = Math.min(7, Math.max(0, awayGoals));
-
-        const events = [];
-        for (let i = 0; i < homeGoals; i++) events.push(`${homeClub.name} scores! (Goal ${i+1})`);
-        for (let i = 0; i < awayGoals; i++) events.push(`${awayClub.name} scores! (Goal ${i+1})`);
-        if (Math.random() < 0.3) {
-            const player = homeClub.players[Math.floor(Math.random() * homeClub.players.length)];
-            events.push(`Yellow card for ${player.name} (${homeClub.name})`);
-        }
-        if (Math.random() < 0.2) {
-            const player = awayClub.players[Math.floor(Math.random() * awayClub.players.length)];
-            events.push(`Injury! ${player.name} (${awayClub.name}) substituted.`);
-        }
-
-        // Update league table (done outside)
-        return {
-            home: homeClub.name,
-            away: awayClub.name,
-            homeGoals,
-            awayGoals,
-            xG_home: Math.round(homeXg * 100) / 100,
-            xG_away: Math.round(awayXg * 100) / 100,
-            events
-        };
-    }
-
-    poissonRandom(lambda) {
-        // simple approximation: use Math.random
-        if (lambda < 30) {
-            let L = Math.exp(-lambda);
-            let k = 0;
-            let p = 1;
-            do {
-                k++;
-                p *= Math.random();
-            } while (p > L);
-            return k - 1;
-        }
-        // fallback: normal approx
-        return Math.round(lambda + Math.sqrt(lambda) * (Math.random() - 0.5) * 2);
-    }
-
-    simulateMatchday(fixtures) {
-        const results = [];
-        fixtures.forEach(([home, away]) => {
-            if (!away) {
-                results.push({ home: home.name, away: "BYE", homeGoals: null, awayGoals: null, events: [] });
-                return;
-            }
-            const result = this.simulateMatch(home, away);
-            results.push(result);
-            // Update table
-            if (result.homeGoals > result.awayGoals) {
-                this.leagueTable[home.name] += 3;
-            } else if (result.homeGoals < result.awayGoals) {
-                this.leagueTable[away.name] += 3;
-            } else {
-                this.leagueTable[home.name] += 1;
-                this.leagueTable[away.name] += 1;
-            }
-        });
-        this.currentMatchday++;
-        return results;
-    }
-}
-
-// ================================================================
-//  APPLICATION STATE & UI
-// ================================================================
-
-let appState = {
-    clubs: [],
-    engine: null,
-    playerClub: null,
-    currentTab: 'dashboard'
-};
-
-// ----- DOM refs -----
-const selectScreen = document.getElementById('select-screen');
-const gameScreen = document.getElementById('game-screen');
-const clubList = document.getElementById('club-list');
-const loadGameBtn = document.getElementById('load-game-btn');
-const clubNameHeader = document.getElementById('club-name-header');
-const matchdayDisplay = document.getElementById('matchday-display');
-
-const tabContents = {
-    dashboard: document.getElementById('tab-dashboard'),
-    squad: document.getElementById('tab-squad'),
-    transfers: document.getElementById('tab-transfers'),
-    coach: document.getElementById('tab-coach'),
-    matchday: document.getElementById('tab-matchday'),
-    save: document.getElementById('tab-save')
-};
-
-// ----- Helpers -----
-let selectedLeagueTab = "Bundesliga";
-
-function renderClubList() {
-    clubList.innerHTML = '';
-    appState.clubs
-        .filter(club => club.league === selectedLeagueTab)
-        .forEach((club) => {
-            const idx = appState.clubs.indexOf(club);
-            const crest = CLUB_CREST[club.name] || club.name.slice(0,3).toUpperCase();
-            const crestClass = club.league === "2. Bundesliga" ? "crest league-2" : "crest";
-            const div = document.createElement('div');
-            div.className = 'card club-card';
-            div.innerHTML = `
-                <div class="club-head">
-                    <div class="${crestClass}">${crest}</div>
-                    <h3>${club.name}</h3>
+    <div id="app">
+        <!-- ====== START SCREEN ====== -->
+        <div id="start-screen" class="container">
+            <div style="text-align:center;padding:30px 0;">
+                <h1 style="font-size:32px;">⚽ SPORTDIREKTOR</h1>
+                <p style="font-size:28px;color:var(--gold);">BUNDESLIGA MANAGEMENT</p>
+                <p style="font-size:18px;color:var(--dim);margin:20px 0 40px;">SIMULATOR 2026/27</p>
+                <div style="display:flex;flex-direction:column;gap:16px;align-items:center;max-width:300px;margin:0 auto;">
+                    <button id="btn-new-career" style="width:100%;font-size:14px;padding:16px;">🆕 NEUE KARRIERE</button>
+                    <button id="btn-load-career" style="width:100%;font-size:14px;padding:16px;background:var(--blue);outline-color:#0b2a80;">📂 KARRIERE LADEN</button>
                 </div>
-                <p>Budget: ${club.transferBudget.toFixed(1)} Mio. €</p>
-                <p>Kader: ${club.players.length} Spieler</p>
-                <button data-idx="${idx}">▶ Uebernehmen</button>`;
-            div.querySelector('button').addEventListener('click', () => {
-                appState.playerClub = club;
-                startGame();
-            });
-            clubList.appendChild(div);
-        });
-}
-
-document.querySelectorAll('#league-tabs button').forEach(btn => {
-    btn.addEventListener('click', () => {
-        selectedLeagueTab = btn.dataset.league;
-        document.querySelectorAll('#league-tabs button').forEach(b => b.classList.toggle('active', b === btn));
-        renderClubList();
-    });
-});
-
-function startGame() {
-    selectScreen.classList.add('hidden');
-    gameScreen.classList.remove('hidden');
-    clubNameHeader.textContent = appState.playerClub.name;
-    updateMatchdayDisplay();
-    switchTab('dashboard');
-}
-
-function updateMatchdayDisplay() {
-    matchdayDisplay.textContent = `Spieltag ${appState.engine.currentMatchday}`;
-}
-
-function switchTab(tabId) {
-    // Update menu buttons
-    document.querySelectorAll('.menu button').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tabId);
-    });
-    // Hide all tabs, show selected
-    Object.keys(tabContents).forEach(key => {
-        tabContents[key].classList.toggle('hidden', key !== tabId);
-    });
-    appState.currentTab = tabId;
-    // Render content
-    switch (tabId) {
-        case 'dashboard': renderDashboard(); break;
-        case 'squad': renderSquad(); break;
-        case 'transfers': renderTransfers(); break;
-        case 'coach': renderCoach(); break;
-        case 'matchday': renderMatchday(); break;
-        case 'save': renderSave(); break;
-    }
-}
-
-// ================================================================
-//  TAB RENDERERS
-// ================================================================
-
-function renderDashboard() {
-    const club = appState.playerClub;
-    const engine = appState.engine;
-    const crest = CLUB_CREST[club.name] || club.name.slice(0,3).toUpperCase();
-    const leagueTagClass = club.league === "2. Bundesliga" ? "league-tag tag-2" : "league-tag";
-    let html = `
-        <span class="${leagueTagClass}">${club.league}</span>
-        <div class="flex">
-            <div class="card"><h3>📊 Finanzen</h3>
-                <p>Ruecklagen: ${club.financialReserves.toFixed(1)} Mio. €</p>
-                <p>Transferbudget: ${club.transferBudget.toFixed(1)} Mio.</p>
-                <p>Gehaltsbudget: ${club.salaryBudget.toFixed(1)} Mio.</p>
-            </div>
-            <div class="card"><h3>👥 Kader</h3>
-                <p>Spieler: ${club.players.length}</p>
-                <p>Ø Staerke: ${club.averageOverall().toFixed(1)}</p>
-                <p>Fan-Vertrauen: ${club.fanTrust}%</p>
-            </div>
-            <div class="card"><h3>🧑‍🏫 Trainer</h3>
-                <p>${club.coach ? club.coach.name : 'Keiner'}</p>
-                <p>Reputation: ${club.coach ? club.coach.reputation : '-'}</p>
+                <p style="margin-top:30px;color:var(--dim);font-size:14px;">Alle Daten werden lokal im Browser gespeichert.</p>
             </div>
         </div>
-    `;
-    html += renderLeagueTableHTML(engine, club.league, club.name, true);
-    tabContents.dashboard.innerHTML = html;
-}
 
-function renderSquad() {
-    const club = appState.playerClub;
-    const engine = appState.engine;
-    let html = `<h3>Squad of ${club.name}</h3>
-                <button onclick="showSquadAnalysis()">📊 Squad Analysis</button>
-                <div id="squad-analysis-output"></div>
-                <table>
-                    <tr><th>ID</th><th>Name</th><th>Pos</th><th>Age</th><th>Overall</th><th>Value</th><th>Salary</th><th>Contract</th></tr>`;
-    club.players.forEach(p => {
-        html += `<tr>
-            <td>${p.id}</td>
-            <td>${p.name}</td>
-            <td>${p.position}</td>
-            <td>${p.age}</td>
-            <td>${p.overall}</td>
-            <td>${p.marketValue.toFixed(1)}</td>
-            <td>${p.salary.toFixed(1)}</td>
-            <td>${p.contractYears}</td>
-        </tr>`;
-    });
-    html += `</table>
-             <div class="btn-group">
-                <button onclick="extendContract()">Extend Contract</button>
-             </div>`;
-    tabContents.squad.innerHTML = html;
-}
-
-function showSquadAnalysis() {
-    const engine = appState.engine;
-    const club = appState.playerClub;
-    const report = engine.squadDepthReport(club);
-    document.getElementById('squad-analysis-output').innerHTML = `<pre>${report}</pre>`;
-}
-
-function extendContract() {
-    const club = appState.playerClub;
-    const pid = prompt("Enter player ID to extend:");
-    if (!pid) return;
-    const id = parseInt(pid);
-    const player = club.players.find(p => p.id === id);
-    if (!player) { alert("Player not found."); return; }
-    const years = parseInt(prompt("Enter additional years (1-3):"));
-    if (isNaN(years) || years < 1 || years > 3) { alert("Invalid years."); return; }
-    if (player.satisfaction > 50) {
-        player.contractYears += years;
-        player.satisfaction = Math.min(100, player.satisfaction + 5);
-        alert(`Contract extended! ${player.name} now has ${player.contractYears} years left.`);
-    } else {
-        alert(`${player.name} is not satisfied and refuses to extend.`);
-    }
-    renderSquad();
-}
-
-function renderTransfers() {
-    const club = appState.playerClub;
-    const engine = appState.engine;
-    let html = `
-        <h3>Transfer Market</h3>
-        <div class="btn-group">
-            <button onclick="scoutPlayersUI()">🔍 Scout Players</button>
-            <button onclick="makeOfferUI()">💰 Make Offer</button>
-            <button onclick="sellPlayerUI()">📤 Sell Player</button>
-            <button onclick="viewOffersUI()">📋 Pending Offers</button>
+        <!-- ====== SELECT SCREEN ====== -->
+        <div id="select-screen" class="container hidden">
+            <h2>&gt; Wähle deinen Verein_</h2>
+            <div id="league-tabs" class="league-tabs">
+                <button data-league="Bundesliga" class="active">1. Bundesliga</button>
+                <button data-league="2. Bundesliga">2. Bundesliga</button>
+            </div>
+            <div id="club-list" class="flex"></div>
+            <button id="back-to-start" class="secondary" style="margin-top:14px;">⬅ Zurück</button>
         </div>
-        <div id="transfer-output"></div>
-    `;
-    tabContents.transfers.innerHTML = html;
-}
 
-function scoutPlayersUI() {
-    const club = appState.playerClub;
-    const engine = appState.engine;
-    const pos = prompt("Enter position to scout (IV, AV, ZM, FL, ST):");
-    if (!pos || !POSITIONS.includes(pos)) { alert("Invalid position."); return; }
-    const budget = parseFloat(prompt("Max budget (Mio. €):"));
-    if (isNaN(budget)) return;
-    const candidates = engine.scoutPlayers(club, pos, budget);
-    let out = `<h4>Scouting results for ${pos}</h4><table><tr><th>Name</th><th>Club</th><th>Overall</th><th>Value</th></tr>`;
-    candidates.forEach(p => {
-        let clubName = "Unknown";
-        for (let c of engine.clubs) {
-            if (c !== club && c.players.includes(p)) { clubName = c.name; break; }
-        }
-        out += `<tr><td>${p.name}</td><td>${clubName}</td><td>${p.overall}</td><td>${p.marketValue.toFixed(1)}</td></tr>`;
-    });
-    out += `</table>`;
-    document.getElementById('transfer-output').innerHTML = out;
-}
+        <!-- ====== MAIN GAME UI ====== -->
+        <div id="game-screen" class="hidden">
+            <!-- Header -->
+            <div class="flex" style="justify-content:space-between;align-items:center;">
+                <h2 id="club-name-header"></h2>
+                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                    <span id="season-display" class="status">Saison 2026/27</span>
+                    <span id="matchday-display" class="status">Spieltag 0</span>
+                    <span id="budget-display" class="status" style="border-color:var(--gold);">€0.0M</span>
+                </div>
+            </div>
 
-function makeOfferUI() {
-    const club = appState.playerClub;
-    const engine = appState.engine;
-    const search = prompt("Enter player name or ID to make an offer:");
-    if (!search) return;
-    let targetPlayer = null, targetClub = null;
-    const id = parseInt(search);
-    if (!isNaN(id)) {
-        for (let c of engine.clubs) {
-            if (c === club) continue;
-            const p = c.players.find(p => p.id === id);
-            if (p) { targetPlayer = p; targetClub = c; break; }
-        }
-    } else {
-        const name = search.toLowerCase();
-        for (let c of engine.clubs) {
-            if (c === club) continue;
-            const p = c.players.find(p => p.name.toLowerCase().includes(name));
-            if (p) { targetPlayer = p; targetClub = c; break; }
-        }
-    }
-    if (!targetPlayer) { alert("Player not found in other clubs."); return; }
-    const amount = parseFloat(prompt(`Offer amount for ${targetPlayer.name} (Value: ${targetPlayer.marketValue} Mio.):`));
-    if (isNaN(amount)) return;
-    const result = engine.makeOffer(club, targetClub, targetPlayer, amount);
-    document.getElementById('transfer-output').innerHTML = `<p>${result}</p>`;
-}
+            <!-- Menu -->
+            <div class="menu" id="main-menu">
+                <button data-tab="dashboard" class="active">Dashboard</button>
+                <button data-tab="squad">Kader</button>
+                <button data-tab="transfers">Transfers</button>
+                <button data-tab="scouting">Scouting</button>
+                <button data-tab="coach">Trainer</button>
+                <button data-tab="board">Vorstand</button>
+                <button data-tab="news">News</button>
+                <button data-tab="matchday">Spieltag</button>
+                <button data-tab="save">Speichern</button>
+            </div>
 
-function sellPlayerUI() {
-    const club = appState.playerClub;
-    const engine = appState.engine;
-    // List players
-    let list = club.players.map((p, i) => `${i+1}. ${p.name} (${p.position}, Value: ${p.marketValue} Mio.)`).join('\n');
-    const sel = parseInt(prompt(`Select player to sell:\n${list}\nEnter number (0 to cancel):`));
-    if (isNaN(sel) || sel < 1 || sel > club.players.length) return;
-    const player = club.players[sel - 1];
-    const interested = engine.clubs.filter(c => c !== club && c.transferBudget > player.marketValue * 0.5);
-    if (!interested.length) { alert("No clubs interested."); return; }
-    const buyer = interested[Math.floor(Math.random() * interested.length)];
-    const offerAmount = Math.round(player.marketValue * (0.7 + Math.random() * 0.6) * 10) / 10;
-    if (confirm(`${buyer.name} offers ${offerAmount} Mio. for ${player.name}. Accept?`)) {
-        const offer = { player, fromClub: club, toClub: buyer, amount: offerAmount };
-        engine.executeTransfer(offer);
-        alert(`Transfer completed! ${player.name} sold to ${buyer.name}.`);
-    } else {
-        alert("Offer rejected.");
-    }
-    renderTransfers();
-}
-
-function viewOffersUI() {
-    const engine = appState.engine;
-    if (!engine.transferOffers.length) {
-        document.getElementById('transfer-output').innerHTML = "<p>No pending offers.</p>";
-        return;
-    }
-    let out = "<h4>Pending Offers</h4><ul>";
-    engine.transferOffers.forEach(o => {
-        out += `<li>${o.fromClub.name} offers ${o.amount} Mio. for ${o.player.name} (status: ${o.status})`;
-        if (o.counterAmount) out += ` - counter: ${o.counterAmount} Mio.`;
-        out += `</li>`;
-    });
-    out += `</ul>`;
-    document.getElementById('transfer-output').innerHTML = out;
-}
-
-function renderCoach() {
-    const club = appState.playerClub;
-    const engine = appState.engine;
-    let html = `<h3>Coach Management</h3>`;
-    if (club.coach) {
-        const c = club.coach;
-        html += `<div class="card">
-            <h4>${c.name}</h4>
-            <p>Age: ${c.age}, Reputation: ${c.reputation}</p>
-            <p>Philosophy: ${c.philosophy}, Formation: ${c.preferredFormation}</p>
-            <p>Strengths: ${Object.entries(c.strengths).map(([k,v]) => `${k}: ${v}`).join(', ')}</p>
-            <p>Weaknesses: ${Object.entries(c.weaknesses).map(([k,v]) => `${k}: ${v}`).join(', ')}</p>
-            <p>Contract years left: ${c.contractYears}</p>
-        </div>`;
-    } else {
-        html += `<p>No coach assigned.</p>`;
-    }
-    html += `<div class="btn-group">
-        <button onclick="evaluateCoachUI()">Evaluate Coach</button>
-        <button class="danger" onclick="fireCoachUI()">Fire Coach</button>
-        <button onclick="hireCoachUI()">Hire New Coach</button>
+            <!-- Tab Contents -->
+            <div id="tab-dashboard" class="container tab-content"></div>
+            <div id="tab-squad" class="container tab-content hidden"></div>
+            <div id="tab-transfers" class="container tab-content hidden"></div>
+            <div id="tab-scouting" class="container tab-content hidden"></div>
+            <div id="tab-coach" class="container tab-content hidden"></div>
+            <div id="tab-board" class="container tab-content hidden"></div>
+            <div id="tab-news" class="container tab-content hidden"></div>
+            <div id="tab-matchday" class="container tab-content hidden"></div>
+            <div id="tab-save" class="container tab-content hidden"></div>
+        </div>
     </div>
-    <div id="coach-output"></div>`;
-    tabContents.coach.innerHTML = html;
-}
 
-function evaluateCoachUI() {
-    const engine = appState.engine;
-    const club = appState.playerClub;
-    document.getElementById('coach-output').innerHTML = `<pre>${engine.evaluateCoach(club)}</pre>`;
-}
+    <!-- ====== MODAL CONTAINER ====== -->
+    <div id="modal-container"></div>
 
-function fireCoachUI() {
-    const engine = appState.engine;
-    const club = appState.playerClub;
-    if (!club.coach) { alert("No coach to fire."); return; }
-    if (confirm(`Fire ${club.coach.name}?`)) {
-        alert(engine.fireCoach(club));
-        renderCoach();
-    }
-}
+    <script>
+        // ================================================================
+        //  DATA MODELS
+        // ================================================================
 
-function hireCoachUI() {
-    const engine = appState.engine;
-    const club = appState.playerClub;
-    // Generate 5 random coaches
-    const coaches = [];
-    for (let i = 0; i < 5; i++) coaches.push(generateCoach(100 + i));
-    let list = coaches.map((c, i) => `${i+1}. ${c.name} (Rep: ${c.reputation}, Philosophy: ${c.philosophy})`).join('\n');
-    const sel = parseInt(prompt(`Available coaches:\n${list}\nSelect number (0 to cancel):`));
-    if (isNaN(sel) || sel < 1 || sel > coaches.length) return;
-    const newCoach = coaches[sel-1];
-    if (club.coach) engine.fireCoach(club);
-    alert(engine.hireCoach(club, newCoach));
-    renderCoach();
-}
+        const POSITIONS = ["IV", "AV", "ZM", "FL", "ST"];
+        const ATTRIBUTES = ["geschwindigkeit", "passspiel", "schuss", "defensive", "kopfball"];
+        const POSITION_WEIGHTS = {
+            IV: { defensive: 0.6, kopfball: 0.2, passspiel: 0.1, geschwindigkeit: 0.05, schuss: 0.05 },
+            AV: { geschwindigkeit: 0.3, defensive: 0.3, passspiel: 0.2, schuss: 0.1, kopfball: 0.1 },
+            ZM: { passspiel: 0.3, schuss: 0.2, geschwindigkeit: 0.15, defensive: 0.25, kopfball: 0.1 },
+            FL: { geschwindigkeit: 0.3, schuss: 0.25, passspiel: 0.2, defensive: 0.1, kopfball: 0.15 },
+            ST: { schuss: 0.35, kopfball: 0.25, geschwindigkeit: 0.2, passspiel: 0.1, defensive: 0.1 }
+        };
 
-function renderMatchday() {
-    const engine = appState.engine;
-    let html = `
-        <h3>Spieltag ${engine.currentMatchday + 1}</h3>
-        <button onclick="simulateMatchdayUI()">▶ Naechsten Spieltag simulieren</button>
-        <div id="matchday-results"></div>
-    `;
-    tabContents.matchday.innerHTML = html;
-}
+        const FIRST_NAMES = ["Max", "Lukas", "Julian", "Marco", "Mats", "Thomas", "Manuel", "Joshua", "Serge", "Leon",
+            "Kai", "Timo", "Niclas", "Florian", "Robin", "Bernd", "Kevin", "Matthias", "Christian", "Jan",
+            "Felix", "Luis", "Paul", "Finn", "Luca", "Elias", "Marlon", "Emil", "Anton", "Oskar",
+            "David", "Noah", "Matteo", "Johannes", "Philipp", "Moritz", "Benedikt", "Jakob", "Alexander", "Niklas"
+        ];
+        const LAST_NAMES = ["Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz",
+            "Hoffmann",
+            "Koch", "Richter", "Klein", "Wolf", "Schröder", "Neumann", "Zimmermann", "Braun", "Krüger", "Frank",
+            "Bauer", "König", "Huber", "Keller", "Baum", "Schulze", "Lange", "Werner", "Hartmann", "Krause",
+            "Fuchs", "Peters", "Möller", "Weiß", "Jung", "Hahn", "Schubert", "Vogel", "Friedrich", "Klein"
+        ];
 
-function buildFixturesForLeague(engine, leagueName) {
-    const leagueClubs = engine.clubs.filter(c => c.league === leagueName);
-    const shuffled = [...leagueClubs].sort(() => Math.random() - 0.5);
-    const fixtures = [];
-    for (let i = 0; i < shuffled.length; i += 2) {
-        if (i + 1 < shuffled.length) {
-            fixtures.push([shuffled[i], shuffled[i + 1]]);
-        } else {
-            fixtures.push([shuffled[i], null]);
+        const NATIONALITIES = ["Deutschland", "Österreich", "Schweiz", "Polen", "Frankreich", "Italien", "Spanien",
+            "England", "Niederlande", "Belgien", "Dänemark", "Schweden", "Norwegen", "Brasilien", "Argentinien",
+            "Uruguay", "Kroatien", "Serbien", "Tschechien", "Slowakei", "Ungarn", "Griechenland", "Türkei", "USA",
+            "Kanada", "Australien", "Japan", "Korea", "China", "Kamerun", "Ghana", "Nigeria", "Senegal", "Elfenbeinküste"
+        ];
+
+        function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function randomName() {
+            return randomItem(FIRST_NAMES) + " " + randomItem(LAST_NAMES);
         }
-    }
-    return fixtures;
-}
 
-function renderResultsBlock(engine, leagueName, results, playerClubName) {
-    let html = `<h4>&gt; ${leagueName.toUpperCase()}</h4><div class="ticker">`;
-    results.forEach(r => {
-        const isOwn = r.home === playerClubName || r.away === playerClubName;
-        if (!r.away) {
-            html += `<p>${r.home} ist spielfrei.</p>`;
-            return;
-        }
-        html += `<p${isOwn ? ' class="highlight"' : ''}><strong>${r.home} ${r.homeGoals} - ${r.awayGoals} ${r.away}</strong> (xG: ${r.xG_home} - ${r.xG_away})</p>`;
-        r.events.forEach(e => html += `<p>&nbsp;&nbsp;${e}</p>`);
-        html += `<hr>`;
-    });
-    html += `</div>`;
-    html += renderLeagueTableHTML(engine, leagueName, playerClubName, false);
-    return html;
-}
+        function randomNationality() { return randomItem(NATIONALITIES); }
 
-function renderLeagueTableHTML(engine, leagueName, playerClubName, top5Only) {
-    let sorted = engine.tableForLeague(leagueName);
-    if (top5Only) sorted = sorted.slice(0, 5);
-    let html = `<h4>&gt; Tabelle ${leagueName}</h4><table><tr><th>Pl.</th><th>Verein</th><th>Pkt.</th></tr>`;
-    sorted.forEach(([name, pts], i) => {
-        const pos = i + 1;
-        let rowClass = '';
-        if (leagueName === "Bundesliga") {
-            if (pos <= 4) rowClass = 'row-champions';
-            else if (pos === 5) rowClass = 'row-europa';
-            else if (pos === 6) rowClass = 'row-europa';
-            else if (pos === 16) rowClass = 'row-playoff';
-            else if (pos >= 17) rowClass = 'row-relegation';
-        } else {
-            if (pos <= 2) rowClass = 'row-champions';
-            else if (pos === 3) rowClass = 'row-playoff';
-            else if (pos >= 17) rowClass = 'row-relegation';
-        }
-        if (name === playerClubName) rowClass += ' row-own';
-        const crest = CLUB_CREST[name] || name.slice(0,3).toUpperCase();
-        html += `<tr class="${rowClass.trim()}"><td>${pos}</td><td>${crest} · ${name}</td><td>${pts}</td></tr>`;
-    });
-    html += `</table>`;
-    return html;
-}
+        function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-function simulateMatchdayUI() {
-    const engine = appState.engine;
-    const playerClub = appState.playerClub;
+        function rand(min, max) { return min + Math.random() * (max - min); }
 
-    const bundesligaFixtures = buildFixturesForLeague(engine, "Bundesliga");
-    const zweitligaFixtures = buildFixturesForLeague(engine, "2. Bundesliga");
+        function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
 
-    const bundesligaResults = engine.simulateMatchday(bundesligaFixtures);
-    engine.currentMatchday--; // Spieltag-Zaehler nur einmal pro Runde erhoehen
-    const zweitligaResults = engine.simulateMatchday(zweitligaFixtures);
+        // ---- Player ----
+        class Player {
+            constructor(id, name, age, position, attributes, marketValue, salary, contractYears, potential, nationality) {
+                this.id = id;
+                this.name = name;
+                this.age = age;
+                this.position = position;
+                this.attributes = attributes;
+                this.marketValue = marketValue;
+                this.salary = salary;
+                this.contractYears = contractYears;
+                this.potential = potential;
+                this.nationality = nationality || randomNationality();
+                this.satisfaction = 60 + randInt(0, 35);
+                this.gamesPlayed = 0;
+                this.goals = 0;
+                this.assists = 0;
+                this.injuryWeeks = 0;
+                this.formPenalty = 0;
+                this.morale = 60 + randInt(0, 30);
+                this.reputation = 40 + randInt(0, 40);
+                this.role = "Stammspieler";
+                this.yellowCards = 0;
+                this.redCards = 0;
+                this.weeksDeveloped = 0;
+            }
 
-    let html = `<h4>Spieltag ${engine.currentMatchday} — Ergebnisse</h4>`;
-    html += renderResultsBlock(engine, "Bundesliga", bundesligaResults, playerClub.name);
-    html += renderResultsBlock(engine, "2. Bundesliga", zweitligaResults, playerClub.name);
+            get overall() {
+                const vals = Object.values(this.attributes);
+                let ov = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+                ov = clamp(ov - this.formPenalty, 1, 99);
+                return ov;
+            }
 
-    document.getElementById('matchday-results').innerHTML = html;
-    updateMatchdayDisplay();
-}
+            get form() {
+                let f = 70 + randInt(-5, 5);
+                f = clamp(f - this.formPenalty * 1.5, 0, 100);
+                return Math.round(f);
+            }
 
-function renderSave() {
-    let html = `
-        <h3>Save / Load</h3>
-        <div class="btn-group">
-            <button onclick="saveGame()">💾 Save Game</button>
-            <button onclick="loadGame()">📂 Load Saved Game</button>
-        </div>
-        <div id="save-output"></div>
-    `;
-    tabContents.save.innerHTML = html;
-}
+            toJSON() {
+                return { ...this, attributes: { ...this.attributes } };
+            }
 
-// ================================================================
-//  SAVE / LOAD (localStorage)
-// ================================================================
-
-function saveGame() {
-    if (!appState.clubs.length) return;
-    const data = {
-        clubs: appState.clubs.map(c => c.toJSON()),
-        currentMatchday: appState.engine.currentMatchday,
-        leagueTable: appState.engine.leagueTable,
-        transferOffers: appState.engine.transferOffers
-    };
-    localStorage.setItem('footballSimulatorSave', JSON.stringify(data));
-    document.getElementById('save-output').innerHTML = '<p>✅ Game saved successfully!</p>';
-}
-
-function loadGame() {
-    const raw = localStorage.getItem('footballSimulatorSave');
-    if (!raw) {
-        document.getElementById('save-output').innerHTML = '<p>❌ No save found.</p>';
-        return;
-    }
-    try {
-        const data = JSON.parse(raw);
-        const clubs = data.clubs.map(c => Club.fromJSON(c));
-        const engine = new GameEngine(clubs);
-        engine.currentMatchday = data.currentMatchday || 0;
-        engine.leagueTable = data.leagueTable || {};
-        engine.transferOffers = data.transferOffers || [];
-        // Rebuild transferOffers with proper references? For simplicity, we just keep as plain objects.
-        // In a full solution, we'd need to map, but for MVP we'll just store the data.
-        // We'll also need to fix references to player objects.
-        // But since we only use transferOffers for display, we can keep as is.
-        appState.clubs = clubs;
-        appState.engine = engine;
-        // find the player club (by name)
-        const playerClubName = appState.playerClub ? appState.playerClub.name : null;
-        if (playerClubName) {
-            const found = clubs.find(c => c.name === playerClubName);
-            if (found) appState.playerClub = found;
-        }
-        document.getElementById('save-output').innerHTML = '<p>✅ Game loaded successfully!</p>';
-        // Refresh UI
-        if (appState.playerClub) {
-            clubNameHeader.textContent = appState.playerClub.name;
-            updateMatchdayDisplay();
-            switchTab(appState.currentTab || 'dashboard');
-        } else {
-            // go to select screen
-            location.reload(); // simple reset
-        }
-    } catch(e) {
-        document.getElementById('save-output').innerHTML = '<p>❌ Error loading save.</p>';
-        console.error(e);
-    }
-}
-
-// ================================================================
-//  EVENT LISTENERS & INIT
-// ================================================================
-
-document.querySelectorAll('.menu button').forEach(btn => {
-    btn.addEventListener('click', () => {
-        switchTab(btn.dataset.tab);
-    });
-});
-
-loadGameBtn.addEventListener('click', () => {
-    // Try to load, then if successful, go to game
-    const raw = localStorage.getItem('footballSimulatorSave');
-    if (!raw) { alert("No saved game found."); return; }
-    try {
-        const data = JSON.parse(raw);
-        const clubs = data.clubs.map(c => Club.fromJSON(c));
-        const engine = new GameEngine(clubs);
-        engine.currentMatchday = data.currentMatchday || 0;
-        engine.leagueTable = data.leagueTable || {};
-        engine.transferOffers = data.transferOffers || [];
-        appState.clubs = clubs;
-        appState.engine = engine;
-        // Let user choose club again? For simplicity, pick first club with same name? We'll ask.
-        const clubNames = clubs.map(c => c.name).join('\n');
-        const chosen = prompt(`Loaded save. Choose your club by name:\n${clubNames}`);
-        if (chosen) {
-            const club = clubs.find(c => c.name === chosen);
-            if (club) {
-                appState.playerClub = club;
-                startGame();
-                return;
+            static fromJSON(data) {
+                const p = new Player(data.id, data.name, data.age, data.position, data.attributes,
+                    data.marketValue, data.salary, data.contractYears, data.potential, data.nationality);
+                p.satisfaction = data.satisfaction;
+                p.gamesPlayed = data.gamesPlayed;
+                p.goals = data.goals;
+                p.assists = data.assists;
+                p.injuryWeeks = data.injuryWeeks;
+                p.formPenalty = data.formPenalty;
+                p.morale = data.morale;
+                p.reputation = data.reputation;
+                p.role = data.role;
+                p.yellowCards = data.yellowCards || 0;
+                p.redCards = data.redCards || 0;
+                p.weeksDeveloped = data.weeksDeveloped || 0;
+                return p;
             }
         }
-        alert("Club not found, starting new game.");
-        // fallback to new game
-        initNewGame();
-    } catch(e) {
-        alert("Error loading save. Starting new game.");
-        initNewGame();
-    }
-});
 
-function initNewGame() {
-    const clubs = generateInitialData();
-    appState.clubs = clubs;
-    appState.engine = new GameEngine(clubs);
-    // Show selection
-    selectScreen.classList.remove('hidden');
-    gameScreen.classList.add('hidden');
-    renderClubList();
-}
+        // ---- Coach ----
+        class Coach {
+            constructor(id, name, age, reputation, philosophy, preferredFormation, strengths, weaknesses, contractYears,
+                wageDemand) {
+                this.id = id;
+                this.name = name;
+                this.age = age;
+                this.reputation = reputation;
+                this.philosophy = philosophy;
+                this.preferredFormation = preferredFormation;
+                this.strengths = strengths;
+                this.weaknesses = weaknesses;
+                this.contractYears = contractYears;
+                this.wageDemand = wageDemand || 1.0 + Math.random() * 3.0;
+                this.nationality = randomNationality();
+                this.tacticalQuality = 50 + randInt(0, 45);
+                this.youthDevelopment = 50 + randInt(0, 45);
+                this.authority = 50 + randInt(0, 45);
+                this.media = 50 + randInt(0, 45);
+                this.satisfaction = 70;
+            }
 
-// Start the app
-initNewGame();
+            toJSON() {
+                return { ...this, strengths: { ...this.strengths }, weaknesses: { ...this.weaknesses } };
+            }
 
-// Also allow starting from select screen by clicking club.
-</script>
+            static fromJSON(data) {
+                const c = new Coach(data.id, data.name, data.age, data.reputation,
+                    data.philosophy, data.preferredFormation,
+                    data.strengths, data.weaknesses, data.contractYears, data.wageDemand);
+                c.nationality = data.nationality;
+                c.tacticalQuality = data.tacticalQuality;
+                c.youthDevelopment = data.youthDevelopment;
+                c.authority = data.authority;
+                c.media = data.media;
+                c.satisfaction = data.satisfaction;
+                return c;
+            }
+        }
+
+        // ---- Club ----
+        class Club {
+            constructor(name, league, financialReserves, transferBudget, salaryBudget, seasonGoals, youthAcademyLevel = 1,
+                stadium, reputation) {
+                this.name = name;
+                this.league = league;
+                this.financialReserves = financialReserves;
+                this.transferBudget = transferBudget;
+                this.salaryBudget = salaryBudget;
+                this.seasonGoals = seasonGoals;
+                this.youthAcademyLevel = youthAcademyLevel;
+                this.stadium = stadium || { name: name + " Stadion", capacity: 20000 + randInt(0, 60000) };
+                this.reputation = reputation || 40 + randInt(0, 40);
+                this.fanTrust = 50;
+                this.players = [];
+                this.coach = null;
+                this.boardSatisfaction = 70;
+                this.fanSatisfaction = 70;
+                this.trophies = [];
+                this.seasonPoints = 0;
+                this.seasonGoalsScored = 0;
+                this.seasonGoalsConceded = 0;
+                this.history = [];
+                this.sponsorIncome = 5 + randInt(0, 20);
+                this.ticketIncome = 2 + randInt(0, 10);
+                this.merchandisingIncome = 1 + randInt(0, 5);
+                this.youthTalents = [];
+            }
+
+            averageOverall() {
+                if (!this.players.length) return 0;
+                const sum = this.players.reduce((acc, p) => acc + p.overall, 0);
+                return Math.round(sum / this.players.length);
+            }
+
+            totalWages() {
+                return this.players.reduce((acc, p) => acc + p.salary, 0);
+            }
+
+            squadValue() {
+                return this.players.reduce((acc, p) => acc + p.marketValue, 0);
+            }
+
+            toJSON() {
+                return {
+                    name: this.name,
+                    league: this.league,
+                    financialReserves: this.financialReserves,
+                    transferBudget: this.transferBudget,
+                    salaryBudget: this.salaryBudget,
+                    seasonGoals: { ...this.seasonGoals },
+                    youthAcademyLevel: this.youthAcademyLevel,
+                    stadium: { ...this.stadium },
+                    reputation: this.reputation,
+                    fanTrust: this.fanTrust,
+                    boardSatisfaction: this.boardSatisfaction,
+                    fanSatisfaction: this.fanSatisfaction,
+                    trophies: [...this.trophies],
+                    seasonPoints: this.seasonPoints,
+                    seasonGoalsScored: this.seasonGoalsScored,
+                    seasonGoalsConceded: this.seasonGoalsConceded,
+                    history: [...this.history],
+                    sponsorIncome: this.sponsorIncome,
+                    ticketIncome: this.ticketIncome,
+                    merchandisingIncome: this.merchandisingIncome,
+                    youthTalents: this.youthTalents.map(t => ({ ...t })),
+                    players: this.players.map(p => p.toJSON()),
+                    coach: this.coach ? this.coach.toJSON() : null
+                };
+            }
+
+            static fromJSON(data) {
+                const club = new Club(data.name, data.league || "Bundesliga", data.financialReserves, data.transferBudget,
+                    data.salaryBudget, data.seasonGoals, data.youthAcademyLevel, data.stadium, data.reputation);
+                club.fanTrust = data.fanTrust;
+                club.boardSatisfaction = data.boardSatisfaction;
+                club.fanSatisfaction = data.fanSatisfaction;
+                club.trophies = data.trophies || [];
+                club.seasonPoints = data.seasonPoints || 0;
+                club.seasonGoalsScored = data.seasonGoalsScored || 0;
+                club.seasonGoalsConceded = data.seasonGoalsConceded || 0;
+                club.history = data.history || [];
+                club.sponsorIncome = data.sponsorIncome || 5;
+                club.ticketIncome = data.ticketIncome || 2;
+                club.merchandisingIncome = data.merchandisingIncome || 1;
+                club.youthTalents = data.youthTalents || [];
+                club.players = data.players.map(p => Player.fromJSON(p));
+                club.coach = data.coach ? Coach.fromJSON(data.coach) : null;
+                return club;
+            }
+        }
+
+        // ---- League Data ----
+        const BUNDESLIGA_CLUBS = [
+            { name: "FC Bayern München", crest: "FCB", reputation: 85, stadium: "Allianz Arena", capacity: 75000 },
+            { name: "Borussia Dortmund", crest: "BVB", reputation: 80, stadium: "Signal Iduna Park", capacity: 81365 },
+            { name: "RB Leipzig", crest: "RBL", reputation: 75, stadium: "Red Bull Arena", capacity: 47000 },
+            { name: "Bayer 04 Leverkusen", crest: "B04", reputation: 78, stadium: "BayArena", capacity: 30210 },
+            { name: "Eintracht Frankfurt", crest: "SGE", reputation: 72, stadium: "Deutsche Bank Park", capacity: 58000 },
+            { name: "VfB Stuttgart", crest: "VfB", reputation: 70, stadium: "MHPArena", capacity: 60449 },
+            { name: "SC Freiburg", crest: "SCF", reputation: 68, stadium: "Europa-Park Stadion", capacity: 34700 },
+            { name: "1. FC Union Berlin", crest: "FCU", reputation: 65, stadium: "Stadion An der Alten Försterei",
+            capacity: 22012 },
+            { name: "TSG Hoffenheim", crest: "TSG", reputation: 62, stadium: "PreZero Arena", capacity: 30150 },
+            { name: "Borussia Mönchengladbach", crest: "BMG", reputation: 68, stadium: "Borussia-Park", capacity: 54057 },
+            { name: "1. FC Köln", crest: "KOE", reputation: 64, stadium: "RheinEnergieStadion", capacity: 50000 },
+            { name: "Werder Bremen", crest: "SVW", reputation: 66, stadium: "Weserstadion", capacity: 42100 },
+            { name: "FC Augsburg", crest: "FCA", reputation: 58, stadium: "WWK Arena", capacity: 30660 },
+            { name: "1. FSV Mainz 05", crest: "M05", reputation: 60, stadium: "Mewa Arena", capacity: 34000 },
+            { name: "Hamburger SV", crest: "HSV", reputation: 62, stadium: "Volksparkstadion", capacity: 57000 },
+            { name: "FC Schalke 04", crest: "S04", reputation: 60, stadium: "Veltins-Arena", capacity: 62271 },
+            { name: "SV Elversberg", crest: "SVE", reputation: 45, stadium: "Ursapharm-Arena", capacity: 10000 },
+            { name: "SC Paderborn 07", crest: "SCP", reputation: 48, stadium: "Home Deluxe Arena", capacity: 15000 }
+        ];
+
+        const ZWEITLIGA_CLUBS = [
+            { name: "Hertha BSC", crest: "BSC", reputation: 55, stadium: "Olympiastadion", capacity: 74649 },
+            { name: "Hannover 96", crest: "H96", reputation: 52, stadium: "Heinz-von-Heiden-Arena", capacity: 49000 },
+            { name: "1. FC Kaiserslautern", crest: "FCK", reputation: 50, stadium: "Fritz-Walter-Stadion",
+            capacity: 49780 },
+            { name: "1. FC Nürnberg", crest: "FCN", reputation: 50, stadium: "Max-Morlock-Stadion", capacity: 50000 },
+            { name: "VfL Bochum", crest: "VfL", reputation: 48, stadium: "Vonovia Ruhrstadion", capacity: 27599 },
+            { name: "Arminia Bielefeld", crest: "DSC", reputation: 46, stadium: "SchücoArena", capacity: 27300 },
+            { name: "Karlsruher SC", crest: "KSC", reputation: 45, stadium: "BBBank Wildpark", capacity: 29699 },
+            { name: "Eintracht Braunschweig", crest: "EBS", reputation: 44, stadium: "Eintracht-Stadion", capacity: 23325 },
+            { name: "Holstein Kiel", crest: "KSV", reputation: 46, stadium: "Holstein-Stadion", capacity: 15034 },
+            { name: "1. FC Magdeburg", crest: "FCM", reputation: 44, stadium: "MDCC-Arena", capacity: 30098 },
+            { name: "SG Dynamo Dresden", crest: "SGD", reputation: 45, stadium: "Rudolf-Harbig-Stadion", capacity: 32066 },
+            { name: "SpVgg Greuther Fürth", crest: "SGF", reputation: 44, stadium: "Sportpark Ronhof", capacity: 16626 },
+            { name: "SV Darmstadt 98", crest: "SVD", reputation: 44, stadium: "Merck-Stadion", capacity: 17650 },
+            { name: "VfL Osnabrück", crest: "VfLO", reputation: 40, stadium: "Bremer Brücke", capacity: 16200 },
+            { name: "Energie Cottbus", crest: "FCE", reputation: 40, stadium: "Stadion der Freundschaft", capacity: 22528 },
+            { name: "VfL Wolfsburg", crest: "WOB", reputation: 48, stadium: "Volkswagen Arena", capacity: 30000 },
+            { name: "1. FC Heidenheim", crest: "FCH", reputation: 42, stadium: "Voith-Arena", capacity: 15000 },
+            { name: "FC St. Pauli", crest: "STP", reputation: 46, stadium: "Millerntor-Stadion", capacity: 29546 }
+        ];
+
+        const CLUB_CREST = {};
+        BUNDESLIGA_CLUBS.forEach(c => CLUB_CREST[c.name] = c.crest);
+        ZWEITLIGA_CLUBS.forEach(c => CLUB_CREST[c.name] = c.crest);
+
+        // ---- Generator functions ----
+        function generatePlayer(id, age = null, position = null) {
+            if (age === null) age = 18 + randInt(0, 18);
+            if (position === null) position = randomItem(POSITIONS);
+            const attrs = {};
+            ATTRIBUTES.forEach(attr => {
+                let base = 45 + randInt(0, 40);
+                const weights = POSITION_WEIGHTS[position];
+                if (weights && weights[attr]) {
+                    base += Math.floor(weights[attr] * 25);
+                }
+                attrs[attr] = clamp(base, 1, 99);
+            });
+            const overall = Math.round(Object.values(attrs).reduce((a, b) => a + b, 0) / ATTRIBUTES.length);
+            const marketValue = Math.round((0.3 + (overall / 100) * 12 + rand(-0.5, 0.5)) * 10) / 10;
+            const salary = Math.round((0.15 + (overall / 100) * 5 + rand(-0.3, 0.3)) * 10) / 10;
+            const contract = 1 + randInt(0, 4);
+            const potential = clamp(overall + 5 + randInt(0, 25), 1, 99);
+            const nat = randomNationality();
+            return new Player(id, randomName(), age, position, attrs, Math.max(0.1, marketValue),
+                Math.max(0.05, salary), contract, potential, nat);
+        }
+
+        function generateCoach(id) {
+            const philosophies = ["Ballbesitz", "Konterspiel", "Pressing", "Direktes Spiel", "Tiki-Taka", "Catenaccio"];
+            const formations = ["4-3-3", "4-2-3-1", "3-4-3", "4-4-2", "3-5-2", "5-3-2", "4-1-4-1"];
+            const allSkills = ["offensive_development", "youth_promotion", "motivation", "defensive_organisation",
+                "media_competence"
+            ];
+            const strengths = {};
+            const weaknesses = {};
+            allSkills.forEach(skill => {
+                strengths[skill] = 40 + randInt(0, 45);
+                weaknesses[skill] = 30 + randInt(0, 40);
+            });
+            const age = 35 + randInt(0, 30);
+            const rep = 40 + randInt(0, 45);
+            const wage = 0.5 + rand(0, 3.5);
+            const c = new Coach(id, randomName(), age, rep,
+                randomItem(philosophies), randomItem(formations),
+                strengths, weaknesses,
+                1 + randInt(0, 3), Math.round(wage * 10) / 10);
+            c.tacticalQuality = 40 + randInt(0, 50);
+            c.youthDevelopment = 40 + randInt(0, 50);
+            c.authority = 40 + randInt(0, 45);
+            c.media = 40 + randInt(0, 45);
+            return c;
+        }
+
+        function buildLeagueClubs(clubDefs, league, startId, financeScale) {
+            const clubs = [];
+            let playerId = startId;
+            clubDefs.forEach((def, idx) => {
+                const factor = 1.0 - (idx / (clubDefs.length * 1.3));
+                const f = clamp(factor, 0.2, 1.0);
+                const financial = Math.round((financeScale.reserveBase + f * financeScale.reserveSpan) * 10) / 10;
+                const transfer = Math.round((financeScale.transferBase + f * financeScale.transferSpan) * 10) / 10;
+                const salary = Math.round((financeScale.salaryBase + f * financeScale.salarySpan) * 10) / 10;
+                const goals = {
+                    leaguePlace: 1 + randInt(0, 17),
+                    cupRound: ["round1", "round2", "quarter", "semi", "final"][randInt(0, 4)]
+                };
+                const stadium = { name: def.stadium, capacity: def.capacity };
+                const club = new Club(def.name, league, financial, transfer, salary, goals,
+                    1 + randInt(0, 5), stadium, def.reputation || 50);
+                const numPlayers = 22 + randInt(0, 8);
+                for (let i = 0; i < numPlayers; i++) {
+                    let age = 18 + randInt(0, 18);
+                    if (i < 4) age = 17 + randInt(0, 4);
+                    else if (i > 18) age = 30 + randInt(0, 6);
+                    const p = generatePlayer(playerId++, age);
+                    const valueMult = (0.6 + 0.5 * f) * financeScale.valueMultiplier;
+                    p.marketValue = Math.round(p.marketValue * valueMult * 10) / 10;
+                    p.salary = Math.round(p.salary * (0.7 + 0.5 * f) * 10) / 10;
+                    club.players.push(p);
+                }
+                // assign a coach
+                const coach = generateCoach(1000 + idx + startId);
+                coach.wageDemand = Math.round((0.5 + f * 2.5) * 10) / 10;
+                club.coach = coach;
+                clubs.push(club);
+            });
+            return clubs;
+        }
+
+        function generateInitialData() {
+            const bundesliga = buildLeagueClubs(BUNDESLIGA_CLUBS, "Bundesliga", 0, {
+                reserveBase: 40,
+                reserveSpan: 160,
+                transferBase: 8,
+                transferSpan: 110,
+                salaryBase: 4,
+                salarySpan: 60,
+                valueMultiplier: 1.0
+            });
+            const zweitliga = buildLeagueClubs(ZWEITLIGA_CLUBS, "2. Bundesliga", 5000, {
+                reserveBase: 6,
+                reserveSpan: 25,
+                transferBase: 1.0,
+                transferSpan: 12,
+                salaryBase: 0.6,
+                salarySpan: 6,
+                valueMultiplier: 0.3
+            });
+            return [...bundesliga, ...zweitliga];
+        }
+
+        // ================================================================
+        //  GAME ENGINE
+        // ================================================================
+
+        class GameEngine {
+            constructor(clubs) {
+                this.clubs = clubs;
+                this.currentMatchday = 0;
+                this.currentSeason = 2026;
+                this.leagueTable = {};
+                this.leagueTable2 = {};
+                this.clubs.forEach(c => {
+                    if (c.league === "Bundesliga") this.leagueTable[c.name] = 0;
+                    else this.leagueTable2[c.name] = 0;
+                });
+                this.transferOffers = [];
+                this.scoutingReports = [];
+                this.news = [];
+                this.newsId = 0;
+                this.seasonComplete = false;
+                this.transferWindowOpen = true;
+                this.matchdayResults = [];
+                this.clubHistory = {};
+                this.running = true;
+                this.youthIntakeTimer = 0;
+                this.eventTimer = 0;
+                this.seasonGoals = {};
+                this.clubs.forEach(c => {
+                    this.seasonGoals[c.name] = { ...c.seasonGoals };
+                });
+            }
+
+            getTable(leagueName) {
+                const table = leagueName === "Bundesliga" ? this.leagueTable : this.leagueTable2;
+                const namesInLeague = new Set(this.clubs.filter(c => c.league === leagueName).map(c => c.name));
+                return Object.entries(table)
+                    .filter(([name]) => namesInLeague.has(name))
+                    .sort((a, b) => b[1] - a[1]);
+            }
+
+            clubLeague(clubName) {
+                const c = this.clubs.find(c => c.name === clubName);
+                return c ? c.league : "Bundesliga";
+            }
+
+            getClub(name) { return this.clubs.find(c => c.name === name); }
+
+            // ---- Squad Analysis ----
+            analyzeSquad(club) {
+                const counts = {},
+                    avg = {};
+                club.players.forEach(p => {
+                    counts[p.position] = (counts[p.position] || 0) + 1;
+                    if (!avg[p.position]) avg[p.position] = [];
+                    avg[p.position].push(p.overall);
+                });
+                for (let pos in avg) {
+                    avg[pos] = Math.round(avg[pos].reduce((a, b) => a + b, 0) / avg[pos].length);
+                }
+                return { counts, avgOverall: avg };
+            }
+
+            squadDepthReport(club) {
+                const analysis = this.analyzeSquad(club);
+                let report = `📊 Kaderanalyse ${club.name}:\nPosition | Anzahl | Ø Stärke\n`;
+                for (let pos in analysis.counts) {
+                    report += `${pos.padEnd(8)} | ${analysis.counts[pos].toString().padEnd(5)} | ${analysis.avgOverall[pos]}\n`;
+                }
+                const weak = [];
+                for (let pos in analysis.counts) {
+                    if (analysis.counts[pos] < 2) weak.push(pos + " (zu dünn)");
+                    else if (analysis.avgOverall[pos] < 65) weak.push(pos + " (schwach)");
+                }
+                report += weak.length ? `⚠ Schwachstellen: ${weak.join(', ')}` : "✅ Kader ausgewogen.";
+                return report;
+            }
+
+            // ---- Transfers ----
+            scoutPlayers(club, position, budget) {
+                const candidates = [];
+                this.clubs.forEach(other => {
+                    if (other === club) return;
+                    other.players.forEach(p => {
+                        if (p.position === position && p.marketValue <= budget * 1.2) {
+                            candidates.push({ player: p, club: other });
+                        }
+                    });
+                });
+                candidates.sort((a, b) => b.player.overall - a.player.overall);
+                return candidates.slice(0, 12);
+            }
+
+            makeOffer(fromClub, toClub, player, amount, addons) {
+                if (amount > fromClub.transferBudget) return { success: false, msg: "Nicht genug Transferbudget." };
+                const ratio = amount / player.marketValue;
+                let decision;
+                let counterAmount = null;
+                if (ratio >= 1.3) decision = "accept";
+                else if (ratio < 0.7) decision = "reject";
+                else {
+                    decision = "counter";
+                    counterAmount = Math.round((amount * (1.05 + rand(0, 0.25)) + 0.5) * 10) / 10;
+                }
+                const offer = {
+                    id: Date.now() + Math.random(),
+                    player: player,
+                    playerId: player.id,
+                    fromClub: fromClub,
+                    fromClubName: fromClub.name,
+                    toClub: toClub,
+                    toClubName: toClub.name,
+                    amount: amount,
+                    status: decision,
+                    counterAmount: counterAmount,
+                    addons: addons || {},
+                    date: this.currentMatchday
+                };
+                if (decision === "accept") {
+                    this.executeTransfer(offer);
+                    return { success: true, msg: `${player.name} wechselt für ${amount.toFixed(1)} Mio. zu ${fromClub.name}.`,
+                        offer };
+                } else if (decision === "reject") {
+                    return { success: false, msg: `${toClub.name} lehnt ab.` };
+                } else {
+                    this.transferOffers.push(offer);
+                    return { success: false, msg: `${toClub.name} fordert ${counterAmount.toFixed(1)} Mio. (Gegenangebot).`,
+                        offer };
+                }
+            }
+
+            executeTransfer(offer) {
+                const { player, fromClub, toClub, amount } = offer;
+                const idx = fromClub.players.indexOf(player);
+                if (idx !== -1) fromClub.players.splice(idx, 1);
+                toClub.players.push(player);
+                toClub.transferBudget -= amount;
+                toClub.financialReserves -= amount;
+                fromClub.transferBudget += amount;
+                fromClub.financialReserves += amount;
+                player.contractYears = 3 + randInt(0, 2);
+                const oIdx = this.transferOffers.indexOf(offer);
+                if (oIdx !== -1) this.transferOffers.splice(oIdx, 1);
+                this.addNews(`Transfer abgeschlossen: ${player.name} wechselt von ${fromClub.name} zu ${toClub.name} für ${amount.toFixed(1)} Mio. €`,
+                    "success");
+                this.addNews(`${toClub.name} verpflichtet ${player.name} für ${amount.toFixed(1)} Mio. €`, "success");
+            }
+
+            acceptCounter(offerId) {
+                const offer = this.transferOffers.find(o => o.id === offerId);
+                if (!offer) return { success: false, msg: "Angebot nicht gefunden." };
+                if (offer.status !== "counter") return { success: false, msg: "Kein Gegenangebot." };
+                if (!offer.counterAmount) return { success: false, msg: "Kein Gegenangebot." };
+                if (offer.counterAmount > offer.fromClub.transferBudget) {
+                    return { success: false, msg: "Nicht genug Budget für Gegenangebot." };
+                }
+                // Execute with counter amount
+                const oldAmount = offer.amount;
+                offer.amount = offer.counterAmount;
+                offer.status = "accept";
+                this.executeTransfer(offer);
+                return { success: true, msg: `Gegenangebot angenommen! ${offer.player.name} wechselt für ${offer.amount.toFixed(1)} Mio.` };
+            }
+
+            rejectOffer(offerId) {
+                const idx = this.transferOffers.findIndex(o => o.id === offerId);
+                if (idx === -1) return { success: false, msg: "Angebot nicht gefunden." };
+                this.transferOffers.splice(idx, 1);
+                return { success: true, msg: "Angebot abgelehnt." };
+            }
+
+            // ---- Coach ----
+            evaluateCoach(club) {
+                if (!club.coach) return "❌ Kein Trainer.";
+                const c = club.coach;
+                const perf = club.fanSatisfaction;
+                const score = (perf * 0.4 + c.reputation * 0.4 + c.tacticalQuality * 0.2);
+                let rating = score > 75 ? "Hervorragend" : score > 55 ? "Gut" : score > 40 ? "Durchschnittlich" :
+                "Verbesserungswürdig";
+                return `🧑‍🏫 ${c.name} (${c.age} Jahre)\nReputation: ${c.reputation} | Taktik: ${c.tacticalQuality}\nJugendförderung: ${c.youthDevelopment} | Autorität: ${c.authority}\nMedien: ${c.media}\nPhilosophie: ${c.philosophy} | Formation: ${c.preferredFormation}\nBewertung: ${rating}`;
+            }
+
+            hireCoach(club, coach) {
+                if (club.coach) return { success: false, msg: `${club.name} hat bereits einen Trainer.` };
+                club.coach = coach;
+                this.addNews(`${coach.name} wird neuer Trainer von ${club.name}.`, "success");
+                return { success: true, msg: `${coach.name} als neuer Trainer verpflichtet.` };
+            }
+
+            fireCoach(club) {
+                if (!club.coach) return { success: false, msg: "Kein Trainer." };
+                const fired = club.coach;
+                club.coach = null;
+                this.addNews(`${fired.name} wurde als Trainer entlassen.`, "urgent");
+                return { success: true, msg: `${fired.name} entlassen.` };
+            }
+
+            // ---- Scouting ----
+            startScouting(club, region, ageMin, ageMax, position, minPotential, durationWeeks, budget) {
+                if (budget > club.transferBudget) return { success: false, msg: "Nicht genug Budget." };
+                club.transferBudget -= budget;
+                const report = {
+                    id: Date.now() + Math.random(),
+                    club: club.name,
+                    region,
+                    ageMin,
+                    ageMax,
+                    position,
+                    minPotential,
+                    durationWeeks,
+                    budget,
+                    startDay: this.currentMatchday,
+                    completed: false,
+                    results: [],
+                    progress: 0
+                };
+                this.scoutingReports.push(report);
+                this.addNews(`Scoutingauftrag in ${region} gestartet (${position}, Potential ${minPotential}+). Dauer: ${durationWeeks} Wochen.`,
+                    "success");
+                return { success: true, msg: "Scoutingauftrag gestartet.", report };
+            }
+
+            advanceScouting(weeks) {
+                const reports = this.scoutingReports.filter(r => !r.completed);
+                reports.forEach(r => {
+                    r.progress += weeks;
+                    if (r.progress >= r.durationWeeks) {
+                        r.completed = true;
+                        // Generate results
+                        const numResults = 2 + randInt(0, 5);
+                        for (let i = 0; i < numResults; i++) {
+                            const age = r.ageMin + randInt(0, r.ageMax - r.ageMin);
+                            const p = generatePlayer(9999 + Math.random() * 10000, age, r.position);
+                            const potBonus = randInt(0, 15);
+                            p.potential = clamp(p.potential + potBonus, 1, 99);
+                            if (p.overall < 40) p.overall = 40 + randInt(0, 20);
+                            // scale market value down for scouted players (they're not signed yet)
+                            p.marketValue = Math.round(p.marketValue * (0.4 + rand(0, 0.4)) * 10) / 10;
+                            p.nationality = r.region === "Deutschland" ? "Deutschland" :
+                                r.region === "Südamerika" ? randomItem(["Brasilien", "Argentinien", "Uruguay", "Chile",
+                                    "Kolumbien"
+                                ]) :
+                                r.region === "Afrika" ? randomItem(["Kamerun", "Ghana", "Nigeria", "Senegal",
+                                    "Elfenbeinküste"
+                                ]) :
+                                r.region === "Asien" ? randomItem(["Japan", "Korea", "China", "Australien"]) :
+                                r.region === "Nordamerika" ? randomItem(["USA", "Kanada", "Mexiko"]) :
+                                randomNationality();
+                            r.results.push(p);
+                        }
+                        this.addNews(`Scoutingauftrag in ${r.region} abgeschlossen! ${r.results.length} Spieler gefunden.`,
+                            "success");
+                    }
+                });
+            }
+
+            getScoutingResults(clubName) {
+                return this.scoutingReports.filter(r => r.club === clubName && r.completed);
+            }
+
+            // ---- Board ----
+            evaluateBoard(club) {
+                const goals = this.seasonGoals[club.name] || club.seasonGoals;
+                const table = this.getTable(club.league);
+                const pos = table.findIndex(([name]) => name === club.name) + 1;
+                let achieved = 0;
+                let total = 0;
+                if (goals.leaguePlace) {
+                    total++;
+                    if (pos <= goals.leaguePlace) achieved++;
+                }
+                if (goals.cupRound) {
+                    total++;
+                    // simplified: check if club has a cup result
+                    if (club.history.some(h => h.cup && h.cup === goals.cupRound)) achieved++;
+                }
+                const score = total > 0 ? achieved / total : 0.5;
+                club.boardSatisfaction = clamp(club.boardSatisfaction + (score - 0.5) * 15, 0, 100);
+                if (club.boardSatisfaction < 25) {
+                    this.addNews(`⚠ Vorstand unzufrieden! Saisonziele gefährdet.`, "urgent");
+                }
+                return {
+                    satisfaction: Math.round(club.boardSatisfaction),
+                    pos,
+                    goals,
+                    achieved,
+                    total,
+                    score: Math.round(score * 100)
+                };
+            }
+
+            // ---- News ----
+            addNews(text, type = "normal") {
+                const entry = {
+                    id: this.newsId++,
+                    text,
+                    type,
+                    date: `${this.currentSeason}/${this.currentMatchday}`,
+                    timestamp: Date.now()
+                };
+                this.news.unshift(entry);
+                if (this.news.length > 200) this.news.pop();
+                return entry;
+            }
+
+            // ---- Match Simulation ----
+            simulateMatch(homeClub, awayClub) {
+                let homeStrength = homeClub.averageOverall();
+                let awayStrength = awayClub.averageOverall();
+                if (homeClub.coach) homeStrength += homeClub.coach.tacticalQuality * 0.06;
+                if (awayClub.coach) awayStrength += awayClub.coach.tacticalQuality * 0.06;
+                // Home advantage
+                homeStrength *= 1.05;
+                // Form / morale adjustments
+                const homeMorale = homeClub.players.reduce((a, p) => a + p.morale, 0) / homeClub.players.length;
+                const awayMorale = awayClub.players.reduce((a, p) => a + p.morale, 0) / awayClub.players.length;
+                homeStrength *= (0.8 + (homeMorale / 100) * 0.4);
+                awayStrength *= (0.8 + (awayMorale / 100) * 0.4);
+                homeStrength *= (1 + (Math.random() - 0.5) * 0.35);
+                awayStrength *= (1 + (Math.random() - 0.5) * 0.35);
+
+                const diff = homeStrength - awayStrength;
+                const homeXg = Math.max(0.2, (homeStrength / 100) * 2.2 + diff * 0.015 + rand(-0.3, 0.3));
+                const awayXg = Math.max(0.2, (awayStrength / 100) * 2.2 - diff * 0.015 + rand(-0.3, 0.3));
+                let homeGoals = this.poissonRandom(homeXg);
+                let awayGoals = this.poissonRandom(awayXg);
+                homeGoals = clamp(homeGoals, 0, 8);
+                awayGoals = clamp(awayGoals, 0, 8);
+
+                // Events
+                const events = [];
+                for (let i = 0; i < homeGoals; i++) {
+                    const scorer = homeClub.players[randInt(0, homeClub.players.length - 1)];
+                    if (scorer) {
+                        scorer.goals = (scorer.goals || 0) + 1;
+                        events.push(`⚽ ${scorer.name} (${homeClub.name}) ${i+1}. Tor`);
+                    } else {
+                        events.push(`⚽ ${homeClub.name} Tor!`);
+                    }
+                }
+                for (let i = 0; i < awayGoals; i++) {
+                    const scorer = awayClub.players[randInt(0, awayClub.players.length - 1)];
+                    if (scorer) {
+                        scorer.goals = (scorer.goals || 0) + 1;
+                        events.push(`⚽ ${scorer.name} (${awayClub.name}) ${i+1}. Tor`);
+                    } else {
+                        events.push(`⚽ ${awayClub.name} Tor!`);
+                    }
+                }
+                // Random yellow card
+                if (Math.random() < 0.25) {
+                    const team = Math.random() < 0.5 ? homeClub : awayClub;
+                    const player = team.players[randInt(0, team.players.length - 1)];
+                    if (player) {
+                        player.yellowCards = (player.yellowCards || 0) + 1;
+                        events.push(`🟨 Gelb für ${player.name} (${team.name})`);
+                    }
+                }
+                // Random injury
+                if (Math.random() < 0.12) {
+                    const team = Math.random() < 0.5 ? homeClub : awayClub;
+                    const player = team.players[randInt(0, team.players.length - 1)];
+                    if (player) {
+                        const weeks = 1 + randInt(0, 4);
+                        player.injuryWeeks = weeks;
+                        events.push(`🩹 Verletzung! ${player.name} (${team.name}) fällt ${weeks} Wochen aus.`);
+                    }
+                }
+
+                // Update player stats
+                homeClub.players.forEach(p => { p.gamesPlayed = (p.gamesPlayed || 0) + 1;
+                    p.morale = clamp(p.morale + rand(-2, 3), 0, 100); });
+                awayClub.players.forEach(p => { p.gamesPlayed = (p.gamesPlayed || 0) + 1;
+                    p.morale = clamp(p.morale + rand(-2, 3), 0, 100); });
+
+                // Update club season stats
+                homeClub.seasonGoalsScored = (homeClub.seasonGoalsScored || 0) + homeGoals;
+                homeClub.seasonGoalsConceded = (homeClub.seasonGoalsConceded || 0) + awayGoals;
+                awayClub.seasonGoalsScored = (awayClub.seasonGoalsScored || 0) + awayGoals;
+                awayClub.seasonGoalsConceded = (awayClub.seasonGoalsConceded || 0) + homeGoals;
+
+                return {
+                    home: homeClub.name,
+                    away: awayClub.name,
+                    homeGoals,
+                    awayGoals,
+                    xG_home: Math.round(homeXg * 100) / 100,
+                    xG_away: Math.round(awayXg * 100) / 100,
+                    events,
+                    homeStrength: Math.round(homeStrength),
+                    awayStrength: Math.round(awayStrength)
+                };
+            }
+
+            poissonRandom(lambda) {
+                if (lambda < 30) {
+                    let L = Math.exp(-lambda);
+                    let k = 0;
+                    let p = 1;
+                    do {
+                        k++;
+                        p *= Math.random();
+                    } while (p > L);
+                    return k - 1;
+                }
+                return Math.round(lambda + Math.sqrt(lambda) * (Math.random() - 0.5) * 2);
+            }
+
+            simulateMatchday(fixtures) {
+                const results = [];
+                fixtures.forEach(([home, away]) => {
+                    if (!away) {
+                        results.push({ home: home.name, away: "BYE", homeGoals: null, awayGoals: null, events: [],
+                            homeStrength: 0, awayStrength: 0 });
+                        return;
+                    }
+                    const result = this.simulateMatch(home, away);
+                    results.push(result);
+                    const table = home.league === "Bundesliga" ? this.leagueTable : this.leagueTable2;
+                    if (result.homeGoals > result.awayGoals) {
+                        table[home.name] = (table[home.name] || 0) + 3;
+                        home.seasonPoints = (home.seasonPoints || 0) + 3;
+                    } else if (result.homeGoals < result.awayGoals) {
+                        table[away.name] = (table[away.name] || 0) + 3;
+                        away.seasonPoints = (away.seasonPoints || 0) + 3;
+                    } else {
+                        table[home.name] = (table[home.name] || 0) + 1;
+                        table[away.name] = (table[away.name] || 0) + 1;
+                        home.seasonPoints = (home.seasonPoints || 0) + 1;
+                        away.seasonPoints = (away.seasonPoints || 0) + 1;
+                    }
+                });
+                this.currentMatchday++;
+                this.matchdayResults = results;
+                this.advanceScouting(1);
+                this.youthIntakeTimer++;
+                // Youth intake every 10 weeks
+                if (this.youthIntakeTimer >= 10) {
+                    this.youthIntakeTimer = 0;
+                    this.clubs.forEach(club => {
+                        this.generateYouthIntake(club);
+                    });
+                }
+                // Random events
+                this.eventTimer++;
+                if (this.eventTimer % 3 === 0) {
+                    this.generateRandomEvent();
+                }
+                // Player development
+                this.developPlayers();
+
+                // Check season end (34 matchdays)
+                if (this.currentMatchday >= 34) {
+                    this.seasonComplete = true;
+                    this.endSeason();
+                }
+                return results;
+            }
+
+            generateYouthIntake(club) {
+                const level = club.youthAcademyLevel || 1;
+                const numTalents = 1 + randInt(0, level);
+                for (let i = 0; i < numTalents; i++) {
+                    const age = 16 + randInt(0, 2);
+                    const p = generatePlayer(99999 + Math.random() * 100000, age);
+                    const boost = randInt(0, level * 3);
+                    p.potential = clamp(p.potential + boost, 1, 99);
+                    p.overall = clamp(p.overall + randInt(0, 5 + level), 1, 99);
+                    p.marketValue = Math.round((0.2 + (p.overall / 100) * 2) * 10) / 10;
+                    p.salary = Math.round((0.05 + (p.overall / 100) * 0.5) * 10) / 10;
+                    p.contractYears = 3 + randInt(0, 2);
+                    p.nationality = club.league === "Bundesliga" ? "Deutschland" : randomNationality();
+                    club.players.push(p);
+                    club.youthTalents.push({ playerId: p.id, season: this.currentSeason });
+                    this.addNews(`🌱 Jugendspieler ${p.name} (${p.position}, ${p.overall} Stärke, Potential ${p.potential}) in ${club.name} nachgerückt.`,
+                        "success");
+                }
+                return numTalents;
+            }
+
+            developPlayers() {
+                this.clubs.forEach(club => {
+                    club.players.forEach(p => {
+                        p.weeksDeveloped = (p.weeksDeveloped || 0) + 1;
+                        const devSpeed = 0.1 + (p.potential - p.overall) / 200 +
+                            (club.coach ? club.coach.youthDevelopment / 200 : 0.1) +
+                            (p.gamesPlayed > 10 ? 0.05 : 0);
+                        if (Math.random() < devSpeed && p.overall < p.potential) {
+                            // Increase a random attribute
+                            const attr = randomItem(ATTRIBUTES);
+                            p.attributes[attr] = clamp(p.attributes[attr] + randInt(1, 3), 1, 99);
+                            // Also increase market value slightly
+                            p.marketValue = Math.round((p.marketValue + 0.1 + rand(0, 0.3)) * 10) / 10;
+                        }
+                        // Morale changes based on games played
+                        if (p.gamesPlayed > 15) {
+                            p.morale = clamp(p.morale + rand(0, 1), 0, 100);
+                        } else if (p.gamesPlayed < 5 && p.role !== "Talent") {
+                            p.morale = clamp(p.morale + rand(-2, 0), 0, 100);
+                        }
+                        // Injury recovery
+                        if (p.injuryWeeks > 0) {
+                            p.injuryWeeks--;
+                            if (p.injuryWeeks === 0) {
+                                this.addNews(`💪 ${p.name} (${club.name}) ist wieder fit.`, "normal");
+                            }
+                        }
+                        // Form penalty recovery
+                        if (p.formPenalty > 0) {
+                            p.formPenalty = Math.max(0, p.formPenalty - 0.5);
+                        }
+                    });
+                });
+            }
+
+            generateRandomEvent() {
+                const club = randomItem(this.clubs);
+                if (!club) return;
+                const eventType = randInt(0, 9);
+                // 0-2: player related, 3-5: transfer related, 6-7: coach, 8-9: club
+                if (eventType <= 2) {
+                    // Player event
+                    if (club.players.length < 3) return;
+                    const p = randomItem(club.players);
+                    if (!p) return;
+                    const sub = randInt(0, 3);
+                    if (sub === 0 && p.satisfaction < 60) {
+                        this.addNews(`😤 ${p.name} (${club.name}) ist unzufrieden und fordert mehr Spielzeit.`, "urgent");
+                        p.morale = clamp(p.morale - 10, 0, 100);
+                    } else if (sub === 1 && p.overall > 75 && p.contractYears < 2) {
+                        this.addNews(`📝 ${p.name} (${club.name}) möchte seinen Vertrag verlängern.`, "normal");
+                        p.satisfaction = clamp(p.satisfaction + 5, 0, 100);
+                    } else if (sub === 2 && p.gamesPlayed > 20 && p.goals > 10) {
+                        this.addNews(`🌟 ${p.name} (${club.name}) ist in Top-Form und wird von großen Vereinen beobachtet.`,
+                            "success");
+                        p.marketValue = Math.round((p.marketValue + rand(0.5, 2)) * 10) / 10;
+                    } else {
+                        // Player randomly improves
+                        if (Math.random() < 0.3) {
+                            const attr = randomItem(ATTRIBUTES);
+                            p.attributes[attr] = clamp(p.attributes[attr] + randInt(1, 2), 1, 99);
+                            this.addNews(`📈 ${p.name} (${club.name}) hat sich im Training verbessert (${attr}).`, "success");
+                        }
+                    }
+                } else if (eventType <= 5) {
+                    // Transfer event
+                    if (club.players.length < 2) return;
+                    const p = randomItem(club.players);
+                    if (!p) return;
+                    if (Math.random() < 0.4) {
+                        const interested = this.clubs.filter(c => c !== club && c.transferBudget > p.marketValue * 0.7);
+                        if (interested.length > 0) {
+                            const buyer = randomItem(interested);
+                            const offer = Math.round((p.marketValue * (0.8 + rand(0, 0.5))) * 10) / 10;
+                            this.addNews(`🔔 ${buyer.name} bietet ${offer.toFixed(1)} Mio. für ${p.name} (${club.name}).`,
+                                "urgent");
+                            // Auto-create a transfer offer
+                            const offerObj = {
+                                id: Date.now() + Math.random(),
+                                player: p,
+                                playerId: p.id,
+                                fromClub: buyer,
+                                fromClubName: buyer.name,
+                                toClub: club,
+                                toClubName: club.name,
+                                amount: offer,
+                                status: "pending",
+                                counterAmount: null,
+                                addons: {},
+                                date: this.currentMatchday,
+                                incoming: true
+                            };
+                            this.transferOffers.push(offerObj);
+                        }
+                    }
+                } else if (eventType <= 7) {
+                    // Coach event
+                    if (!club.coach) return;
+                    if (Math.random() < 0.3) {
+                        this.addNews(`🧑‍🏫 ${club.coach.name} (${club.name}) fordert Verstärkung auf dem Transfermarkt.`,
+                            "normal");
+                        club.coach.satisfaction = clamp(club.coach.satisfaction - 5, 0, 100);
+                    } else {
+                        this.addNews(`📊 ${club.coach.name} (${club.name}) ist mit der Kaderentwicklung zufrieden.`,
+                            "success");
+                        club.coach.satisfaction = clamp(club.coach.satisfaction + 5, 0, 100);
+                    }
+                } else {
+                    // Club event
+                    const sub = randInt(0, 2);
+                    if (sub === 0) {
+                        // Sponsor
+                        const bonus = randInt(1, 5);
+                        club.financialReserves += bonus;
+                        club.transferBudget += bonus * 0.3;
+                        this.addNews(`💰 Neuer Sponsor: ${club.name} erhält ${bonus.toFixed(1)} Mio. € zusätzlich.`,
+                            "success");
+                    } else if (sub === 1) {
+                        // Fan event
+                        const change = randInt(-5, 10);
+                        club.fanSatisfaction = clamp(club.fanSatisfaction + change, 0, 100);
+                        if (change > 5) {
+                            this.addNews(`❤️ Fan-Zufriedenheit bei ${club.name} gestiegen!`, "success");
+                        } else if (change < -3) {
+                            this.addNews(`😡 Fanproteste bei ${club.name}!`, "urgent");
+                        }
+                    } else {
+                        // Stadium/Infrastructure
+                        if (Math.random() < 0.2) {
+                            const cost = randInt(2, 8);
+                            if (club.financialReserves > cost) {
+                                club.financialReserves -= cost;
+                                club.stadium.capacity += randInt(1000, 5000);
+                                this.addNews(`🏟 Stadionausbau in ${club.name} abgeschlossen. Kapazität: ${club.stadium.capacity}`,
+                                    "success");
+                            }
+                        }
+                    }
+                }
+            }
+
+            endSeason() {
+                // Process season end: promotion, relegation, European spots, etc.
+                this.addNews(`🏆 Saison ${this.currentSeason} beendet!`, "success");
+                // Determine champions, promotion, relegation
+                const bundesTable = this.getTable("Bundesliga");
+                const zweitTable = this.getTable("2. Bundesliga");
+
+                if (bundesTable.length > 0) {
+                    const champ = bundesTable[0][0];
+                    const champClub = this.getClub(champ);
+                    if (champClub) {
+                        champClub.trophies.push({ season: this.currentSeason, title: "Meister" });
+                        this.addNews(`🏆 ${champ} ist Meister der 1. Bundesliga ${this.currentSeason}!`, "success");
+                    }
+                    // Relegation: 16th plays playoff vs 3rd of 2. Bundesliga
+                    if (bundesTable.length >= 16) {
+                        const relegationClub = this.getClub(bundesTable[15][0]);
+                        const promotionClub = zweitTable.length >= 3 ? this.getClub(zweitTable[2][0]) : null;
+                        if (relegationClub && promotionClub) {
+                            // Playoff simulation
+                            const playoff = this.simulateMatch(relegationClub, promotionClub);
+                            let playoffWinner, playoffLoser;
+                            if (playoff.homeGoals > playoff.awayGoals) {
+                                playoffWinner = relegationClub;
+                                playoffLoser = promotionClub;
+                            } else if (playoff.homeGoals < playoff.awayGoals) {
+                                playoffWinner = promotionClub;
+                                playoffLoser = relegationClub;
+                            } else {
+                                // Extra time penalty (simplified: random)
+                                if (Math.random() < 0.5) {
+                                    playoffWinner = relegationClub;
+                                    playoffLoser = promotionClub;
+                                } else {
+                                    playoffWinner = promotionClub;
+                                    playoffLoser = relegationClub;
+                                }
+                            }
+                            this.addNews(`⚖ Relegation: ${playoffWinner.name} bleibt/stetigt auf!`, "urgent");
+                            // Swap leagues
+                            if (playoffWinner === promotionClub) {
+                                playoffWinner.league = "Bundesliga";
+                                playoffLoser.league = "2. Bundesliga";
+                            } else {
+                                playoffWinner.league = "Bundesliga";
+                                playoffLoser.league = "2. Bundesliga";
+                            }
+                        }
+                    }
+                    // Direct relegation: 17th and 18th
+                    if (bundesTable.length >= 18) {
+                        const rel1 = this.getClub(bundesTable[16][0]);
+                        const rel2 = this.getClub(bundesTable[17][0]);
+                        if (rel1) rel1.league = "2. Bundesliga";
+                        if (rel2) rel2.league = "2. Bundesliga";
+                        this.addNews(`⬇ ${rel1?.name} und ${rel2?.name} steigen in die 2. Bundesliga ab.`, "urgent");
+                    }
+                }
+                // Promotion from 2. Bundesliga: top 2
+                if (zweitTable.length >= 2) {
+                    const prom1 = this.getClub(zweitTable[0][0]);
+                    const prom2 = this.getClub(zweitTable[1][0]);
+                    if (prom1) {
+                        prom1.league = "Bundesliga";
+                        this.addNews(`⬆ ${prom1.name} steigt in die 1. Bundesliga auf!`, "success");
+                    }
+                    if (prom2) {
+                        prom2.league = "Bundesliga";
+                        this.addNews(`⬆ ${prom2.name} steigt in die 1. Bundesliga auf!`, "success");
+                    }
+                }
+
+                // Reset for next season
+                this.currentSeason++;
+                this.currentMatchday = 0;
+                this.seasonComplete = false;
+                this.clubs.forEach(c => {
+                    c.seasonPoints = 0;
+                    c.seasonGoalsScored = 0;
+                    c.seasonGoalsConceded = 0;
+                    c.players.forEach(p => {
+                        p.gamesPlayed = 0;
+                        p.goals = 0;
+                        p.assists = 0;
+                        p.yellowCards = 0;
+                        p.redCards = 0;
+                    });
+                    // Increase player ages
+                    c.players.forEach(p => p.age++);
+                    // Set new season goals
+                    const table = this.getTable(c.league);
+                    const pos = table.findIndex(([name]) => name === c.name) + 1;
+                    const prevGoal = this.seasonGoals[c.name]?.leaguePlace || 10;
+                    const newGoal = Math.max(1, Math.min(18, prevGoal + randInt(-2, 3)));
+                    c.seasonGoals = {
+                        leaguePlace: newGoal,
+                        cupRound: ["round1", "round2", "quarter", "semi", "final"][randInt(0, 4)]
+                    };
+                    this.seasonGoals[c.name] = { ...c.seasonGoals };
+                    // Update budgets
+                    const tvMoney = c.league === "Bundesliga" ? 10 + rand(0, 10) : 3 + rand(0, 5);
+                    const sponsorBonus = c.league === "Bundesliga" ? 5 + rand(0, 8) : 1 + rand(0, 3);
+                    c.financialReserves += tvMoney + sponsorBonus + rand(0, 5);
+                    c.transferBudget += rand(2, 8) + (c.league === "Bundesliga" ? 5 : 1);
+                    c.transferBudget = Math.round(c.transferBudget * 10) / 10;
+                    c.financialReserves = Math.round(c.financialReserves * 10) / 10;
+                    // Fan trust changes
+                    const tablePos = this.getTable(c.league).findIndex(([name]) => name === c.name) + 1;
+                    if (tablePos <= 4) c.fanSatisfaction = clamp(c.fanSatisfaction + 5, 0, 100);
+                    else if (tablePos >= 16) c.fanSatisfaction = clamp(c.fanSatisfaction - 10, 0, 100);
+                    else c.fanSatisfaction = clamp(c.fanSatisfaction + rand(-2, 3), 0, 100);
+                });
+                // Reset league tables
+                this.leagueTable = {};
+                this.leagueTable2 = {};
+                this.clubs.forEach(c => {
+                    if (c.league === "Bundesliga") this.leagueTable[c.name] = 0;
+                    else this.leagueTable2[c.name] = 0;
+                });
+
+                this.addNews(`📅 Neue Saison ${this.currentSeason} gestartet!`, "success");
+                this.saveGame();
+            }
+
+            // ---- Save/Load ----
+            saveGame() {
+                const data = {
+                    clubs: this.clubs.map(c => c.toJSON()),
+                    currentMatchday: this.currentMatchday,
+                    currentSeason: this.currentSeason,
+                    leagueTable: this.leagueTable,
+                    leagueTable2: this.leagueTable2,
+                    transferOffers: this.transferOffers.map(o => ({
+                        ...o,
+                        player: o.player ? { id: o.player.id, name: o.player.name } : null,
+                        fromClub: o.fromClub ? o.fromClub.name : null,
+                        toClub: o.toClub ? o.toClub.name : null
+                    })),
+                    scoutingReports: this.scoutingReports,
+                    news: this.news,
+                    newsId: this.newsId,
+                    seasonComplete: this.seasonComplete,
+                    seasonGoals: this.seasonGoals,
+                    youthIntakeTimer: this.youthIntakeTimer,
+                    eventTimer: this.eventTimer,
+                    clubHistory: this.clubHistory
+                };
+                localStorage.setItem('sportdirektorSave', JSON.stringify(data));
+                return data;
+            }
+
+            loadGame(data) {
+                this.clubs = data.clubs.map(c => Club.fromJSON(c));
+                this.currentMatchday = data.currentMatchday || 0;
+                this.currentSeason = data.currentSeason || 2026;
+                this.leagueTable = data.leagueTable || {};
+                this.leagueTable2 = data.leagueTable2 || {};
+                this.transferOffers = data.transferOffers || [];
+                this.scoutingReports = data.scoutingReports || [];
+                this.news = data.news || [];
+                this.newsId = data.newsId || 0;
+                this.seasonComplete = data.seasonComplete || false;
+                this.seasonGoals = data.seasonGoals || {};
+                this.youthIntakeTimer = data.youthIntakeTimer || 0;
+                this.eventTimer = data.eventTimer || 0;
+                this.clubHistory = data.clubHistory || {};
+                // Rebuild transfer offers with actual objects
+                this.transferOffers = this.transferOffers.map(o => {
+                    const from = this.getClub(o.fromClubName);
+                    const to = this.getClub(o.toClubName);
+                    let player = null;
+                    if (o.player && o.player.id) {
+                        for (let c of this.clubs) {
+                            const p = c.players.find(p => p.id === o.player.id);
+                            if (p) { player = p; break; }
+                        }
+                    }
+                    return { ...o, fromClub: from, toClub: to, player: player };
+                });
+                return this;
+            }
+        }
+
+        // ================================================================
+        //  APPLICATION STATE
+        // ================================================================
+
+        let appState = {
+            clubs: [],
+            engine: null,
+            playerClub: null,
+            currentTab: 'dashboard',
+            careerStarted: false
+        };
+
+        // ================================================================
+        //  DOM REFS
+        // ================================================================
+
+        const startScreen = document.getElementById('start-screen');
+        const selectScreen = document.getElementById('select-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const clubList = document.getElementById('club-list');
+        const clubNameHeader = document.getElementById('club-name-header');
+        const seasonDisplay = document.getElementById('season-display');
+        const matchdayDisplay = document.getElementById('matchday-display');
+        const budgetDisplay = document.getElementById('budget-display');
+        const modalContainer = document.getElementById('modal-container');
+
+        const tabContents = {
+            dashboard: document.getElementById('tab-dashboard'),
+            squad: document.getElementById('tab-squad'),
+            transfers: document.getElementById('tab-transfers'),
+            scouting: document.getElementById('tab-scouting'),
+            coach: document.getElementById('tab-coach'),
+            board: document.getElementById('tab-board'),
+            news: document.getElementById('tab-news'),
+            matchday: document.getElementById('tab-matchday'),
+            save: document.getElementById('tab-save')
+        };
+
+        let selectedLeagueTab = "Bundesliga";
+
+        // ================================================================
+        //  UI HELPERS
+        // ================================================================
+
+        function showModal(title, contentHTML, onClose) {
+            modalContainer.innerHTML = `
+                <div class="modal-overlay" onclick="if(event.target===this) closeModal();">
+                    <div class="modal-box">
+                        <button class="close-btn" onclick="closeModal()">✕</button>
+                        <h2>${title}</h2>
+                        <div>${contentHTML}</div>
+                    </div>
+                </div>
+            `;
+            if (onClose) modalContainer._onClose = onClose;
+        }
+
+        function closeModal() {
+            if (modalContainer._onClose) modalContainer._onClose();
+            modalContainer.innerHTML = '';
+        }
+
+        function progressBar(value, max = 100, color = 'gold') {
+            const pct = clamp((value / max) * 100, 0, 100);
+            return `<div class="progress-bar"><div class="fill ${color}" style="width:${pct}%"></div></div>`;
+        }
+
+        function formatMoney(v) { return v.toFixed(1) + " Mio. €"; }
+
+        function getCrest(name) { return CLUB_CREST[name] || name.slice(0, 3).toUpperCase(); }
+
+        // ================================================================
+        //  RENDER FUNCTIONS
+        // ================================================================
+
+        function renderClubList() {
+            clubList.innerHTML = '';
+            const clubs = appState.clubs.filter(c => c.league === selectedLeagueTab);
+            clubs.forEach(club => {
+                const crest = getCrest(club.name);
+                const crestClass = club.league === "2. Bundesliga" ? "crest league-2" : "crest";
+                const div = document.createElement('div');
+                div.className = 'card club-card';
+                const diff = club.reputation > 70 ? "★☆☆☆☆" :
+                    club.reputation > 60 ? "★★☆☆☆" :
+                    club.reputation > 50 ? "★★★☆☆" :
+                    club.reputation > 40 ? "★★★★☆" : "★★★★★";
+                const boardGoal = club.seasonGoals?.leaguePlace ? `Platz ${club.seasonGoals.leaguePlace}` : "—";
+                div.innerHTML = `
+                    <div class="club-head">
+                        <div class="${crestClass}">${crest}</div>
+                        <h3>${club.name}</h3>
+                    </div>
+                    <p style="font-size:14px;">💰 ${formatMoney(club.transferBudget)}</p>
+                    <p style="font-size:14px;">📊 Kaderwert: ${formatMoney(club.squadValue())}</p>
+                    <p style="font-size:14px;">🏟 ${club.stadium?.name || ''} (${club.stadium?.capacity || 0})</p>
+                    <p style="font-size:14px;">🎯 Ziel: ${boardGoal} | Schwierigkeit: ${diff}</p>
+                    <p style="font-size:14px;">📈 Reputation: ${club.reputation}</p>
+                    <button data-name="${club.name}" class="select-club">▶ Übernehmen</button>
+                `;
+                div.querySelector('.select-club').addEventListener('click', () => {
+                    appState.playerClub = appState.clubs.find(c => c.name === club.name);
+                    if (appState.playerClub) startGame();
+                });
+                clubList.appendChild(div);
+            });
+        }
+
+        function startGame() {
+            if (!appState.playerClub) return;
+            selectScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            clubNameHeader.textContent = appState.playerClub.name + " (" + appState.playerClub.league + ")";
+            updateHeader();
+            switchTab('dashboard');
+            // initial save
+            appState.engine.saveGame();
+        }
+
+        function updateHeader() {
+            const club = appState.playerClub;
+            if (!club) return;
+            const eng = appState.engine;
+            seasonDisplay.textContent = `Saison ${eng.currentSeason}/${eng.currentSeason+1}`;
+            matchdayDisplay.textContent = `Spieltag ${eng.currentMatchday}`;
+            budgetDisplay.textContent = `€${club.transferBudget.toFixed(1)}M`;
+        }
+
+        // ---- Tab switching ----
+        function switchTab(tabId) {
+            document.querySelectorAll('.menu button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabId);
+            });
+            Object.keys(tabContents).forEach(key => {
+                tabContents[key].classList.toggle('hidden', key !== tabId);
+            });
+            appState.currentTab = tabId;
+            switch (tabId) {
+                case 'dashboard':
+                    renderDashboard();
+                    break;
+                case 'squad':
+                    renderSquad();
+                    break;
+                case 'transfers':
+                    renderTransfers();
+                    break;
+                case 'scouting':
+                    renderScouting();
+                    break;
+                case 'coach':
+                    renderCoach();
+                    break;
+                case 'board':
+                    renderBoard();
+                    break;
+                case 'news':
+                    renderNews();
+                    break;
+                case 'matchday':
+                    renderMatchday();
+                    break;
+                case 'save':
+                    renderSave();
+                    break;
+            }
+        }
+
+        // ---- Dashboard ----
+        function renderDashboard() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            if (!club) return;
+            const table = eng.getTable(club.league);
+            const pos = table.findIndex(([name]) => name === club.name) + 1;
+            const pts = table.find(([name]) => name === club.name)?.[1] || 0;
+            const boardEval = eng.evaluateBoard(club);
+            const crest = getCrest(club.name);
+            const leagueTag = club.league === "2. Bundesliga" ? "tag-2" : "";
+
+            let html = `
+                <div class="flex">
+                    <div class="card" style="flex:1 1 100%;">
+                        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                            <div class="crest ${leagueTag}">${crest}</div>
+                            <div>
+                                <h2 style="margin:0;">${club.name}</h2>
+                                <span class="league-tag ${leagueTag}">${club.league}</span>
+                                <span class="badge gold">Platz ${pos}</span>
+                                <span class="badge blue">${pts} Pkt.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex">
+                    <div class="card"><h3>💰 Finanzen</h3>
+                        <p>Transferbudget: <span class="highlight">${formatMoney(club.transferBudget)}</span></p>
+                        <p>Rücklagen: ${formatMoney(club.financialReserves)}</p>
+                        <p>Gehaltsbudget: ${formatMoney(club.salaryBudget)}</p>
+                        <p>Kaderwert: ${formatMoney(club.squadValue())}</p>
+                        <p>Gehaltssumme: ${formatMoney(club.totalWages())}</p>
+                    </div>
+                    <div class="card"><h3>👥 Kader</h3>
+                        <p>Spieler: ${club.players.length}</p>
+                        <p>Ø Stärke: ${club.averageOverall()}</p>
+                        <p>Trainer: ${club.coach ? club.coach.name : '❌ Keiner'}</p>
+                        <p>Jugendakademie: Lv. ${club.youthAcademyLevel}</p>
+                    </div>
+                    <div class="card"><h3>📊 Zufriedenheit</h3>
+                        <p>Vorstand: ${boardEval.satisfaction}% ${progressBar(boardEval.satisfaction)}</p>
+                        <p>Fans: ${club.fanSatisfaction}% ${progressBar(club.fanSatisfaction,100,'green')}</p>
+                        <p>Trainer: ${club.coach ? club.coach.satisfaction : 0}% ${progressBar(club.coach?.satisfaction||0,100,'blue')}</p>
+                    </div>
+                    <div class="card"><h3>🎯 Saisonziele</h3>
+                        <p>Liga: Platz ${club.seasonGoals?.leaguePlace || '?'}</p>
+                        <p>Pokal: ${club.seasonGoals?.cupRound || '?'}</p>
+                        <p>Fortschritt: ${boardEval.score}%</p>
+                    </div>
+                </div>
+                <div class="flex">
+                    <div class="card wide"><h3>📋 Nächste Aufgaben</h3>
+                        <div id="dashboard-tasks"></div>
+                    </div>
+                </div>
+            `;
+            tabContents.dashboard.innerHTML = html;
+
+            // Render tasks
+            const tasksDiv = document.getElementById('dashboard-tasks');
+            let tasks = [];
+            if (!club.coach) tasks.push("❌ Kein Trainer – stelle einen ein!");
+            if (club.players.length < 20) tasks.push("⚠ Kleiner Kader – verpflichte Spieler.");
+            if (club.transferBudget < 5) tasks.push("💰 Knappes Budget – Verkäufe erwägen.");
+            if (boardEval.satisfaction < 40) tasks.push("⚠ Vorstand unzufrieden – Ergebnisse verbessern!");
+            if (club.fanSatisfaction < 30) tasks.push("😡 Fanunruhe – sportliche Erfolge nötig.");
+            if (tasks.length === 0) tasks.push("✅ Alles im grünen Bereich. Weiter so!");
+
+            tasksDiv.innerHTML = tasks.map(t => `<p style="font-size:18px;">${t}</p>`).join('');
+
+            // Show recent news (3 items)
+            const recentNews = eng.news.slice(0, 3);
+            if (recentNews.length) {
+                html += `<div class="card wide"><h3>📰 Aktuelle News</h3>`;
+                recentNews.forEach(n => {
+                    const cls = n.type === 'urgent' ? 'urgent' : n.type === 'success' ? 'success' : '';
+                    html += `<div class="news-item ${cls}">
+                                <span class="news-date">[${n.date}]</span>
+                                <span>${n.text}</span>
+                            </div>`;
+                });
+                html += `</div>`;
+                tabContents.dashboard.innerHTML += html;
+            }
+        }
+
+        // ---- Squad ----
+        function renderSquad() {
+            const club = appState.playerClub;
+            if (!club) return;
+            let html = `
+                <div class="flex" style="justify-content:space-between;align-items:center;">
+                    <h3>🧑‍🤝‍🧑 Kader von ${club.name}</h3>
+                    <div>
+                        <button onclick="showSquadAnalysis()" class="secondary small">📊 Analyse</button>
+                        <button onclick="extendContractUI()" class="small">📝 Vertrag verlängern</button>
+                    </div>
+                </div>
+                <div id="squad-analysis-output" style="margin-bottom:12px;"></div>
+                <div style="overflow-x:auto;">
+                <table>
+                    <tr><th>#</th><th>Name</th><th>Pos</th><th>Alter</th><th>Stärke</th><th>Pot.</th><th>Wert</th><th>Gehalt</th><th>Vertrag</th><th>Form</th><th>Moral</th></tr>
+            `;
+            club.players.sort((a, b) => b.overall - a.overall);
+            club.players.forEach((p, i) => {
+                const form = p.form;
+                const formColor = form > 75 ? 'green' : form > 50 ? 'gold' : 'red';
+                const moraleColor = p.morale > 70 ? 'green' : p.morale > 40 ? 'gold' : 'red';
+                const inj = p.injuryWeeks > 0 ? `🩹${p.injuryWeeks}W` : '';
+                html += `<tr>
+                    <td>${i+1}</td>
+                    <td>${p.name} ${inj}</td>
+                    <td>${p.position}</td>
+                    <td>${p.age}</td>
+                    <td>${p.overall}</td>
+                    <td>${p.potential}</td>
+                    <td>${formatMoney(p.marketValue)}</td>
+                    <td>${formatMoney(p.salary)}</td>
+                    <td>${p.contractYears}J</td>
+                    <td><span style="color:var(--${formColor});">${form}%</span></td>
+                    <td><span style="color:var(--${moraleColor});">${p.morale}%</span></td>
+                </tr>`;
+            });
+            html += `</table></div>
+                <div class="btn-group">
+                    <button onclick="showPlayerDetails()" class="secondary">🔍 Spieler-Details</button>
+                    <button onclick="sellPlayerUI()" class="danger">📤 Spieler verkaufen</button>
+                </div>
+            `;
+            tabContents.squad.innerHTML = html;
+        }
+
+        function showSquadAnalysis() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            const report = eng.squadDepthReport(club);
+            document.getElementById('squad-analysis-output').innerHTML = `<pre>${report}</pre>`;
+        }
+
+        function showPlayerDetails() {
+            const club = appState.playerClub;
+            const name = prompt("Spielername eingeben:");
+            if (!name) return;
+            const p = club.players.find(p => p.name.toLowerCase().includes(name.toLowerCase()));
+            if (!p) { alert("Spieler nicht gefunden."); return; }
+            const attrs = Object.entries(p.attributes).map(([k, v]) => `${k}: ${v}`).join(', ');
+            showModal(`🧑 ${p.name}`, `
+                <p><strong>Position:</strong> ${p.position} | <strong>Alter:</strong> ${p.age}</p>
+                <p><strong>Nationalität:</strong> ${p.nationality}</p>
+                <p><strong>Stärke:</strong> ${p.overall} | <strong>Potential:</strong> ${p.potential}</p>
+                <p><strong>Marktwert:</strong> ${formatMoney(p.marketValue)} | <strong>Gehalt:</strong> ${formatMoney(p.salary)}</p>
+                <p><strong>Vertrag:</strong> ${p.contractYears} Jahre</p>
+                <p><strong>Form:</strong> ${p.form}% | <strong>Moral:</strong> ${p.morale}%</p>
+                <p><strong>Einsätze:</strong> ${p.gamesPlayed} | <strong>Tore:</strong> ${p.goals}</p>
+                <p><strong>Attribute:</strong> ${attrs}</p>
+                <p><strong>Rolle:</strong> ${p.role}</p>
+                ${p.injuryWeeks > 0 ? `<p style="color:var(--red);">🩹 Verletzt: ${p.injuryWeeks} Wochen</p>` : ''}
+                <div class="btn-group">
+                    <button onclick="closeModal();extendContractPlayer(${p.id})">📝 Vertrag verlängern</button>
+                    <button onclick="closeModal();changeRole(${p.id})">🔄 Rolle ändern</button>
+                </div>
+            `);
+        }
+
+        function extendContractPlayer(id) {
+            const club = appState.playerClub;
+            const p = club.players.find(p => p.id === id);
+            if (!p) return;
+            const years = parseInt(prompt(`Vertragslaufzeit für ${p.name} verlängern (1-4 Jahre):`));
+            if (isNaN(years) || years < 1 || years > 4) return;
+            if (p.satisfaction > 40) {
+                p.contractYears += years;
+                p.satisfaction = clamp(p.satisfaction + 5, 0, 100);
+                alert(`✅ Vertrag verlängert! ${p.name} bis ${p.contractYears} Jahre.`);
+            } else {
+                alert(`❌ ${p.name} ist unzufrieden und lehnt ab.`);
+            }
+            renderSquad();
+        }
+
+        function changeRole(id) {
+            const club = appState.playerClub;
+            const p = club.players.find(p => p.id === id);
+            if (!p) return;
+            const roles = ["Stammspieler", "Rotationsspieler", "Ersatz", "Talent", "Führungsspieler"];
+            const choice = prompt(`Rolle für ${p.name}:\n${roles.map((r,i) => `${i+1}. ${r}`).join('\n')}\nAuswahl (1-5):`);
+            if (!choice) return;
+            const idx = parseInt(choice) - 1;
+            if (idx < 0 || idx >= roles.length) return;
+            p.role = roles[idx];
+            alert(`✅ Rolle von ${p.name} auf "${p.role}" geändert.`);
+            renderSquad();
+        }
+
+        function extendContractUI() {
+            const club = appState.playerClub;
+            const name = prompt("Spielername für Vertragsverlängerung:");
+            if (!name) return;
+            const p = club.players.find(p => p.name.toLowerCase().includes(name.toLowerCase()));
+            if (!p) { alert("Spieler nicht gefunden."); return; }
+            const years = parseInt(prompt(`${p.name} – zusätzliche Jahre (1-4):`));
+            if (isNaN(years) || years < 1 || years > 4) return;
+            if (p.satisfaction > 40) {
+                p.contractYears += years;
+                p.satisfaction = clamp(p.satisfaction + 5, 0, 100);
+                alert(`✅ Vertrag verlängert! ${p.name} hat noch ${p.contractYears} Jahre.`);
+            } else {
+                alert(`❌ ${p.name} ist unzufrieden.`);
+            }
+            renderSquad();
+        }
+
+        function sellPlayerUI() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            const name = prompt("Spielername zum Verkauf:");
+            if (!name) return;
+            const p = club.players.find(p => p.name.toLowerCase().includes(name.toLowerCase()));
+            if (!p) { alert("Spieler nicht gefunden."); return; }
+            const interested = eng.clubs.filter(c => c !== club && c.transferBudget > p.marketValue * 0.5);
+            if (!interested.length) { alert("Keine interessierten Vereine."); return; }
+            const buyer = randomItem(interested);
+            const offer = Math.round((p.marketValue * (0.7 + rand(0, 0.5))) * 10) / 10;
+            if (confirm(`${buyer.name} bietet ${formatMoney(offer)} für ${p.name}. Verkaufen?`)) {
+                const offerObj = {
+                    id: Date.now() + Math.random(),
+                    player: p,
+                    fromClub: club,
+                    toClub: buyer,
+                    amount: offer,
+                    status: 'accept'
+                };
+                eng.executeTransfer(offerObj);
+                alert(`✅ ${p.name} für ${formatMoney(offer)} an ${buyer.name} verkauft.`);
+                renderSquad();
+            } else {
+                alert("Verkauf abgelehnt.");
+            }
+        }
+
+        // ---- Transfers ----
+        function renderTransfers() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            let html = `
+                <h3>💰 Transfermarkt</h3>
+                <div class="btn-group">
+                    <button onclick="scoutPlayersUI()" class="secondary">🔍 Scouten</button>
+                    <button onclick="makeOfferUI()">💰 Angebot abgeben</button>
+                    <button onclick="viewOffersUI()">📋 Angebote (${eng.transferOffers.length})</button>
+                    <button onclick="viewTransferHistory()">📜 Historie</button>
+                </div>
+                <div id="transfer-output" style="margin-top:12px;"></div>
+            `;
+            tabContents.transfers.innerHTML = html;
+        }
+
+        function scoutPlayersUI() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            const pos = prompt("Position (IV, AV, ZM, FL, ST):");
+            if (!pos || !POSITIONS.includes(pos)) { alert("Ungültige Position."); return; }
+            const budget = parseFloat(prompt("Max. Budget (Mio. €):"));
+            if (isNaN(budget)) return;
+            const candidates = eng.scoutPlayers(club, pos, budget);
+            if (!candidates.length) {
+                document.getElementById('transfer-output').innerHTML = "<p>❌ Keine Spieler gefunden.</p>";
+                return;
+            }
+            let out =
+                `<h4>🔍 Scouting-Ergebnisse für ${pos} (Budget ${formatMoney(budget)})</h4><table><tr><th>Name</th><th>Verein</th><th>Stärke</th><th>Alter</th><th>Wert</th><th>Gehalt</th></tr>`;
+            candidates.forEach(({ player, club: c }) => {
+                out +=
+                    `<tr><td>${player.name}</td><td>${c.name}</td><td>${player.overall}</td><td>${player.age}</td><td>${formatMoney(player.marketValue)}</td><td>${formatMoney(player.salary)}</td></tr>`;
+            });
+            out += `</table>`;
+            document.getElementById('transfer-output').innerHTML = out;
+        }
+
+        function makeOfferUI() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            const search = prompt("Spielername oder ID für Angebot:");
+            if (!search) return;
+            let targetPlayer = null,
+                targetClub = null;
+            const id = parseInt(search);
+            if (!isNaN(id)) {
+                for (let c of eng.clubs) {
+                    if (c === club) continue;
+                    const p = c.players.find(p => p.id === id);
+                    if (p) { targetPlayer = p;
+                        targetClub = c; break; }
+                }
+            } else {
+                const name = search.toLowerCase();
+                for (let c of eng.clubs) {
+                    if (c === club) continue;
+                    const p = c.players.find(p => p.name.toLowerCase().includes(name));
+                    if (p) { targetPlayer = p;
+                        targetClub = c; break; }
+                }
+            }
+            if (!targetPlayer) { alert("❌ Spieler nicht gefunden."); return; }
+            const amount = parseFloat(prompt(`Angebot für ${targetPlayer.name} (Wert: ${formatMoney(targetPlayer.marketValue)}):`));
+            if (isNaN(amount) || amount <= 0) return;
+            const result = eng.makeOffer(club, targetClub, targetPlayer, amount);
+            document.getElementById('transfer-output').innerHTML =
+                `<p style="color:${result.success ? 'var(--green)' : 'var(--gold)'};">${result.msg}</p>`;
+            if (result.offer && result.offer.status === 'counter') {
+                const btn = document.createElement('button');
+                btn.textContent = '⚡ Gegenangebot annehmen';
+                btn.onclick = () => {
+                    const res = eng.acceptCounter(result.offer.id);
+                    document.getElementById('transfer-output').innerHTML =
+                        `<p style="color:${res.success ? 'var(--green)' : 'var(--red)'};">${res.msg}</p>`;
+                    renderTransfers();
+                };
+                document.getElementById('transfer-output').appendChild(btn);
+            }
+            renderTransfers();
+        }
+
+        function viewOffersUI() {
+            const eng = appState.engine;
+            if (!eng.transferOffers.length) {
+                document.getElementById('transfer-output').innerHTML = "<p>📭 Keine offenen Angebote.</p>";
+                return;
+            }
+            let out = `<h4>📋 Offene Angebote</h4>`;
+            eng.transferOffers.forEach((o, idx) => {
+                const isIncoming = o.toClub && o.toClub.name === appState.playerClub.name;
+                const isOutgoing = o.fromClub && o.fromClub.name === appState.playerClub.name;
+                const label = isIncoming ? '👉 Angebot für dich' : isOutgoing ? '👈 Dein Angebot' : '⚖️';
+                out += `<div class="news-item" style="border-left-color:${isIncoming ? 'var(--gold)' : 'var(--blue)'}">
+                    <p><strong>${label}</strong> ${o.player?.name || 'Spieler'} – ${formatMoney(o.amount)}</p>
+                    <p>Von: ${o.fromClubName || '?'} → Zu: ${o.toClubName || '?'}</p>
+                    <p>Status: ${o.status} ${o.counterAmount ? `(Gegenangebot: ${formatMoney(o.counterAmount)})` : ''}</p>
+                    ${isIncoming ? `<button onclick="acceptIncomingOffer(${idx})" class="success small">Annehmen</button>` : ''}
+                    ${isOutgoing && o.status === 'counter' ? `<button onclick="acceptCounterOffer(${idx})" class="gold small">Gegenangebot annehmen</button>` : ''}
+                    <button onclick="rejectOffer(${idx})" class="danger small">Ablehnen</button>
+                </div>`;
+            });
+            document.getElementById('transfer-output').innerHTML = out;
+        }
+
+        function acceptIncomingOffer(idx) {
+            const eng = appState.engine;
+            const offer = eng.transferOffers[idx];
+            if (!offer) return;
+            // Incoming offer: the offer is from another club to buy the player from the player's club
+            // But in our model, we need to check the direction
+            if (offer.toClub && offer.toClub.name === appState.playerClub.name) {
+                // This is an offer FOR a player of the player's club
+                // The player is in offer.player, the buying club is offer.fromClub
+                // We need to sell the player
+                const player = offer.player;
+                const buyer = offer.fromClub;
+                if (!player || !buyer) return;
+                if (confirm(`${buyer.name} bietet ${formatMoney(offer.amount)} für ${player.name}. Verkaufen?`)) {
+                    const idx2 = eng.transferOffers.indexOf(offer);
+                    if (idx2 !== -1) eng.transferOffers.splice(idx2, 1);
+                    const offerObj = { ...offer, fromClub: appState.playerClub, toClub: buyer, status: 'accept' };
+                    eng.executeTransfer(offerObj);
+                    document.getElementById('transfer-output').innerHTML = `<p style="color:var(--green);">✅ Verkauf abgeschlossen!</p>`;
+                    renderTransfers();
+                }
+            } else {
+                alert("Ungültiges Angebot.");
+            }
+        }
+
+        function acceptCounterOffer(idx) {
+            const eng = appState.engine;
+            const offer = eng.transferOffers[idx];
+            if (!offer) return;
+            if (offer.status !== 'counter') { alert("Kein Gegenangebot."); return; }
+            if (!offer.counterAmount) { alert("Kein Gegenangebot."); return; }
+            const result = eng.acceptCounter(offer.id);
+            document.getElementById('transfer-output').innerHTML =
+                `<p style="color:${result.success ? 'var(--green)' : 'var(--red)'};">${result.msg}</p>`;
+            renderTransfers();
+        }
+
+        function rejectOffer(idx) {
+            const eng = appState.engine;
+            const result = eng.rejectOffer(eng.transferOffers[idx]?.id);
+            document.getElementById('transfer-output').innerHTML =
+                `<p style="color:var(--gold);">${result.msg}</p>`;
+            renderTransfers();
+        }
+
+        function viewTransferHistory() {
+            const club = appState.playerClub;
+            // Show recent transfers from news
+            const transfers = appState.engine.news.filter(n => n.text.includes('Transfer') || n.text.includes('wechselt'));
+            if (!transfers.length) {
+                showModal("📜 Transferhistorie", "<p>Keine Transfers in dieser Saison.</p>");
+                return;
+            }
+            let html = `<p>Letzte Transfers:</p><ul>`;
+            transfers.slice(0, 20).forEach(n => {
+                html += `<li>[${n.date}] ${n.text}</li>`;
+            });
+            html += `</ul>`;
+            showModal("📜 Transferhistorie", html);
+        }
+
+        // ---- Scouting ----
+        function renderScouting() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            const reports = eng.scoutingReports.filter(r => r.club === club.name);
+            let html = `
+                <h3>🔍 Scouting</h3>
+                <div class="btn-group">
+                    <button onclick="startScoutingUI()" class="secondary">📋 Neuen Auftrag</button>
+                    <button onclick="viewScoutingResultsUI()">📊 Berichte ansehen</button>
+                </div>
+                <div id="scouting-output">
+                    ${reports.length ? `<h4>Aktive Aufträge:</h4>` : '<p>Keine aktiven Scoutingaufträge.</p>'}
+            `;
+            reports.forEach(r => {
+                const status = r.completed ? '✅ Abgeschlossen' :
+                    `⏳ Fortschritt: ${Math.round((r.progress/r.durationWeeks)*100)}%`;
+                html += `<div class="card" style="flex:1 1 100%;">
+                    <p><strong>Region:</strong> ${r.region} | <strong>Position:</strong> ${r.position}</p>
+                    <p>Alter: ${r.ageMin}-${r.ageMax} | Potential: ${r.minPotential}+</p>
+                    <p>${status} | Gefundene Spieler: ${r.results?.length || 0}</p>
+                    ${r.completed && r.results?.length ? `<button onclick="showScoutedPlayers(${r.id})" class="small">Spieler anzeigen</button>` : ''}
+                </div>`;
+            });
+            html += `</div>`;
+            tabContents.scouting.innerHTML = html;
+        }
+
+        function startScoutingUI() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            const regions = ["Deutschland", "Europa", "Südamerika", "Afrika", "Nordamerika", "Asien", "Weltweit"];
+            const region = prompt(`Region wählen:\n${regions.map((r,i) => `${i+1}. ${r}`).join('\n')}\nAuswahl (1-7):`);
+            if (!region) return;
+            const idx = parseInt(region) - 1;
+            if (idx < 0 || idx >= regions.length) return;
+            const pos = prompt("Position (IV, AV, ZM, FL, ST) oder 'alle':");
+            if (!pos) return;
+            const posFilter = pos.toLowerCase() === 'alle' ? null : pos;
+            const minAge = parseInt(prompt("Mindestalter:") || "16");
+            const maxAge = parseInt(prompt("Höchstalter:") || "25");
+            const minPot = parseInt(prompt("Mindestpotential:") || "70");
+            const duration = parseInt(prompt("Dauer (Wochen, 2-8):") || "4");
+            const cost = Math.round((duration * 0.15 + 0.2) * 10) / 10;
+            if (cost > club.transferBudget) {
+                alert(`❌ Nicht genug Budget. Benötigt: ${formatMoney(cost)}`);
+                return;
+            }
+            const result = eng.startScouting(club, regions[idx], minAge, maxAge, posFilter || "alle", minPot, duration,
+            cost);
+            document.getElementById('scouting-output').innerHTML =
+                `<p style="color:${result.success ? 'var(--green)' : 'var(--red)'};">${result.msg}</p>`;
+            renderScouting();
+        }
+
+        function viewScoutingResultsUI() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            const reports = eng.scoutingReports.filter(r => r.club === club.name && r.completed);
+            if (!reports.length) { alert("Keine abgeschlossenen Scoutingberichte."); return; }
+            let html = `<h4>📊 Scoutingberichte</h4>`;
+            reports.forEach(r => {
+                html += `<div class="card"><p><strong>${r.region}</strong> – ${r.position} (${r.ageMin}-${r.ageMax} J.)</p>
+                    <p>Gefunden: ${r.results?.length || 0} Spieler</p>`;
+                if (r.results?.length) {
+                    html += `<table><tr><th>Name</th><th>Pos</th><th>Alter</th><th>Stärke</th><th>Pot.</th><th>Wert</th></tr>`;
+                    r.results.slice(0, 8).forEach(p => {
+                        html +=
+                            `<tr><td>${p.name}</td><td>${p.position}</td><td>${p.age}</td><td>${p.overall}</td><td>${p.potential}</td><td>${formatMoney(p.marketValue)}</td></tr>`;
+                    });
+                    html += `</table>`;
+                    html +=
+                        `<button onclick="signScoutedPlayer(${r.id})" class="success small">Spieler verpflichten</button>`;
+                }
+                html += `</div>`;
+            });
+            showModal("📊 Scoutingberichte", html);
+        }
+
+        function signScoutedPlayer(reportId) {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            const report = eng.scoutingReports.find(r => r.id === reportId);
+            if (!report || !report.results?.length) { alert("Keine Spieler verfügbar."); return; }
+            const list = report.results.map((p, i) => `${i+1}. ${p.name} (${p.position}, ${p.overall} Stärke, ${formatMoney(p.marketValue)})`)
+                .join('\n');
+            const choice = parseInt(prompt(`Spieler verpflichten:\n${list}\nAuswahl (1-${report.results.length}):`));
+            if (isNaN(choice) || choice < 1 || choice > report.results.length) return;
+            const player = report.results[choice - 1];
+            if (!player) return;
+            const cost = player.marketValue * 1.1;
+            if (cost > club.transferBudget) {
+                alert(`❌ Nicht genug Budget. Benötigt: ${formatMoney(cost)}`);
+                return;
+            }
+            // Add player to club
+            const newPlayer = new Player(
+                Date.now() + Math.random() * 10000,
+                player.name,
+                player.age,
+                player.position,
+                { ...player.attributes },
+                player.marketValue,
+                player.salary,
+                3 + randInt(0, 2),
+                player.potential,
+                player.nationality
+            );
+            club.players.push(newPlayer);
+            club.transferBudget -= cost;
+            club.financialReserves -= cost * 0.5;
+            // Remove from report
+            const idx = report.results.indexOf(player);
+            if (idx !== -1) report.results.splice(idx, 1);
+            eng.addNews(`✅ ${newPlayer.name} wurde vom Scouting verpflichtet.`, "success");
+            alert(`✅ ${newPlayer.name} verpflichtet!`);
+            closeModal();
+            renderScouting();
+        }
+
+        function showScoutedPlayers(reportId) {
+            const eng = appState.engine;
+            const report = eng.scoutingReports.find(r => r.id === reportId);
+            if (!report || !report.results?.length) { alert("Keine Spieler."); return; }
+            let html = `<h4>Gefundene Spieler</h4><table><tr><th>Name</th><th>Pos</th><th>Alter</th><th>Stärke</th><th>Pot.</th><th>Wert</th></tr>`;
+            report.results.forEach(p => {
+                html +=
+                    `<tr><td>${p.name}</td><td>${p.position}</td><td>${p.age}</td><td>${p.overall}</td><td>${p.potential}</td><td>${formatMoney(p.marketValue)}</td></tr>`;
+            });
+            html += `</table><button onclick="signScoutedPlayer(${reportId})" class="success">Spieler verpflichten</button>`;
+            showModal("📊 Scouting-Ergebnisse", html);
+        }
+
+        // ---- Coach ----
+        function renderCoach() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            let html = `
+                <h3>🧑‍🏫 Trainermanagement</h3>
+                <div id="coach-display">
+            `;
+            if (club.coach) {
+                const c = club.coach;
+                html += `<div class="card">
+                    <h4>${c.name}</h4>
+                    <p>Alter: ${c.age} | Nationalität: ${c.nationality}</p>
+                    <p>Reputation: ${c.reputation} | Gehalt: ${formatMoney(c.wageDemand)}</p>
+                    <p>Philosophie: ${c.philosophy} | Formation: ${c.preferredFormation}</p>
+                    <p>Taktik: ${c.tacticalQuality} | Jugend: ${c.youthDevelopment}</p>
+                    <p>Autorität: ${c.authority} | Medien: ${c.media}</p>
+                    <p>Zufriedenheit: ${c.satisfaction}% ${progressBar(c.satisfaction)}</p>
+                    <p>Vertrag: ${c.contractYears} Jahre</p>
+                    <p>Stärken: ${Object.entries(c.strengths).map(([k,v]) => `${k}: ${v}`).join(', ')}</p>
+                </div>`;
+            } else {
+                html += `<p>❌ Kein Trainer. Stelle einen ein!</p>`;
+            }
+            html += `</div>
+                <div class="btn-group">
+                    <button onclick="evaluateCoachUI()" class="secondary">📊 Bewerten</button>
+                    ${club.coach ? `<button onclick="fireCoachUI()" class="danger">🔥 Entlassen</button>` : ''}
+                    <button onclick="hireCoachUI()" class="success">👨‍🏫 Neuer Trainer</button>
+                    <button onclick="extendCoachContractUI()" class="gold">📝 Vertrag verlängern</button>
+                </div>
+                <div id="coach-output"></div>
+            `;
+            tabContents.coach.innerHTML = html;
+        }
+
+        function evaluateCoachUI() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            document.getElementById('coach-output').innerHTML = `<pre>${eng.evaluateCoach(club)}</pre>`;
+        }
+
+        function fireCoachUI() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            if (!club.coach) { alert("Kein Trainer."); return; }
+            if (confirm(`${club.coach.name} entlassen?`)) {
+                const result = eng.fireCoach(club);
+                document.getElementById('coach-output').innerHTML =
+                    `<p style="color:${result.success ? 'var(--green)' : 'var(--red)'};">${result.msg}</p>`;
+                renderCoach();
+            }
+        }
+
+        function hireCoachUI() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            const candidates = [];
+            for (let i = 0; i < 6; i++) {
+                const c = generateCoach(9000 + i + Math.random() * 1000);
+                c.wageDemand = Math.round((0.5 + rand(0, 3)) * 10) / 10;
+                candidates.push(c);
+            }
+            let list = candidates.map((c, i) => `${i+1}. ${c.name} (${c.age} J.) – Rep: ${c.reputation}, ${c.philosophy}, Gehalt: ${formatMoney(c.wageDemand)}`)
+                .join('\n');
+            const choice = parseInt(prompt(`Trainer auswählen:\n${list}\nAuswahl (1-6):`));
+            if (isNaN(choice) || choice < 1 || choice > candidates.length) return;
+            const coach = candidates[choice - 1];
+            if (coach.wageDemand > club.salaryBudget * 0.2) {
+                if (!confirm(`Gehalt von ${formatMoney(coach.wageDemand)} ist hoch. Trotzdem verpflichten?`)) return;
+            }
+            const result = eng.hireCoach(club, coach);
+            document.getElementById('coach-output').innerHTML =
+                `<p style="color:${result.success ? 'var(--green)' : 'var(--red)'};">${result.msg}</p>`;
+            renderCoach();
+        }
+
+        function extendCoachContractUI() {
+            const club = appState.playerClub;
+            if (!club.coach) { alert("Kein Trainer."); return; }
+            const years = parseInt(prompt(`Vertrag für ${club.coach.name} verlängern (1-3 Jahre):`));
+            if (isNaN(years) || years < 1 || years > 3) return;
+            club.coach.contractYears += years;
+            club.coach.satisfaction = clamp(club.coach.satisfaction + 5, 0, 100);
+            alert(`✅ Vertrag verlängert! ${club.coach.name} bis ${club.coach.contractYears} Jahre.`);
+            renderCoach();
+        }
+
+        // ---- Board ----
+        function renderBoard() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            const evalRes = eng.evaluateBoard(club);
+            const table = eng.getTable(club.league);
+            const pos = table.findIndex(([name]) => name === club.name) + 1;
+
+            let html = `
+                <h3>🏛 Vorstand von ${club.name}</h3>
+                <div class="flex">
+                    <div class="card"><h3>Zufriedenheit</h3>
+                        <p>Vorstand: ${evalRes.satisfaction}% ${progressBar(evalRes.satisfaction)}</p>
+                        <p>Fans: ${club.fanSatisfaction}% ${progressBar(club.fanSatisfaction,100,'green')}</p>
+                    </div>
+                    <div class="card"><h3>Saisonziele</h3>
+                        <p>Liga: Platz ${club.seasonGoals?.leaguePlace || '?'} (aktuell: ${pos})</p>
+                        <p>Pokal: ${club.seasonGoals?.cupRound || '?'}</p>
+                        <p>Fortschritt: ${evalRes.score}%</p>
+                    </div>
+                    <div class="card"><h3>Vereinsdaten</h3>
+                        <p>Reputation: ${club.reputation}</p>
+                        <p>Stadion: ${club.stadium?.name || '?'} (${club.stadium?.capacity || 0})</p>
+                        <p>Jugendakademie: Lv. ${club.youthAcademyLevel}</p>
+                        <p>Titel: ${club.trophies?.length || 0}</p>
+                    </div>
+                </div>
+                <div class="card wide"><h3>Letzte Bewertung</h3>
+                    <p>${evalRes.satisfaction > 60 ? '✅ Der Vorstand ist zufrieden.' :
+                        evalRes.satisfaction > 40 ? '⚠ Der Vorstand zeigt sich besorgt.' :
+                        '❌ Der Vorstand ist sehr unzufrieden!'}</p>
+                    <p>Erwartete Platzierung: ${evalRes.goals.leaguePlace || '?'} | Aktuell: ${pos}</p>
+                </div>
+                <div class="btn-group">
+                    <button onclick="showBoardHistory()" class="secondary">📜 Historie</button>
+                    <button onclick="upgradeAcademy()" class="gold">⬆ Jugendakademie ausbauen (${club.youthAcademyLevel + 1})</button>
+                </div>
+            `;
+            tabContents.board.innerHTML = html;
+        }
+
+        function showBoardHistory() {
+            const club = appState.playerClub;
+            if (!club.history || !club.history.length) {
+                showModal("📜 Vereinshistorie", "<p>Keine Historie verfügbar.</p>");
+                return;
+            }
+            let html = `<p>Letzte Saisons:</p><ul>`;
+            club.history.slice(-10).forEach(h => {
+                html += `<li>${h.season}: Platz ${h.position}, Punkte ${h.points}</li>`;
+            });
+            html += `</ul>`;
+            showModal("📜 Vereinshistorie", html);
+        }
+
+        function upgradeAcademy() {
+            const club = appState.playerClub;
+            const cost = (club.youthAcademyLevel + 1) * 2;
+            if (cost > club.financialReserves) {
+                alert(`❌ Nicht genug Rücklagen. Benötigt: ${formatMoney(cost)}`);
+                return;
+            }
+            if (club.youthAcademyLevel >= 10) {
+                alert("✅ Maximale Stufe erreicht!");
+                return;
+            }
+            club.financialReserves -= cost;
+            club.youthAcademyLevel++;
+            appState.engine.addNews(`⬆ Jugendakademie in ${club.name} auf Stufe ${club.youthAcademyLevel} ausgebaut.`,
+                "success");
+            alert(`✅ Akademie auf Stufe ${club.youthAcademyLevel} ausgebaut!`);
+            renderBoard();
+        }
+
+        // ---- News ----
+        function renderNews() {
+            const eng = appState.engine;
+            let html = `
+                <h3>📰 Nachrichten</h3>
+                <div class="btn-group">
+                    <button onclick="clearNews()" class="danger small">🗑 Alle löschen</button>
+                </div>
+                <div id="news-list" style="max-height:500px;overflow-y:auto;">
+            `;
+            if (!eng.news.length) {
+                html += `<p>Keine Nachrichten.</p>`;
+            } else {
+                eng.news.slice(0, 100).forEach(n => {
+                    const cls = n.type === 'urgent' ? 'urgent' : n.type === 'success' ? 'success' : '';
+                    html += `<div class="news-item ${cls}">
+                        <span class="news-date">[${n.date}]</span>
+                        <span>${n.text}</span>
+                    </div>`;
+                });
+            }
+            html += `</div>`;
+            tabContents.news.innerHTML = html;
+        }
+
+        function clearNews() {
+            if (confirm("Alle Nachrichten löschen?")) {
+                appState.engine.news = [];
+                renderNews();
+            }
+        }
+
+        // ---- Matchday ----
+        function renderMatchday() {
+            const eng = appState.engine;
+            const club = appState.playerClub;
+            const isSeasonOver = eng.currentMatchday >= 34;
+
+            let html = `
+                <h3>📅 Spieltag ${eng.currentMatchday + (isSeasonOver ? ' (Saison beendet)' : '')}</h3>
+                <div class="btn-group">
+                    ${!isSeasonOver ? `<button onclick="simulateMatchdayUI()" class="success">▶ Nächsten Spieltag simulieren</button>` :
+                    `<button onclick="startNextSeason()" class="gold">📅 Nächste Saison starten</button>`}
+                    <button onclick="showFullTable()" class="secondary">📊 Tabelle</button>
+                </div>
+                <div id="matchday-results" style="margin-top:12px;"></div>
+                <div id="matchday-table"></div>
+            `;
+
+            // Show current table
+            const table = eng.getTable(club.league);
+            let tableHtml = `<h4>&gt; Tabelle ${club.league}</h4><table><tr><th>Pl.</th><th>Verein</th><th>Pkt.</th></tr>`;
+            table.slice(0, 18).forEach(([name, pts], i) => {
+                const pos = i + 1;
+                let rowClass = '';
+                if (club.league === "Bundesliga") {
+                    if (pos <= 4) rowClass = 'row-champions';
+                    else if (pos === 5 || pos === 6) rowClass = 'row-europa';
+                    else if (pos === 16) rowClass = 'row-playoff';
+                    else if (pos >= 17) rowClass = 'row-relegation';
+                } else {
+                    if (pos <= 2) rowClass = 'row-champions';
+                    else if (pos === 3) rowClass = 'row-playoff';
+                    else if (pos >= 17) rowClass = 'row-relegation';
+                }
+                if (name === club.name) rowClass += ' row-own';
+                const crest = getCrest(name);
+                tableHtml +=
+                    `<tr class="${rowClass.trim()}"><td>${pos}</td><td>${crest} · ${name}</td><td>${pts}</td></tr>`;
+            });
+            tableHtml += `</table>`;
+            tabContents.matchday.innerHTML = html + tableHtml;
+        }
+
+        function simulateMatchdayUI() {
+            const eng = appState.engine;
+            const club = appState.playerClub;
+            if (eng.currentMatchday >= 34) {
+                alert("Saison bereits beendet! Starte nächste Saison.");
+                return;
+            }
+
+            // Build fixtures for both leagues
+            const bundesClubs = eng.clubs.filter(c => c.league === "Bundesliga");
+            const zweitClubs = eng.clubs.filter(c => c.league === "2. Bundesliga");
+
+            const fixtures1 = buildFixtures(bundesClubs);
+            const fixtures2 = buildFixtures(zweitClubs);
+
+            // Simulate both leagues
+            const results1 = eng.simulateMatchday(fixtures1);
+            // We need to simulate 2. Bundesliga separately without incrementing matchday twice
+            const oldMatchday = eng.currentMatchday;
+            const results2 = eng.simulateMatchday(fixtures2);
+            eng.currentMatchday = oldMatchday + 1;
+
+            // Render results
+            let html = `<h4>Spieltag ${eng.currentMatchday} — Ergebnisse</h4>`;
+            html += renderResultsBlock(eng, "Bundesliga", results1, club.name);
+            html += renderResultsBlock(eng, "2. Bundesliga", results2, club.name);
+
+            document.getElementById('matchday-results').innerHTML = html;
+            updateHeader();
+            renderMatchday();
+            renderDashboard();
+        }
+
+        function buildFixtures(clubs) {
+            const shuffled = [...clubs].sort(() => Math.random() - 0.5);
+            const fixtures = [];
+            for (let i = 0; i < shuffled.length; i += 2) {
+                if (i + 1 < shuffled.length) {
+                    fixtures.push([shuffled[i], shuffled[i + 1]]);
+                } else {
+                    fixtures.push([shuffled[i], null]);
+                }
+            }
+            return fixtures;
+        }
+
+        function renderResultsBlock(eng, leagueName, results, playerClubName) {
+            let html = `<h4>&gt; ${leagueName.toUpperCase()}</h4><div class="ticker">`;
+            results.forEach(r => {
+                if (!r.away) {
+                    html += `<p>${r.home} ist spielfrei.</p>`;
+                    return;
+                }
+                const isOwn = r.home === playerClubName || r.away === playerClubName;
+                html += `<p${isOwn ? ' class="highlight"' : ''}>
+                    <strong>${r.home} ${r.homeGoals} - ${r.awayGoals} ${r.away}</strong>
+                    (xG: ${r.xG_home} - ${r.xG_away})
+                </p>`;
+                r.events.forEach(e => html += `<p>&nbsp;&nbsp;${e}</p>`);
+                html += `<hr>`;
+            });
+            html += `</div>`;
+            return html;
+        }
+
+        function showFullTable() {
+            const club = appState.playerClub;
+            const eng = appState.engine;
+            const table = eng.getTable(club.league);
+            let html =
+                `<h4>📊 Tabelle ${club.league}</h4><table><tr><th>Pl.</th><th>Verein</th><th>Pkt.</th><th>Spiele</th><th>+/-</th></tr>`;
+            table.slice(0, 18).forEach(([name, pts], i) => {
+                const pos = i + 1;
+                const c = eng.getClub(name);
+                const gd = (c?.seasonGoalsScored || 0) - (c?.seasonGoalsConceded || 0);
+                const rowClass = name === club.name ? 'row-own' : '';
+                const crest = getCrest(name);
+                html += `<tr class="${rowClass}"><td>${pos}</td><td>${crest} ${name}</td><td>${pts}</td>
+                    <td>${eng.currentMatchday}</td><td>${gd}</td></tr>`;
+            });
+            html += `</table>`;
+            showModal("📊 Tabelle", html);
+        }
+
+        function startNextSeason() {
+            const eng = appState.engine;
+            if (!eng.seasonComplete) {
+                if (!confirm("Saison noch nicht beendet. Trotzdem fortsetzen?")) return;
+            }
+            eng.endSeason();
+            updateHeader();
+            renderMatchday();
+            renderDashboard();
+            alert(`📅 Neue Saison ${eng.currentSeason} gestartet!`);
+        }
+
+        // ---- Save ----
+        function renderSave() {
+            let html = `
+                <h3>💾 Speichern & Laden</h3>
+                <div class="btn-group">
+                    <button onclick="saveGameUI()" class="success">💾 Spiel speichern</button>
+                    <button onclick="loadGameUI()" class="secondary">📂 Spiel laden</button>
+                    <button onclick="deleteSaveUI()" class="danger">🗑 Save löschen</button>
+                </div>
+                <div id="save-output"></div>
+                <div class="card" style="margin-top:12px;">
+                    <p style="font-size:14px;color:var(--dim);">Automatisches Speichern nach jedem Spieltag und Saisonende.</p>
+                    <p style="font-size:14px;color:var(--dim);">Daten werden lokal im Browser gespeichert (localStorage).</p>
+                </div>
+            `;
+            tabContents.save.innerHTML = html;
+        }
+
+        function saveGameUI() {
+            const eng = appState.engine;
+            eng.saveGame();
+            document.getElementById('save-output').innerHTML = '<p style="color:var(--green);">✅ Spiel gespeichert!</p>';
+        }
+
+        function loadGameUI() {
+            const raw = localStorage.getItem('sportdirektorSave');
+            if (!raw) {
+                document.getElementById('save-output').innerHTML = '<p style="color:var(--red);">❌ Kein Save gefunden.</p>';
+                return;
+            }
+            try {
+                const data = JSON.parse(raw);
+                const eng = new GameEngine([]);
+                eng.loadGame(data);
+                appState.clubs = eng.clubs;
+                appState.engine = eng;
+                // Find player club by name
+                const playerName = appState.playerClub?.name;
+                if (playerName) {
+                    const found = eng.clubs.find(c => c.name === playerName);
+                    if (found) appState.playerClub = found;
+                }
+                // If no player club, go to selection
+                if (!appState.playerClub && appState.clubs.length) {
+                    appState.playerClub = appState.clubs[0];
+                }
+                updateHeader();
+                document.getElementById('save-output').innerHTML = '<p style="color:var(--green);">✅ Spiel geladen!</p>';
+                if (appState.playerClub) {
+                    gameScreen.classList.remove('hidden');
+                    selectScreen.classList.add('hidden');
+                    startScreen.classList.add('hidden');
+                    clubNameHeader.textContent = appState.playerClub.name + " (" + appState.playerClub.league + ")";
+                    switchTab('dashboard');
+                } else {
+                    location.reload();
+                }
+            } catch (e) {
+                document.getElementById('save-output').innerHTML = '<p style="color:var(--red);">❌ Fehler beim Laden.</p>';
+                console.error(e);
+            }
+        }
+
+        function deleteSaveUI() {
+            if (confirm("Wirklich alle Spielstände löschen?")) {
+                localStorage.removeItem('sportdirektorSave');
+                document.getElementById('save-output').innerHTML = '<p style="color:var(--gold);">🗑 Save gelöscht.</p>';
+            }
+        }
+
+        // ================================================================
+        //  EVENT LISTENERS & INIT
+        // ================================================================
+
+        // Menu tabs
+        document.querySelectorAll('.menu button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchTab(btn.dataset.tab);
+            });
+        });
+
+        // League tabs
+        document.querySelectorAll('#league-tabs button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectedLeagueTab = btn.dataset.league;
+                document.querySelectorAll('#league-tabs button').forEach(b => b.classList.toggle('active', b ===
+                btn));
+                renderClubList();
+            });
+        });
+
+        // Start screen buttons
+        document.getElementById('btn-new-career').addEventListener('click', () => {
+            startScreen.classList.add('hidden');
+            selectScreen.classList.remove('hidden');
+            const clubs = generateInitialData();
+            appState.clubs = clubs;
+            appState.engine = new GameEngine(clubs);
+            renderClubList();
+        });
+
+        document.getElementById('btn-load-career').addEventListener('click', () => {
+            const raw = localStorage.getItem('sportdirektorSave');
+            if (!raw) { alert("❌ Kein Save gefunden."); return; }
+            try {
+                const data = JSON.parse(raw);
+                const eng = new GameEngine([]);
+                eng.loadGame(data);
+                appState.clubs = eng.clubs;
+                appState.engine = eng;
+                // Let user choose a club
+                startScreen.classList.add('hidden');
+                selectScreen.classList.remove('hidden');
+                renderClubList();
+                // Auto-select the club if only one or previously selected
+                if (appState.playerClub) {
+                    const found = eng.clubs.find(c => c.name === appState.playerClub.name);
+                    if (found) {
+                        appState.playerClub = found;
+                        startGame();
+                        return;
+                    }
+                }
+                document.getElementById('save-output')?.innerHTML && (document.getElementById('save-output').innerHTML =
+                    '<p style="color:var(--green);">✅ Save geladen. Wähle deinen Verein.</p>');
+            } catch (e) {
+                alert("❌ Fehler beim Laden.");
+                console.error(e);
+            }
+        });
+
+        document.getElementById('back-to-start').addEventListener('click', () => {
+            selectScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        });
+
+        // ---- Init ----
+        // Start with start screen visible, others hidden
+        startScreen.classList.remove('hidden');
+        selectScreen.classList.add('hidden');
+        gameScreen.classList.add('hidden');
+
+        // Generate initial data for selection
+        const initClubs = generateInitialData();
+        appState.clubs = initClubs;
+        appState.engine = new GameEngine(initClubs);
+
+        // ---- Expose functions to global scope for inline onclick ----
+        window.showSquadAnalysis = showSquadAnalysis;
+        window.showPlayerDetails = showPlayerDetails;
+        window.extendContractPlayer = extendContractPlayer;
+        window.changeRole = changeRole;
+        window.extendContractUI = extendContractUI;
+        window.sellPlayerUI = sellPlayerUI;
+        window.scoutPlayersUI = scoutPlayersUI;
+        window.makeOfferUI = makeOfferUI;
+        window.viewOffersUI = viewOffersUI;
+        window.acceptIncomingOffer = acceptIncomingOffer;
+        window.acceptCounterOffer = acceptCounterOffer;
+        window.rejectOffer = rejectOffer;
+        window.viewTransferHistory = viewTransferHistory;
+        window.startScoutingUI = startScoutingUI;
+        window.viewScoutingResultsUI = viewScoutingResultsUI;
+        window.signScoutedPlayer = signScoutedPlayer;
+        window.showScoutedPlayers = showScoutedPlayers;
+        window.evaluateCoachUI = evaluateCoachUI;
+        window.fireCoachUI = fireCoachUI;
+        window.hireCoachUI = hireCoachUI;
+        window.extendCoachContractUI = extendCoachContractUI;
+        window.showBoardHistory = showBoardHistory;
+        window.upgradeAcademy = upgradeAcademy;
+        window.clearNews = clearNews;
+        window.simulateMatchdayUI = simulateMatchdayUI;
+        window.showFullTable = showFullTable;
+        window.startNextSeason = startNextSeason;
+        window.saveGameUI = saveGameUI;
+        window.loadGameUI = loadGameUI;
+        window.deleteSaveUI = deleteSaveUI;
+        window.closeModal = closeModal;
+        window.showModal = showModal;
+
+        // Make sure appState is accessible
+        window.appState = appState;
+        window.renderTransfers = renderTransfers;
+
+        console.log("⚽ Sportdirektor-Simulator geladen!");
+        console.log(`📊 ${appState.clubs.length} Vereine, ${appState.clubs.reduce((a,c) => a + c.players.length, 0)} Spieler generiert.`);
+    </script>
 </body>
 </html>
