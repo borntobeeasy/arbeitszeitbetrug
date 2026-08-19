@@ -1,4 +1,4 @@
-// ─── server.js ─── KOMPLETT (Host-Checks, Spiel beenden, Game-Over) ──
+// ─── server.js ─── KOMPLETT (mit Frage-Loading-Fix) ──────────────────
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -16,14 +16,31 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ─── Fragen ────────────────────────────────────────────────────────────────
+// ─── Fragen laden (mit Fallback-Pfaden) ──────────────────────────────
 let allQuestions = [];
-try {
-  const data = fs.readFileSync(path.join(__dirname, 'questions.json'), 'utf8');
-  allQuestions = JSON.parse(data);
-  console.log(`📚 ${allQuestions.length} Fragen geladen.`);
-} catch (err) {
-  console.warn('⚠️  Keine questions.json – verwende Standard-Fragen.');
+let loadedFrom = '';
+
+const possiblePaths = [
+  path.join(__dirname, 'questions.json'),
+  path.join(__dirname, 'public', 'questions.json'),
+];
+for (const p of possiblePaths) {
+  if (fs.existsSync(p)) {
+    try {
+      const data = fs.readFileSync(p, 'utf8');
+      allQuestions = JSON.parse(data);
+      loadedFrom = p;
+      break;
+    } catch (err) {
+      console.error(`❌ Fehler beim Parsen von ${p}:`, err.message);
+    }
+  }
+}
+
+if (allQuestions.length > 0) {
+  console.log(`✅ ${allQuestions.length} Fragen geladen von: ${loadedFrom}`);
+} else {
+  console.warn('⚠️  Keine questions.json gefunden – verwende Standard-Fragen.');
   allQuestions = [
     { id: 'fallback1', question: 'Wie viele Beine hat ein Hund?', answer: 4, unit: 'Beine', category: 'Alltag', difficulty: 'easy', hints: [ { text: 'Die Zahl ist kleiner als 10.', type: 'upper' }, { text: 'Die Zahl ist größer als 2.', type: 'lower' } ] },
     { id: 'fallback2', question: 'Wie viele Stunden hat ein Tag?', answer: 24, unit: 'Stunden', category: 'Alltag', difficulty: 'easy', hints: [ { text: 'Die Zahl ist kleiner als 30.', type: 'upper' }, { text: 'Die Zahl ist größer als 20.', type: 'lower' } ] },
@@ -606,13 +623,11 @@ function finishBettingRound(room) {
   }
 }
 
-// ─── Game-Over-Prüfung ────────────────────────────────────────────────────
 function checkGameOver(room) {
   const alive = room.players.filter(p => p.status !== 'OUT');
   if (alive.length < 2) {
     room.phase = PHASES.LOBBY;
     room.started = false;
-    // Host bleibt Host, aber andere können wieder joinen
     broadcastRoom(room);
     return true;
   }
@@ -648,9 +663,8 @@ function showDown(room) {
   room.roundEnded = true;
   broadcastRoom(room);
 
-  // Prüfe, ob nur noch ein Spieler übrig ist
   if (checkGameOver(room)) {
-    return; // Spiel wurde beendet
+    return;
   }
 }
 
@@ -666,7 +680,6 @@ function endRoundEarly(room) {
     room.phase = PHASES.RESULT;
     room.roundEnded = true;
     broadcastRoom(room);
-    // Prüfe Game-Over
     if (checkGameOver(room)) return;
   } else {
     room.roundEnded = true;
@@ -766,7 +779,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ─── Nächste Runde (nur Host) ──────────────────────────────────────────
   socket.on('game:next', () => {
     const room = rooms.get(socket.data.roomId);
     if (!room) {
@@ -782,13 +794,9 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Prüfe erneut, ob Game-Over (falls jemand ausgeschieden ist)
     if (checkGameOver(room)) return;
 
-    // Inkrementiere Rundenzahl
     room.roundNumber++;
-
-    // Prüfe, ob maximale Rundenzahl erreicht ist
     if (room.maxRounds > 0 && room.roundNumber > room.maxRounds) {
       room.phase = PHASES.LOBBY;
       room.started = false;
@@ -806,7 +814,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ─── Spiel beenden (nur Host) ──────────────────────────────────────────
   socket.on('game:end', () => {
     const room = rooms.get(socket.data.roomId);
     if (!room) return;
@@ -840,7 +847,6 @@ io.on('connection', (socket) => {
       broadcastRoom(room);
       const active = getActivePlayers(room);
       if (active.length < 2 && room.started && room.phase !== PHASES.RESULT && room.phase !== PHASES.LOBBY) {
-        // Runde vorzeitig beenden, danach Game-Over-Prüfung
         endRoundEarly(room);
         checkGameOver(room);
       }
